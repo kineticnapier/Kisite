@@ -4,6 +4,8 @@ Kisite is an experimental programming language based on Lisatopian (莉語 / Lis
 
 The name comes from the Lisatopian verb `kisite`, meaning “to process”.
 
+Japanese language specification: [`docs/spec-ja.md`](docs/spec-ja.md)
+
 ## Current milestone
 
 Kisite 0.0.5 currently supports:
