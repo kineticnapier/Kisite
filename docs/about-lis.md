@@ -50,10 +50,12 @@ Pas Kisite, `x kate 5` pasale kasasta x kate 5.
 ## Palusta
 
 ```kisite
-Takute kas "yes" palusta x kate 5.
+Palusta x kate 5 {
+    Takute kas "yes".
+}
 ```
 
-Usapi pata takute kas "yes" palusta x kate 5.
+Pas Kisite, `palusta` lapi kas sapaki kisita, kasta pata kisita lupe pas `{ ... }`.
 
 ## Polike
 
