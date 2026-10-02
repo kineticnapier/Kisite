@@ -6,11 +6,17 @@ import argparse
 import sys
 
 
-VERSION = "0.0.11"
+VERSION = "0.0.12"
 
 
 class KisiteError(Exception):
     pass
+
+
+class FunctionReturn(Exception):
+    def __init__(self, value: object) -> None:
+        super().__init__()
+        self.value = value
 
 
 @dataclass(frozen=True)
@@ -177,6 +183,12 @@ class Binary:
 
 
 @dataclass(frozen=True)
+class Call:
+    name: str
+    arguments: tuple[object, ...]
+
+
+@dataclass(frozen=True)
 class Say:
     value: object
 
@@ -224,12 +236,34 @@ class RepeatEach:
     body: Block
 
 
+@dataclass(frozen=True)
+class FunctionDefinition:
+    name: str
+    parameters: tuple[str, ...]
+    body: Block
+
+
+@dataclass(frozen=True)
+class ReturnValue:
+    value: object
+
+
+@dataclass(frozen=True)
+class CallStatement:
+    call: Call
+
+
 RESERVED_WORDS = {
     "takute",
     "sonome",
     "kemese",
     "polike",
     "pilike",
+    "kisite",
+    "kalivisku",
+    "musope",
+    "jasepe",
+    "minika",
     "kate",
     "palusta",
     "japalusta",
@@ -237,9 +271,13 @@ RESERVED_WORDS = {
     "kas",
     "tas",
     "pas",
+    "vis",
     "vos",
     "stdin",
 }
+
+
+BUILTIN_FUNCTIONS = {"minika"}
 
 
 class Parser:
@@ -289,6 +327,18 @@ class Parser:
             )
         return name
 
+    def function_name(self, allow_builtin: bool = False) -> str:
+        token = self.take("WORD")
+        name = str(token.value)
+        lowered = name.lower()
+        if allow_builtin and lowered in BUILTIN_FUNCTIONS:
+            return lowered
+        if lowered in RESERVED_WORDS:
+            raise KisiteError(
+                f"{token.line}:{token.column}: '{name}' is reserved and cannot be a function name"
+            )
+        return name
+
     def parse(self) -> list[object]:
         statements: list[object] = []
         while self.current.kind != "EOF":
@@ -301,6 +351,14 @@ class Parser:
 
         if self.current_word_is("pilike"):
             return self.loop_statement()
+
+        if self.current_word_is("kalivisku"):
+            return self.function_definition()
+
+        if self.current_word_is("kisite"):
+            call = self.call_expression()
+            self.match("DOT")
+            return CallStatement(call)
 
         if self.current_word_is("japalusta"):
             token = self.current
@@ -360,6 +418,26 @@ class Parser:
             f"{token.line}:{token.column}: pilike must be followed by 'palusta' or 'kas'"
         )
 
+    def function_definition(self) -> FunctionDefinition:
+        self.take_word("kalivisku")
+        self.take_word("musope")
+        self.take_word("kas")
+        name = self.function_name()
+        parameters: list[str] = []
+        if self.current_word_is("vis"):
+            self.pos += 1
+            parameters.append(self.variable_name())
+            while self.current_word_is("kasta"):
+                self.pos += 1
+                parameters.append(self.variable_name())
+
+        if len(set(parameters)) != len(parameters):
+            raise KisiteError(f"function '{name}' has duplicate parameter names")
+
+        body = self.required_block("function definition")
+        self.match("DOT")
+        return FunctionDefinition(name, tuple(parameters), body)
+
     def required_block(self, owner: str) -> Block:
         if self.current.kind != "LBRACE":
             token = self.current
@@ -410,9 +488,13 @@ class Parser:
             stream = str(self.take("WORD").value).lower()
             if stream != "stdin":
                 raise KisiteError(
-                    f"unsupported stream '{stream}'; Kisite 0.0.11 supports only stdin"
+                    f"unsupported stream '{stream}'; Kisite 0.0.12 supports only stdin"
                 )
             return ReadFrom(tuple(names), stream)
+
+        if verb_name == "jasepe":
+            self.take_word("kas")
+            return ReturnValue(self.expression())
 
         raise KisiteError(
             f"{verb.line}:{verb.column}: unsupported statement '{verb.value}'"
@@ -473,6 +555,8 @@ class Parser:
 
     def primary(self) -> object:
         token = self.current
+        if self.current_word_is("kisite"):
+            return self.call_expression()
         if self.match("NUMBER"):
             return Literal(token.value)
         if self.match("STRING"):
@@ -500,8 +584,21 @@ class Parser:
             self.take("RBRACKET")
             return ArrayLiteral(tuple(items))
         raise KisiteError(
-            f"{token.line}:{token.column}: expected a number, string, array, variable, or parenthesized expression"
+            f"{token.line}:{token.column}: expected a number, string, array, variable, function call, or parenthesized expression"
         )
+
+    def call_expression(self) -> Call:
+        self.take_word("kisite")
+        self.take_word("kas")
+        name = self.function_name(allow_builtin=True)
+        arguments: list[object] = []
+        if self.current_word_is("vis"):
+            self.pos += 1
+            arguments.append(self.expression())
+            while self.current_word_is("kasta"):
+                self.pos += 1
+                arguments.append(self.expression())
+        return Call(name, tuple(arguments))
 
 
 def is_number(value: object) -> bool:
@@ -524,12 +621,95 @@ def checked_index(value: object, index: object) -> tuple[object, int]:
     return value, index
 
 
-def evaluate(node: object, variables: dict[str, object]) -> object:
+class InputReader:
+    def __init__(self, data: str | None = None) -> None:
+        self.tokens = data.split() if data is not None else []
+        self.index = 0
+        self.live = data is None
+
+    def read(self) -> str:
+        while self.index >= len(self.tokens):
+            if not self.live:
+                raise KisiteError("stdin is exhausted")
+            line = sys.stdin.readline()
+            if line == "":
+                raise KisiteError("stdin is exhausted")
+            self.tokens.extend(line.split())
+
+        text = self.tokens[self.index]
+        self.index += 1
+        return text
+
+
+@dataclass
+class Runtime:
+    output: list[str]
+    input_reader: InputReader
+    functions: dict[str, FunctionDefinition]
+
+
+def convert_minika(value: object) -> object:
+    if is_number(value):
+        return value
+    if not isinstance(value, str):
+        raise KisiteError("minika requires a string or number")
+    try:
+        return int(value)
+    except ValueError:
+        try:
+            return float(value)
+        except ValueError as exc:
+            raise KisiteError(f"minika cannot convert {value!r} to a number") from exc
+
+
+def invoke_function(
+    name: str,
+    argument_nodes: tuple[object, ...],
+    variables: dict[str, object],
+    runtime: Runtime,
+    *,
+    require_value: bool,
+) -> object:
+    arguments = [evaluate(argument, variables, runtime) for argument in argument_nodes]
+
+    if name.lower() == "minika":
+        if len(arguments) != 1:
+            raise KisiteError(
+                f"function 'minika' expects 1 argument, got {len(arguments)}"
+            )
+        return convert_minika(arguments[0])
+
+    if name not in runtime.functions:
+        raise KisiteError(f"function '{name}' is not defined")
+
+    function = runtime.functions[name]
+    if len(arguments) != len(function.parameters):
+        raise KisiteError(
+            f"function '{name}' expects {len(function.parameters)} arguments, got {len(arguments)}"
+        )
+
+    local_variables = dict(zip(function.parameters, arguments))
+    try:
+        execute_statement(
+            function.body,
+            local_variables,
+            runtime,
+            in_function=True,
+        )
+    except FunctionReturn as returned:
+        return returned.value
+
+    if require_value:
+        raise KisiteError(f"function '{name}' did not return a value")
+    return None
+
+
+def evaluate(node: object, variables: dict[str, object], runtime: Runtime) -> object:
     if isinstance(node, Literal):
         return node.value
 
     if isinstance(node, ArrayLiteral):
-        return [evaluate(item, variables) for item in node.items]
+        return [evaluate(item, variables, runtime) for item in node.items]
 
     if isinstance(node, Variable):
         if node.name not in variables:
@@ -537,20 +717,29 @@ def evaluate(node: object, variables: dict[str, object]) -> object:
         return variables[node.name]
 
     if isinstance(node, Index):
-        value = evaluate(node.value, variables)
-        index = evaluate(node.index, variables)
+        value = evaluate(node.value, variables, runtime)
+        index = evaluate(node.index, variables, runtime)
         value, index = checked_index(value, index)
         return value[index]
 
+    if isinstance(node, Call):
+        return invoke_function(
+            node.name,
+            node.arguments,
+            variables,
+            runtime,
+            require_value=True,
+        )
+
     if isinstance(node, Unary):
-        value = evaluate(node.value, variables)
+        value = evaluate(node.value, variables, runtime)
         if not is_number(value):
             raise KisiteError("unary arithmetic requires a number")
         return +value if node.op == "PLUS" else -value
 
     if isinstance(node, Binary):
-        left = evaluate(node.left, variables)
-        right = evaluate(node.right, variables)
+        left = evaluate(node.left, variables, runtime)
+        right = evaluate(node.right, variables, runtime)
 
         if node.op == "KATE":
             return values_equal(left, right)
@@ -584,7 +773,12 @@ def evaluate(node: object, variables: dict[str, object]) -> object:
     raise KisiteError(f"cannot evaluate {type(node).__name__}")
 
 
-def assign(target: object, value: object, variables: dict[str, object]) -> None:
+def assign(
+    target: object,
+    value: object,
+    variables: dict[str, object],
+    runtime: Runtime,
+) -> None:
     if isinstance(target, Variable):
         if target.name not in variables:
             raise KisiteError(f"variable '{target.name}' is not initialized")
@@ -592,8 +786,8 @@ def assign(target: object, value: object, variables: dict[str, object]) -> None:
         return
 
     if isinstance(target, Index):
-        container = evaluate(target.value, variables)
-        index = evaluate(target.index, variables)
+        container = evaluate(target.value, variables, runtime)
+        index = evaluate(target.index, variables, runtime)
         if not isinstance(index, int) or isinstance(index, bool):
             raise KisiteError("array index must be an integer")
         if not isinstance(container, list):
@@ -604,36 +798,6 @@ def assign(target: object, value: object, variables: dict[str, object]) -> None:
         return
 
     raise KisiteError("invalid assignment target")
-
-
-def parse_input_value(text: str) -> object:
-    try:
-        return int(text)
-    except ValueError:
-        try:
-            return float(text)
-        except ValueError:
-            return text
-
-
-class InputReader:
-    def __init__(self, data: str | None = None) -> None:
-        self.tokens = data.split() if data is not None else []
-        self.index = 0
-        self.live = data is None
-
-    def read(self) -> object:
-        while self.index >= len(self.tokens):
-            if not self.live:
-                raise KisiteError("stdin is exhausted")
-            line = sys.stdin.readline()
-            if line == "":
-                raise KisiteError("stdin is exhausted")
-            self.tokens.extend(line.split())
-
-        text = self.tokens[self.index]
-        self.index += 1
-        return parse_input_value(text)
 
 
 def display(value: object) -> str:
@@ -647,11 +811,12 @@ def display(value: object) -> str:
 def execute_statement(
     statement: object,
     variables: dict[str, object],
-    output: list[str],
-    input_reader: InputReader,
+    runtime: Runtime,
+    *,
+    in_function: bool = False,
 ) -> None:
     if isinstance(statement, Say):
-        output.append(display(evaluate(statement.value, variables)))
+        runtime.output.append(display(evaluate(statement.value, variables, runtime)))
         return
 
     if isinstance(statement, Initialize):
@@ -659,51 +824,104 @@ def execute_statement(
             raise KisiteError(
                 f"variable '{statement.name}' is already initialized"
             )
-        variables[statement.name] = evaluate(statement.value, variables)
+        variables[statement.name] = evaluate(statement.value, variables, runtime)
         return
 
     if isinstance(statement, SetValue):
-        assign(statement.target, evaluate(statement.value, variables), variables)
+        assign(
+            statement.target,
+            evaluate(statement.value, variables, runtime),
+            variables,
+            runtime,
+        )
         return
 
     if isinstance(statement, ReadFrom):
-        values = [input_reader.read() for _ in statement.names]
+        values = [runtime.input_reader.read() for _ in statement.names]
         for name, value in zip(statement.names, values):
             variables[name] = value
         return
 
     if isinstance(statement, Block):
         for child in statement.statements:
-            execute_statement(child, variables, output, input_reader)
+            execute_statement(
+                child,
+                variables,
+                runtime,
+                in_function=in_function,
+            )
         return
 
     if isinstance(statement, Conditional):
-        condition = evaluate(statement.condition, variables)
+        condition = evaluate(statement.condition, variables, runtime)
         if not isinstance(condition, bool):
             raise KisiteError("palusta condition must be boolean")
         if condition:
-            execute_statement(statement.body, variables, output, input_reader)
+            execute_statement(
+                statement.body,
+                variables,
+                runtime,
+                in_function=in_function,
+            )
         elif statement.otherwise is not None:
-            execute_statement(statement.otherwise, variables, output, input_reader)
+            execute_statement(
+                statement.otherwise,
+                variables,
+                runtime,
+                in_function=in_function,
+            )
         return
 
     if isinstance(statement, RepeatWhile):
         while True:
-            condition = evaluate(statement.condition, variables)
+            condition = evaluate(statement.condition, variables, runtime)
             if not isinstance(condition, bool):
                 raise KisiteError("pilike palusta condition must be boolean")
             if not condition:
                 break
-            execute_statement(statement.body, variables, output, input_reader)
+            execute_statement(
+                statement.body,
+                variables,
+                runtime,
+                in_function=in_function,
+            )
         return
 
     if isinstance(statement, RepeatEach):
-        iterable = evaluate(statement.iterable, variables)
+        iterable = evaluate(statement.iterable, variables, runtime)
         if not isinstance(iterable, (list, str)):
             raise KisiteError("pilike foreach requires an array or string")
         for item in iterable:
             variables[statement.name] = item
-            execute_statement(statement.body, variables, output, input_reader)
+            execute_statement(
+                statement.body,
+                variables,
+                runtime,
+                in_function=in_function,
+            )
+        return
+
+    if isinstance(statement, FunctionDefinition):
+        if statement.name.lower() in BUILTIN_FUNCTIONS:
+            raise KisiteError(f"cannot redefine builtin function '{statement.name}'")
+        if statement.name in runtime.functions:
+            raise KisiteError(f"function '{statement.name}' is already defined")
+        runtime.functions[statement.name] = statement
+        return
+
+    if isinstance(statement, ReturnValue):
+        if not in_function:
+            raise KisiteError("jasepe can only be used inside a function")
+        raise FunctionReturn(evaluate(statement.value, variables, runtime))
+
+    if isinstance(statement, CallStatement):
+        invoke_function(
+            statement.call.name,
+            statement.call.arguments,
+            variables,
+            runtime,
+            require_value=False,
+        )
         return
 
     raise KisiteError(f"unknown statement {type(statement).__name__}")
@@ -713,10 +931,10 @@ def run(source: str, input_data: str | None = "") -> list[str]:
     parser = Parser(tokenize(source))
     output: list[str] = []
     variables: dict[str, object] = {}
-    input_reader = InputReader(input_data)
+    runtime = Runtime(output, InputReader(input_data), {})
 
     for statement in parser.parse():
-        execute_statement(statement, variables, output, input_reader)
+        execute_statement(statement, variables, runtime)
 
     return output
 
