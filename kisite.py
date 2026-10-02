@@ -6,7 +6,7 @@ import argparse
 import sys
 
 
-VERSION = "0.0.5"
+VERSION = "0.0.6"
 
 
 class KisiteError(Exception):
@@ -169,7 +169,7 @@ class SetValue:
 
 @dataclass(frozen=True)
 class ReadFrom:
-    name: str
+    names: tuple[str, ...]
     stream: str
 
 
@@ -186,6 +186,7 @@ RESERVED_WORDS = {
     "polike",
     "kate",
     "palusta",
+    "kasta",
     "kas",
     "tas",
     "vos",
@@ -277,14 +278,17 @@ class Parser:
 
         if verb_name == "polike":
             self.take_word("kas")
-            name = self.variable_name()
+            names = [self.variable_name()]
+            while self.current_word_is("kasta"):
+                self.pos += 1
+                names.append(self.variable_name())
             self.take_word("vos")
             stream = str(self.take("WORD").value).lower()
             if stream != "stdin":
                 raise KisiteError(
-                    f"unsupported stream '{stream}'; Kisite 0.0.5 supports only stdin"
+                    f"unsupported stream '{stream}'; Kisite 0.0.6 supports only stdin"
                 )
-            return ReadFrom(name, stream)
+            return ReadFrom(tuple(names), stream)
 
         raise KisiteError(
             f"{verb.line}:{verb.column}: unsupported statement '{verb.value}'"
@@ -457,7 +461,9 @@ def execute_statement(
         return
 
     if isinstance(statement, ReadFrom):
-        variables[statement.name] = input_reader.read()
+        values = [input_reader.read() for _ in statement.names]
+        for name, value in zip(statement.names, values):
+            variables[name] = value
         return
 
     if isinstance(statement, Conditional):
