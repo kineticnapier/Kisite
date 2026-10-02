@@ -1,0 +1,16 @@
+# Kisite 0.0.11 arrays and loops
+Sonome kas T tas [10, 20, 30].
+
+Takute kas T[0].
+Kemese kas T[1] tas 99.
+Takute kas T[1].
+
+Pilike kas i pas T {
+    Takute kas i.
+}
+
+Sonome kas x tas 0.
+Pilike palusta x < 3 {
+    Takute kas x.
+    Kemese kas x tas x + 1.
+}
