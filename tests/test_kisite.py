@@ -114,10 +114,23 @@ class KisiteTests(unittest.TestCase):
         """
         self.assertEqual(kisite.run(source, "3 5"), ["8"])
 
+    def test_polike_reads_multiple_values_with_kasta(self):
+        source = """
+        Polike kas a kasta b vos stdin.
+        Takute kas a + b.
+        """
+        self.assertEqual(kisite.run(source, "3 5"), ["8"])
+
+    def test_polike_reads_three_values_with_kasta(self):
+        source = """
+        Polike kas a kasta b kasta c vos stdin.
+        Takute kas a + b + c.
+        """
+        self.assertEqual(kisite.run(source, "1 2 3"), ["6"])
+
     def test_polike_reads_float_and_string(self):
         source = """
-        Polike kas x vos stdin.
-        Polike kas y vos stdin.
+        Polike kas x kasta y vos stdin.
         Takute kas x.
         Takute kas y.
         """
