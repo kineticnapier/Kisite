@@ -6,7 +6,7 @@ import argparse
 import sys
 
 
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 
 
 class KisiteError(Exception):
@@ -133,6 +133,11 @@ class Literal:
 
 
 @dataclass(frozen=True)
+class Variable:
+    name: str
+
+
+@dataclass(frozen=True)
 class Unary:
     op: str
     value: object
@@ -147,6 +152,18 @@ class Binary:
 
 @dataclass(frozen=True)
 class Say:
+    value: object
+
+
+@dataclass(frozen=True)
+class Initialize:
+    name: str
+    value: object
+
+
+@dataclass(frozen=True)
+class SetValue:
+    name: str
     value: object
 
 
@@ -174,6 +191,14 @@ class Parser:
             return True
         return False
 
+    def take_word(self, expected: str) -> Token:
+        token = self.take("WORD")
+        if str(token.value).lower() != expected:
+            raise KisiteError(
+                f"{token.line}:{token.column}: expected '{expected}', got '{token.value}'"
+            )
+        return token
+
     def parse(self) -> list[object]:
         statements: list[object] = []
         while self.current.kind != "EOF":
@@ -182,20 +207,44 @@ class Parser:
 
     def statement(self) -> object:
         verb = self.take("WORD")
-        if str(verb.value).lower() != "takute":
-            raise KisiteError(
-                f"{verb.line}:{verb.column}: only 'takute' is supported as a statement in Kisite 0.0.1"
-            )
-        case = self.take("WORD")
-        if str(case.value).lower() != "kas":
-            raise KisiteError(
-                f"{case.line}:{case.column}: expected 'kas' after 'takute'"
-            )
-        value = self.expression()
-        self.match("DOT")
-        return Say(value)
+        verb_name = str(verb.value).lower()
+
+        if verb_name == "takute":
+            self.take_word("kas")
+            value = self.expression()
+            self.match("DOT")
+            return Say(value)
+
+        if verb_name in ("sonome", "kemese"):
+            self.take_word("kas")
+            name_token = self.take("WORD")
+            name = str(name_token.value)
+            if name.lower() in {"takute", "sonome", "kemese", "kate", "kas", "tas"}:
+                raise KisiteError(
+                    f"{name_token.line}:{name_token.column}: '{name}' is reserved and cannot be a variable name"
+                )
+            self.take_word("tas")
+            value = self.expression()
+            self.match("DOT")
+            if verb_name == "sonome":
+                return Initialize(name, value)
+            return SetValue(name, value)
+
+        raise KisiteError(
+            f"{verb.line}:{verb.column}: unsupported statement '{verb.value}'"
+        )
 
     def expression(self) -> object:
+        node = self.additive()
+        while (
+            self.current.kind == "WORD"
+            and str(self.current.value).lower() == "kate"
+        ):
+            self.pos += 1
+            node = Binary("KATE", node, self.additive())
+        return node
+
+    def additive(self) -> object:
         node = self.term()
         while self.current.kind in ("PLUS", "MINUS"):
             op = self.current.kind
@@ -224,29 +273,52 @@ class Parser:
             return Literal(token.value)
         if self.match("STRING"):
             return Literal(token.value)
+        if self.match("WORD"):
+            return Variable(str(token.value))
         if self.match("LPAREN"):
             node = self.expression()
             self.take("RPAREN")
             return node
         raise KisiteError(
-            f"{token.line}:{token.column}: expected a number, string, or parenthesized expression"
+            f"{token.line}:{token.column}: expected a number, string, variable, or parenthesized expression"
         )
 
 
-def evaluate(node: object) -> object:
+def evaluate(node: object, variables: dict[str, object]) -> object:
     if isinstance(node, Literal):
         return node.value
 
+    if isinstance(node, Variable):
+        if node.name not in variables:
+            raise KisiteError(f"variable '{node.name}' is not initialized")
+        return variables[node.name]
+
     if isinstance(node, Unary):
-        value = evaluate(node.value)
-        if not isinstance(value, (int, float)):
+        value = evaluate(node.value, variables)
+        if not isinstance(value, (int, float)) or isinstance(value, bool):
             raise KisiteError("unary arithmetic requires a number")
         return +value if node.op == "PLUS" else -value
 
     if isinstance(node, Binary):
-        left = evaluate(node.left)
-        right = evaluate(node.right)
-        if not isinstance(left, (int, float)) or not isinstance(right, (int, float)):
+        left = evaluate(node.left, variables)
+        right = evaluate(node.right, variables)
+
+        if node.op == "KATE":
+            if (
+                isinstance(left, (int, float))
+                and not isinstance(left, bool)
+                and isinstance(right, (int, float))
+                and not isinstance(right, bool)
+            ):
+                return left == right
+            return type(left) is type(right) and left == right
+
+        if (
+            not isinstance(left, (int, float))
+            or isinstance(left, bool)
+            or not isinstance(right, (int, float))
+            or isinstance(right, bool)
+        ):
             raise KisiteError("arithmetic requires numbers")
         if node.op == "PLUS":
             return left + right
@@ -263,6 +335,8 @@ def evaluate(node: object) -> object:
 
 
 def display(value: object) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
     if isinstance(value, float) and value.is_integer():
         return str(int(value))
     return str(value)
@@ -271,11 +345,31 @@ def display(value: object) -> str:
 def run(source: str) -> list[str]:
     parser = Parser(tokenize(source))
     output: list[str] = []
+    variables: dict[str, object] = {}
+
     for statement in parser.parse():
         if isinstance(statement, Say):
-            output.append(display(evaluate(statement.value)))
+            output.append(display(evaluate(statement.value, variables)))
             continue
+
+        if isinstance(statement, Initialize):
+            if statement.name in variables:
+                raise KisiteError(
+                    f"variable '{statement.name}' is already initialized"
+                )
+            variables[statement.name] = evaluate(statement.value, variables)
+            continue
+
+        if isinstance(statement, SetValue):
+            if statement.name not in variables:
+                raise KisiteError(
+                    f"variable '{statement.name}' is not initialized"
+                )
+            variables[statement.name] = evaluate(statement.value, variables)
+            continue
+
         raise KisiteError(f"unknown statement {type(statement).__name__}")
+
     return output
 
 
