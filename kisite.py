@@ -6,7 +6,7 @@ import argparse
 import sys
 
 
-VERSION = "0.0.9"
+VERSION = "0.0.10"
 
 
 class KisiteError(Exception):
@@ -96,11 +96,7 @@ def tokenize(source: str) -> list[Token]:
             continue
 
         two = source[i:i + 2]
-        multi = {
-            "<=": "LE",
-            ">=": "GE",
-            "!=": "NE",
-        }
+        multi = {"<=": "LE", ">=": "GE", "!=": "NE"}
         if two in multi:
             tokens.append(Token(multi[two], two, line, column))
             advance(two)
@@ -198,6 +194,7 @@ class Block:
 class Conditional:
     condition: object
     body: Block
+    otherwise: Block | None = None
 
 
 RESERVED_WORDS = {
@@ -207,6 +204,7 @@ RESERVED_WORDS = {
     "polike",
     "kate",
     "palusta",
+    "japalusta",
     "kasta",
     "kas",
     "tas",
@@ -272,6 +270,12 @@ class Parser:
         if self.current_word_is("palusta"):
             return self.conditional_statement()
 
+        if self.current_word_is("japalusta"):
+            token = self.current
+            raise KisiteError(
+                f"{token.line}:{token.column}: japalusta must follow a palusta block"
+            )
+
         if self.current.kind == "LBRACE":
             body: object = self.block()
         else:
@@ -296,8 +300,19 @@ class Parser:
                 f"{token.line}:{token.column}: palusta condition must be followed by a block"
             )
         body = self.block()
+
+        otherwise = None
+        if self.current_word_is("japalusta"):
+            self.pos += 1
+            if self.current.kind != "LBRACE":
+                token = self.current
+                raise KisiteError(
+                    f"{token.line}:{token.column}: japalusta must be followed by a block"
+                )
+            otherwise = self.block()
+
         self.match("DOT")
-        return Conditional(condition, body)
+        return Conditional(condition, body, otherwise)
 
     def block(self) -> Block:
         opening = self.take("LBRACE")
@@ -338,7 +353,7 @@ class Parser:
             stream = str(self.take("WORD").value).lower()
             if stream != "stdin":
                 raise KisiteError(
-                    f"unsupported stream '{stream}'; Kisite 0.0.9 supports only stdin"
+                    f"unsupported stream '{stream}'; Kisite 0.0.10 supports only stdin"
                 )
             return ReadFrom(tuple(names), stream)
 
@@ -547,6 +562,8 @@ def execute_statement(
             raise KisiteError("palusta condition must be boolean")
         if condition:
             execute_statement(statement.body, variables, output, input_reader)
+        elif statement.otherwise is not None:
+            execute_statement(statement.otherwise, variables, output, input_reader)
         return
 
     raise KisiteError(f"unknown statement {type(statement).__name__}")
