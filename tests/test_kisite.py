@@ -79,32 +79,32 @@ class KisiteTests(unittest.TestCase):
     def test_kate_result_can_be_compared(self):
         self.assertEqual(kisite.run("Takute kas (1 kate 1) kate (2 kate 2)."), ["true"])
 
-    def test_kuesta_executes_body_when_true(self):
+    def test_palusta_executes_statement_when_true(self):
         source = """
         Sonome kas x tas 8.
-        x kate 8 kuesta Takute kas "yes".
+        Takute kas "yes" palusta x kate 8.
         """
         self.assertEqual(kisite.run(source), ["yes"])
 
-    def test_kuesta_skips_body_when_false(self):
+    def test_palusta_skips_statement_when_false(self):
         source = """
         Sonome kas x tas 7.
-        x kate 8 kuesta Takute kas "yes".
+        Takute kas "yes" palusta x kate 8.
         Takute kas "done".
         """
         self.assertEqual(kisite.run(source), ["done"])
 
-    def test_kuesta_can_mutate_state(self):
+    def test_palusta_can_mutate_state(self):
         source = """
         Sonome kas x tas 1.
-        x kate 1 kuesta Kemese kas x tas 2.
+        Kemese kas x tas 2 palusta x kate 1.
         Takute kas x.
         """
         self.assertEqual(kisite.run(source), ["2"])
 
-    def test_kuesta_requires_boolean_condition(self):
+    def test_palusta_requires_boolean_condition(self):
         with self.assertRaisesRegex(kisite.KisiteError, "condition must be boolean"):
-            kisite.run('1 kuesta Takute kas "bad".')
+            kisite.run('Takute kas "bad" palusta 1.')
 
 
 if __name__ == "__main__":
