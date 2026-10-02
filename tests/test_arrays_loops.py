@@ -24,19 +24,11 @@ class ArraysAndLoopsTests(unittest.TestCase):
         self.assertEqual(kisite.run(source), ["3"])
 
     def test_indexed_assignment(self):
-        source = """
-        Sonome kas a tas [10, 20, 30].
-        Kemese kas a[1] tas 99.
-        Takute kas a[1].
-        """
+        source = "Sonome kas a tas [10, 20, 30]. Kemese kas a[1] tas 99. Takute kas a[1]."
         self.assertEqual(kisite.run(source), ["99"])
 
     def test_nested_indexed_assignment(self):
-        source = """
-        Sonome kas a tas [[1, 2], [3, 4]].
-        Kemese kas a[1][0] tas 9.
-        Takute kas a[1][0].
-        """
+        source = "Sonome kas a tas [[1, 2], [3, 4]]. Kemese kas a[1][0] tas 9. Takute kas a[1][0]."
         self.assertEqual(kisite.run(source), ["9"])
 
     def test_index_must_be_integer(self):
@@ -62,30 +54,14 @@ class ArraysAndLoopsTests(unittest.TestCase):
             kisite.run("Pilike palusta 1 { Takute kas 0. }")
 
     def test_foreach_array(self):
-        source = """
-        Sonome kas T tas [10, 20, 30].
-        Pilike kas i pas T {
-            Takute kas i.
-        }
-        """
+        source = "Sonome kas T tas [10, 20, 30]. Pilike kas i pas T { Takute kas i. }"
         self.assertEqual(kisite.run(source), ["10", "20", "30"])
 
     def test_foreach_string(self):
-        source = """
-        Pilike kas c pas "abc" {
-            Takute kas c.
-        }
-        """
-        self.assertEqual(kisite.run(source), ["a", "b", "c"])
+        self.assertEqual(kisite.run('Pilike kas c pas "abc" { Takute kas c. }'), ["a", "b", "c"])
 
     def test_foreach_overwrites_existing_loop_variable(self):
-        source = """
-        Sonome kas i tas 99.
-        Pilike kas i pas [1, 2] {
-            Takute kas i.
-        }
-        Takute kas i.
-        """
+        source = "Sonome kas i tas 99. Pilike kas i pas [1, 2] { Takute kas i. } Takute kas i."
         self.assertEqual(kisite.run(source), ["1", "2", "2"])
 
     def test_foreach_requires_array_or_string(self):
@@ -97,20 +73,15 @@ class ArraysAndLoopsTests(unittest.TestCase):
             kisite.run("Pilike x { Takute kas x. }")
 
     def test_existing_palusta_and_japalusta_still_work(self):
-        source = """
-        Sonome kas x tas 0.
-        Palusta x > 0 {
-            Takute kas "positive".
-        } Japalusta {
-            Takute kas "non-positive".
-        }
-        """
+        source = 'Sonome kas x tas 0. Palusta x > 0 { Takute kas "positive". } Japalusta { Takute kas "non-positive". }'
         self.assertEqual(kisite.run(source), ["non-positive"])
 
-    def test_existing_input_still_works(self):
+    def test_input_numbers_use_explicit_minika_conversion(self):
         source = """
         Polike kas a kasta b vos stdin.
-        Takute kas a + b.
+        Sonome kas x tas Kisite kas minika vis a.
+        Sonome kas y tas Kisite kas minika vis b.
+        Takute kas x + y.
         """
         self.assertEqual(kisite.run(source, "3 5"), ["8"])
 
