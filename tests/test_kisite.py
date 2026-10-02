@@ -73,6 +73,39 @@ class KisiteTests(unittest.TestCase):
         """
         self.assertEqual(kisite.run(source), ["true", "false", "true", "false"])
 
+    def test_comparison_operators(self):
+        source = """
+        Takute kas 2 < 3.
+        Takute kas 3 > 2.
+        Takute kas 2 <= 2.
+        Takute kas 3 >= 4.
+        Takute kas 3 != 4.
+        Takute kas 3 != 3.
+        """
+        self.assertEqual(
+            kisite.run(source),
+            ["true", "true", "true", "false", "true", "false"],
+        )
+
+    def test_not_equal_matches_kate_semantics(self):
+        source = """
+        Takute kas "a" != "b".
+        Takute kas "a" != "a".
+        Takute kas 3 != 3.0.
+        """
+        self.assertEqual(kisite.run(source), ["true", "false", "false"])
+
+    def test_ordering_comparison_requires_numbers(self):
+        with self.assertRaisesRegex(kisite.KisiteError, "ordering comparison requires numbers"):
+            kisite.run('Takute kas "a" < "b".')
+
+    def test_comparison_has_lower_precedence_than_arithmetic(self):
+        source = """
+        Takute kas 2 + 3 < 6.
+        Takute kas 2 * 3 >= 1 + 5.
+        """
+        self.assertEqual(kisite.run(source), ["true", "true"])
+
     def test_kate_has_lower_precedence_than_arithmetic(self):
         self.assertEqual(kisite.run("Takute kas 2 + 3 kate 1 + 4."), ["true"])
 
@@ -85,6 +118,13 @@ class KisiteTests(unittest.TestCase):
         Takute kas "yes" palusta x kate 8.
         """
         self.assertEqual(kisite.run(source), ["yes"])
+
+    def test_palusta_accepts_ordering_comparison(self):
+        source = """
+        Sonome kas x tas 11.
+        Takute kas "big" palusta x > 10.
+        """
+        self.assertEqual(kisite.run(source), ["big"])
 
     def test_palusta_skips_statement_when_false(self):
         source = """
