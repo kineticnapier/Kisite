@@ -6,22 +6,28 @@ The name comes from the Lisatopian verb `kisite`, meaning “to process”.
 
 ## Current milestone
 
-The first implementation intentionally supports only:
+Kisite 0.0.2 supports:
 
 - output with `takute kas ...`
-- numeric literals
-- string literals
+- variables
+  - `sonome kas NAME tas VALUE` initializes a variable
+  - `kemese kas NAME tas VALUE` sets an initialized variable
+- equality with `kate`, which returns a boolean
+- numeric and string literals
 - `+`, `-`, `*`, `/`
 - parentheses and normal arithmetic precedence
 
-The arithmetic symbols are temporary surface syntax. Kisite will move toward Lisatopian vocabulary and grammar as the language design is settled; this first milestone avoids inventing Lisatopian mathematical words that have not been verified.
+The arithmetic symbols are temporary surface syntax. Kisite will move toward Lisatopian vocabulary and grammar as the language design is settled.
 
 ## Examples
 
 ```kisite
 Takute kas "Hello World".
-Takute kas 3 + 5.
-Takute kas (3 + 5) * 2.
+
+Sonome kas x tas 3.
+Kemese kas x tas x + 5.
+Takute kas x.
+Takute kas x kate 8.
 ```
 
 Output:
@@ -29,14 +35,25 @@ Output:
 ```text
 Hello World
 8
-16
+true
 ```
+
+`sonome` only initializes a new variable. Initializing the same variable twice is an error. `kemese` only changes an already initialized variable.
+
+`kate` has lower precedence than arithmetic, so:
+
+```kisite
+Takute kas 2 + 3 kate 1 + 4.
+```
+
+prints `true`.
 
 ## Run
 
 ```powershell
 python kisite.py examples/hello.kis
 python kisite.py examples/arithmetic.kis
+python kisite.py examples/variables.kis
 ```
 
 Run tests with:
