@@ -1,6 +1,6 @@
 # Kisite 言語仕様（日本語）
 
-この文書は Kisite 0.0.12 の現在の実装仕様をまとめたものです。
+この文書は Kisite 0.0.13 の現在の実装仕様をまとめたものです。
 
 Kisite は、莉語（Lisatopa）の語彙・文法を土台にした実験的なプログラミング言語です。莉語そのものを完全に再現することよりも、莉語らしさを残しながらプログラムとして読み書きしやすいことを優先します。
 
@@ -46,7 +46,14 @@ Takute kas "Hello World".
 
 ### 3.3 真偽値
 
-真偽値リテラルはまだありません。`kate` や比較演算の結果として得られ、表示時は `true` / `false` になります。
+真偽値リテラル:
+
+```kisite
+Kati
+Kixkati
+```
+
+表示時はそれぞれ `true` / `false` になります。
 
 ### 3.4 配列
 
@@ -75,12 +82,34 @@ Sonome kas x tas 3.
 ```
 
 ```text
-sonome kas <変数名> tas <式>
+sonome kas <変数名> [pasta <型>] tas <式>
 ```
 
 同じスコープで再初期化するとエラーです。
 
-### 4.2 設定: `kemese`
+### 4.2 明示的な型指定
+
+`pasta` で実行時型注釈を付けられます。
+
+```kisite
+Sonome kas n pasta minika tas 0.
+Sonome kas s pasta takuta tas "abc".
+Sonome kas a pasta kineska tas [1, 2, 3].
+Sonome kas b pasta kati tas Kati.
+```
+
+現在の型名:
+
+| 型名 | Kisite上の型 |
+|---|---|
+| `minika` | 数値（整数または実数） |
+| `takuta` | 文字列 |
+| `kineska` | 配列 |
+| `kati` | 真偽値 |
+
+注釈は初期化時と、その後の変数全体への `kemese` / `polike` で検査されます。配列要素ごとの要素型は現在指定しません。
+
+### 4.3 設定: `kemese`
 
 ```kisite
 Kemese kas x tas x + 1.
@@ -91,19 +120,37 @@ Kemese kas a[0] tas 10.
 kemese kas <代入先> tas <式>
 ```
 
-## 5. 算術と比較
+## 5. 算術・比較・論理演算
 
 算術演算子は `+ - * /` です。
 
-比較は `kate`, `!=`, `<`, `>`, `<=`, `>=` を使います。`< > <= >=` は現在数値同士のみです。
+比較は `kate`, `!=`, `<`, `>`, `<=`, `>=` を使います。`< > <= >=` は数値同士のみです。
+
+論理演算:
+
+| 構文 | 意味 |
+|---|---|
+| `a kasta b` | AND |
+| `a vista b` | OR |
+| `kix a` | NOT |
+
+論理演算の対象は真偽値のみです。`kasta` と `vista` は短絡評価します。
 
 優先順位は高い順に、おおむね:
 
 1. 括弧 `(...)`、添字 `[...]`
-2. 単項 `+` / `-`
+2. 単項 `+` / `-` / `kix`
 3. `*` / `/`
 4. `+` / `-`
 5. `kate`, `!=`, `<`, `>`, `<=`, `>=`
+6. 論理 AND `kasta`
+7. 論理 OR `vista`
+
+`kasta` は関数引数の区切りにも使います。関数呼び出しの1引数として AND 式を渡す場合は括弧で囲みます。
+
+```kisite
+Kisite kas f vis (a kasta b) kasta c.
+```
 
 ## 6. 出力: `takute`
 
@@ -134,7 +181,21 @@ Palusta x > 0 {
 }
 ```
 
-条件は真偽値である必要があります。`japalusta` は直前の `palusta` に属します。
+条件は真偽値である必要があります。
+
+### 8.1 else-if: `japalusta palusta`
+
+```kisite
+Palusta x > 0 {
+    Takute kas "positive".
+} Japalusta palusta x kate 0 {
+    Takute kas "zero".
+} Japalusta {
+    Takute kas "negative".
+}
+```
+
+任意個の `japalusta palusta` を連結できます。
 
 ## 9. 繰り返し: `pilike`
 
@@ -154,34 +215,67 @@ Pilike kas i pas T {
 }
 ```
 
-反復対象は配列または文字列です。
+反復対象は配列、文字列、または `pilika` が返す範囲です。
 
-## 10. 入力: `polike`
+### 9.3 break: `kinise`
+
+引数なしの `kinise` は現在のループを終了します。
+
+```kisite
+Pilike palusta Kati {
+    Palusta done {
+        Kinise.
+    }
+}
+```
+
+ループ外ではエラーです。
+
+### 9.4 continue: `kinate`
+
+```kisite
+Pilike kas i pas T {
+    Palusta skip {
+        Kinate.
+    }
+    Takute kas i.
+}
+```
+
+ループ外ではエラーです。
+
+## 10. 配列の追加・削除
+
+### 10.1 追加: `putike`
+
+```kisite
+Putike kas value tas array.
+Putike kas value tas nested[0].
+```
+
+対象は配列でなければなりません。
+
+### 10.2 削除: `kinise kas`
+
+```kisite
+Kinise kas a[2].
+```
+
+指定した配列要素を削除し、後ろの要素を前へ詰めます。
+
+`kinise` は構文によって意味が分かれます。
+
+- `Kinise.` → ループを break
+- `Kinise kas a[i].` → 配列要素を削除
+
+## 11. 入力: `polike`
+
+`polike` は空白文字で区切られたトークンを **文字列として** 読みます。
 
 ```kisite
 Polike kas x vos stdin.
 Polike kas a kasta b kasta c vos stdin.
 ```
-
-入力は空白文字で区切られます。
-
-### 10.1 0.0.12 の非互換変更
-
-0.0.12 以降、`polike` が読み取る値は **必ず文字列** です。
-
-入力が
-
-```text
-101
-```
-
-なら、
-
-```kisite
-Polike kas S vos stdin.
-```
-
-の `S` は数値 `101` ではなく文字列 `"101"` です。
 
 数値化が必要なら `minika` を明示的に呼び出します。
 
@@ -190,9 +284,20 @@ Polike kas s vos stdin.
 Sonome kas n tas Kisite kas minika vis s.
 ```
 
-`minika` は整数として解釈できれば整数を返し、それ以外では実数への変換を試みます。変換できない文字列はエラーです。
+### 11.1 ファイルストリーム
 
-## 11. 関数呼び出し: `kisite`
+`stdin` の代わりに文字列パスを指定できます。
+
+```kisite
+Polike kas a kasta b vos "input.txt".
+Polike kas c vos "input.txt".
+```
+
+同じファイルから複数回読む場合、実行中は読み取り位置を保持します。
+
+CLI 実行時の相対パスは、Kisite ソースファイルが置かれているディレクトリを基準に解決します。`run()` から利用する場合は `base_dir=` を指定でき、省略時は現在の作業ディレクトリです。
+
+## 12. 関数呼び出し: `kisite`
 
 一般形:
 
@@ -211,13 +316,7 @@ Sonome kas n tas Kisite kas minika vis s.
 
 関数呼び出しは式として使えます。戻り値を使わない場合は文として単独でも書けます。
 
-複雑な式の中で呼び出し結果にさらに演算を続ける場合は、境界を明確にするため括弧を使うことを推奨します。
-
-```kisite
-Takute kas (Kisite kas twice vis 5) + 1.
-```
-
-## 12. 関数定義: `kalivisku musope`
+## 13. 関数定義: `kalivisku musope`
 
 一般形:
 
@@ -236,53 +335,61 @@ Kalivisku musope kas add vis a kasta b {
 }
 ```
 
-同名関数の再定義はエラーです。組み込み関数 `minika` は再定義できません。
+関数呼び出しごとにローカル変数領域を作ります。呼び出し元の変数を暗黙には参照しません。再帰呼び出しは可能です。
 
-関数は実行時に定義されるため、通常は呼び出しより前に定義を書きます。再帰呼び出しは可能です。
-
-### 12.1 関数スコープ
-
-関数呼び出しごとにローカル変数領域を作ります。
-
-- 仮引数はローカル変数です。
-- 関数内の `sonome` もローカルです。
-- 呼び出し元の同名変数は上書きされません。
-- 呼び出し元の変数を暗黙には参照しません。必要な値は引数で渡します。
-
-配列は可変オブジェクトなので、配列そのものを引数として渡して要素を書き換えた場合、その配列への変更は呼び出し元からも見えます。
-
-## 13. 戻り値: `jasepe`
+## 14. 戻り値: `jasepe`
 
 ```kisite
 Jasepe kas <式>.
 ```
 
-関数をそこで終了し、式の値を呼び出し元へ返します。
+関数をそこで終了し、式の値を呼び出し元へ返します。関数外で使うとエラーです。
 
-```kisite
-Kalivisku musope kas square vis x {
-    Jasepe kas x * x.
-}
-```
+## 15. 組み込み関数
 
-`jasepe` を関数外で使うとエラーです。
-
-戻り値のない関数は文として呼び出せますが、その呼び出しを式として値が必要な場所で使うとエラーです。
-
-## 14. 組み込み関数
-
-### 14.1 `minika`
+### 15.1 `minika`
 
 ```kisite
 Kisite kas minika vis "123"
 Kisite kas minika vis "2.5"
 ```
 
-数値または数値を表す文字列を数値へ変換します。引数は1個です。
+数値または数値を表す文字列を数値へ変換します。
 
-## 15. 予約語
+### 15.2 `kipala`
 
-少なくとも次の語は変数名として使用できません。
+配列・文字列・`pilika` 範囲の長さを返します。
+
+```kisite
+Kisite kas kipala vis [1, 2, 3]
+Kisite kas kipala vis "abc"
+```
+
+### 15.3 `pilika`
+
+`range` 相当です。
+
+```kisite
+Kisite kas pilika vis stop
+Kisite kas pilika vis start kasta stop
+Kisite kas pilika vis start kasta stop kasta step
+```
+
+引数は整数で、`step` は0にできません。終了値 `stop` は含みません。
+
+例:
+
+```kisite
+Pilike kas i pas Kisite kas pilika vis 2 kasta 10 kasta 2 {
+    Takute kas i.
+}
+```
+
+`2, 4, 6, 8` を順に出力します。
+
+## 16. 予約語
+
+少なくとも次の語は通常の変数名として使用できません。
 
 ```text
 takute
@@ -290,18 +397,30 @@ sonome
 kemese
 polike
 pilike
+putike
+kinise
+kinate
 kisite
 kalivisku
 musope
 jasepe
 minika
+kipala
+pilika
+takuta
+kineska
+kati
+kixkati
+kix
 kate
 palusta
 japalusta
 kasta
+vista
 kas
 tas
 pas
+pasta
 vis
 vos
 stdin
@@ -309,7 +428,7 @@ stdin
 
 キーワードの大文字・小文字は区別されません。通常の変数名・ユーザー定義関数名は区別されます。
 
-## 16. 実行方法
+## 17. 実行方法
 
 ```powershell
 python kisite.py path/to/program.kis
@@ -317,35 +436,49 @@ python kisite.py --version
 python -m unittest discover -s tests
 ```
 
-## 17. 現在未実装の主な機能
+## 18. 現在未実装の主な機能
+
+0.0.12 までの「主な未実装」一覧にあった次の項目は 0.0.13 で実装されました。
 
 - 論理演算
 - 配列の長さ取得
 - 配列への追加・削除
 - `break` / `continue` 相当
 - `range` 相当
-- `stdin` 以外のストリーム
+- `stdin` 以外の入力ストリーム
 - 明示的な型指定
 - 真偽値リテラル
-- `else if` 専用構文
+- `else if` 相当
 
-## 18. 設計上の対応関係
+今後の候補には、整数除算・剰余、ソート、配列スライス、辞書/集合、出力ストリーム、より細かい型などがあります。
+
+## 19. 設計上の対応関係
 
 | Kisite | 現在の役割 |
 |---|---|
 | `takute` | 出力 |
 | `sonome` | 変数の初期化 |
 | `kemese` | 値の設定 |
+| `pasta` | 型注釈 |
 | `kate` | 等値比較 |
+| `kasta` | 論理 AND / 複数項目の区切り |
+| `vista` | 論理 OR |
+| `kix` | 論理 NOT |
+| `kati`, `kixkati` | true / false |
 | `palusta` | 条件 |
 | `japalusta` | else 側 |
+| `japalusta palusta` | else-if |
 | `pilike` | 繰り返し |
+| `kinise` | break / 配列要素の削除 |
+| `kinate` | continue |
+| `putike` | 配列への追加 |
 | `polike` | 入力 |
 | `kisite` | 関数の実行・呼び出し |
 | `kalivisku musope` | 関数定義 |
 | `jasepe` | 関数から値を返す |
 | `minika` | 数値への明示変換 |
-| `kasta` | 複数項目の連結 |
+| `kipala` | 長さ取得 |
+| `pilika` | range 相当 |
 | `pas` | foreach の対象領域 |
 | `vis` | 関数の引数側 |
 | `vos` | 読み取り元 |

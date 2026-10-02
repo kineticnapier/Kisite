@@ -8,25 +8,30 @@ Japanese language specification: [`docs/spec-ja.md`](docs/spec-ja.md)
 
 ## Current milestone
 
-Kisite 0.0.12 currently supports:
+Kisite 0.0.13 currently supports:
 
 - output with `takute kas ...`
-- numeric and string literals
-- array literals such as `[1, 2, 3]`
+- numeric, string, boolean, and array literals
 - zero-based indexing and indexed assignment
 - `+`, `-`, `*`, `/`
 - variables with `sonome` / `kemese`
+- optional runtime type annotations with `pasta`
 - equality with `kate`
 - comparisons with `<`, `>`, `<=`, `>=`, `!=`
+- logical `kasta` / `vista` / `kix`
 - blocks with `{ ... }`
 - `palusta` / `japalusta` conditionals
+- `japalusta palusta` else-if chains
 - `pilike palusta` while-style loops
 - `pilike kas ... pas ...` foreach-style loops
+- `kinise` / `kinate` break and continue
+- arrays with `putike` append and `kinise kas a[i]` deletion
 - whitespace-token input with `polike`
+- file-backed input streams in addition to `stdin`
 - function calls with `kisite`
 - function definitions with `kalivisku musope`
 - returns with `jasepe`
-- explicit number conversion with the builtin `minika`
+- builtins `minika`, `kipala`, and `pilika`
 
 Kisite keeps Lisatopian vocabulary and sentence structure where practical, while ordinary mathematical notation stays concise.
 
@@ -40,35 +45,71 @@ Kemese kas x tas x + 5.
 Takute kas x.
 ```
 
-Arrays and loops:
+### Boolean and logical expressions
+
+```kisite
+Sonome kas a tas Kati.
+Sonome kas b tas Kixkati.
+
+Takute kas a kasta b.
+Takute kas a vista b.
+Takute kas Kix a.
+```
+
+`kasta` is logical AND in ordinary expressions, `vista` is OR, and `kix` is NOT. Logical operators require boolean operands and short-circuit.
+
+Function arguments also use `kasta` as their separator. To pass one logical-AND expression as a single argument, parenthesize it:
+
+```kisite
+Kisite kas f vis (a kasta b) kasta c
+```
+
+### Arrays and loops
 
 ```kisite
 Sonome kas T tas [10, 20, 30].
+Putike kas 40 tas T.
+Kinise kas T[1].
 
 Pilike kas i pas T {
     Takute kas i.
 }
-
-Sonome kas x tas 0.
-Pilike palusta x < 3 {
-    Kemese kas x tas x + 1.
-}
 ```
 
-### Input is string-valued in 0.0.12
-
-`polike` still reads whitespace-separated tokens, but every token is now a string.
+`kinise` without `kas` breaks the current loop, while `kinate` continues with the next iteration:
 
 ```kisite
-Polike kas S vos stdin.
-Pilike kas c pas S {
-    Takute kas c.
+Pilike kas i pas Kisite kas pilika vis 10 {
+    Palusta i kate 3 {
+        Kinate.
+    }
+    Palusta i kate 8 {
+        Kinise.
+    }
+    Takute kas i.
 }
 ```
 
-With input `101`, `S` is the string `"101"` and the loop prints `1`, `0`, `1`.
+`pilika` is the `range`-equivalent builtin:
 
-Use `minika` through the normal function-call syntax when a number is needed:
+```kisite
+Kisite kas pilika vis 5
+Kisite kas pilika vis 2 kasta 6
+Kisite kas pilika vis 2 kasta 10 kasta 2
+```
+
+These correspond to `range(5)`, `range(2, 6)`, and `range(2, 10, 2)`.
+
+Use `kipala` for length:
+
+```kisite
+Takute kas Kisite kas kipala vis T.
+Takute kas Kisite kas kipala vis "abc".
+```
+
+### Input
+
+`polike` reads whitespace-separated tokens as strings.
 
 ```kisite
 Polike kas a kasta b vos stdin.
@@ -77,7 +118,37 @@ Sonome kas y tas Kisite kas minika vis b.
 Takute kas x + y.
 ```
 
-`minika` produces an integer when the text is integer-shaped and otherwise tries a floating-point value.
+A quoted path can be used as another input stream:
+
+```kisite
+Polike kas a kasta b vos "input.txt".
+Polike kas c vos "input.txt".
+```
+
+Repeated reads from the same file continue from the previous position. Relative paths are resolved from the source file directory when using the CLI.
+
+### Runtime type annotations
+
+```kisite
+Sonome kas n pasta minika tas 0.
+Sonome kas s pasta takuta tas "abc".
+Sonome kas a pasta kineska tas [1, 2, 3].
+Sonome kas b pasta kati tas Kati.
+```
+
+The current type names mean number, string, array, and boolean respectively. The annotation is checked on initialization and later whole-variable assignment/input.
+
+### Conditions and else-if
+
+```kisite
+Palusta x > 0 {
+    Takute kas "positive".
+} Japalusta palusta x kate 0 {
+    Takute kas "zero".
+} Japalusta {
+    Takute kas "negative".
+}
+```
 
 ### Functions
 
@@ -98,27 +169,7 @@ Sonome kas answer tas Kisite kas add vis 2 kasta 3.
 Takute kas answer.
 ```
 
-A zero-argument function omits `vis`:
-
-```kisite
-Kalivisku musope kas answer {
-    Jasepe kas 42.
-}
-
-Takute kas Kisite kas answer.
-```
-
-A function call can also be used as a statement when its return value is not needed:
-
-```kisite
-Kalivisku musope kas greet vis name {
-    Takute kas name.
-}
-
-Kisite kas greet vis "hello".
-```
-
-Function variables are local. Parameters and variables initialized inside a function do not overwrite same-named variables in the caller. Functions do not implicitly capture caller/global variables; pass required values as arguments. Recursion is supported.
+Function variables are local. Functions do not implicitly capture caller/global variables. Recursion is supported.
 
 ## Run
 
