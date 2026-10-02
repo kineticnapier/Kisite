@@ -6,7 +6,7 @@ import argparse
 import sys
 
 
-VERSION = "0.0.4"
+VERSION = "0.0.5"
 
 
 class KisiteError(Exception):
@@ -168,6 +168,12 @@ class SetValue:
 
 
 @dataclass(frozen=True)
+class ReadFrom:
+    name: str
+    stream: str
+
+
+@dataclass(frozen=True)
 class Conditional:
     condition: object
     body: object
@@ -177,10 +183,13 @@ RESERVED_WORDS = {
     "takute",
     "sonome",
     "kemese",
+    "polike",
     "kate",
     "palusta",
     "kas",
     "tas",
+    "vos",
+    "stdin",
 }
 
 
@@ -222,6 +231,15 @@ class Parser:
             and str(self.current.value).lower() == value
         )
 
+    def variable_name(self) -> str:
+        token = self.take("WORD")
+        name = str(token.value)
+        if name.lower() in RESERVED_WORDS:
+            raise KisiteError(
+                f"{token.line}:{token.column}: '{name}' is reserved and cannot be a variable name"
+            )
+        return name
+
     def parse(self) -> list[object]:
         statements: list[object] = []
         while self.current.kind != "EOF":
@@ -250,17 +268,23 @@ class Parser:
 
         if verb_name in ("sonome", "kemese"):
             self.take_word("kas")
-            name_token = self.take("WORD")
-            name = str(name_token.value)
-            if name.lower() in RESERVED_WORDS:
-                raise KisiteError(
-                    f"{name_token.line}:{name_token.column}: '{name}' is reserved and cannot be a variable name"
-                )
+            name = self.variable_name()
             self.take_word("tas")
             value = self.expression()
             if verb_name == "sonome":
                 return Initialize(name, value)
             return SetValue(name, value)
+
+        if verb_name == "polike":
+            self.take_word("kas")
+            name = self.variable_name()
+            self.take_word("vos")
+            stream = str(self.take("WORD").value).lower()
+            if stream != "stdin":
+                raise KisiteError(
+                    f"unsupported stream '{stream}'; Kisite 0.0.5 supports only stdin"
+                )
+            return ReadFrom(name, stream)
 
         raise KisiteError(
             f"{verb.line}:{verb.column}: unsupported statement '{verb.value}'"
@@ -368,6 +392,36 @@ def evaluate(node: object, variables: dict[str, object]) -> object:
     raise KisiteError(f"cannot evaluate {type(node).__name__}")
 
 
+def parse_input_value(text: str) -> object:
+    try:
+        return int(text)
+    except ValueError:
+        try:
+            return float(text)
+        except ValueError:
+            return text
+
+
+class InputReader:
+    def __init__(self, data: str | None = None) -> None:
+        self.tokens = data.split() if data is not None else []
+        self.index = 0
+        self.live = data is None
+
+    def read(self) -> object:
+        while self.index >= len(self.tokens):
+            if not self.live:
+                raise KisiteError("stdin is exhausted")
+            line = sys.stdin.readline()
+            if line == "":
+                raise KisiteError("stdin is exhausted")
+            self.tokens.extend(line.split())
+
+        text = self.tokens[self.index]
+        self.index += 1
+        return parse_input_value(text)
+
+
 def display(value: object) -> str:
     if isinstance(value, bool):
         return "true" if value else "false"
@@ -380,6 +434,7 @@ def execute_statement(
     statement: object,
     variables: dict[str, object],
     output: list[str],
+    input_reader: InputReader,
 ) -> None:
     if isinstance(statement, Say):
         output.append(display(evaluate(statement.value, variables)))
@@ -401,24 +456,29 @@ def execute_statement(
         variables[statement.name] = evaluate(statement.value, variables)
         return
 
+    if isinstance(statement, ReadFrom):
+        variables[statement.name] = input_reader.read()
+        return
+
     if isinstance(statement, Conditional):
         condition = evaluate(statement.condition, variables)
         if not isinstance(condition, bool):
             raise KisiteError("palusta condition must be boolean")
         if condition:
-            execute_statement(statement.body, variables, output)
+            execute_statement(statement.body, variables, output, input_reader)
         return
 
     raise KisiteError(f"unknown statement {type(statement).__name__}")
 
 
-def run(source: str) -> list[str]:
+def run(source: str, input_data: str | None = "") -> list[str]:
     parser = Parser(tokenize(source))
     output: list[str] = []
     variables: dict[str, object] = {}
+    input_reader = InputReader(input_data)
 
     for statement in parser.parse():
-        execute_statement(statement, variables, output)
+        execute_statement(statement, variables, output, input_reader)
 
     return output
 
@@ -431,7 +491,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         source = args.source.read_text(encoding="utf-8")
-        for line in run(source):
+        for line in run(source, input_data=None):
             print(line)
         return 0
     except (OSError, KisiteError) as exc:
