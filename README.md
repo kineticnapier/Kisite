@@ -8,7 +8,7 @@ Japanese language specification: [`docs/spec-ja.md`](docs/spec-ja.md)
 
 ## Current milestone
 
-Kisite 0.0.6 currently supports:
+Kisite 0.0.7 currently supports:
 
 - output with `takute kas ...`
 - numeric and string literals
@@ -18,11 +18,12 @@ Kisite 0.0.6 currently supports:
   - `sonome kas <name> tas <value>` initializes a variable
   - `kemese kas <name> tas <value>` changes an initialized variable
 - equality with `kate`
+- comparisons with `<`, `>`, `<=`, `>=`, `!=`
 - single-statement conditionals with `<statement> palusta <condition>`
 - token input from standard input with `polike kas <name> vos stdin`
 - multi-value input with `kasta`, such as `polike kas a kasta b vos stdin`
 
-The arithmetic symbols are temporary surface syntax. Kisite will move toward Lisatopian vocabulary and grammar as the language design is settled.
+The arithmetic symbols are temporary surface syntax. Kisite will move toward Lisatopian vocabulary and grammar where that remains practical, while ordinary mathematical notation can stay concise.
 
 ## Examples
 
@@ -34,7 +35,7 @@ Kemese kas x tas x + 5.
 Takute kas x.
 Takute kas x kate 8.
 
-Takute kas "x is eight" palusta x kate 8.
+Takute kas "x is large" palusta x > 5.
 ```
 
 Input can be read as whitespace-separated tokens:
