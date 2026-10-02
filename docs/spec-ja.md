@@ -1,6 +1,6 @@
 # Kisite 言語仕様（日本語）
 
-この文書は Kisite 0.0.5 の現在の実装仕様をまとめたものです。
+この文書は Kisite 0.0.6 の現在の実装仕様をまとめたものです。
 
 Kisite は、莉語（Lisatopa）の語彙・文法を土台にした実験的なプログラミング言語です。莉語そのものを完全に再現することよりも、莉語として自然な形を保ちながらプログラムを記述できることを目標としています。
 
@@ -21,11 +21,10 @@ Takute kas "Hello World".
 Hello World
 ```
 
-複数の値を入力して計算する例:
+標準入力から2つの値を読み、足す例:
 
 ```kisite
-Polike kas a vos stdin.
-Polike kas b vos stdin.
+Polike kas a kasta b vos stdin.
 Takute kas a + b.
 ```
 
@@ -50,7 +49,7 @@ Takute kas "Hello".
 Takute kas "World"。
 ```
 
-現在の処理系では文末記号を省略できる場合もありますが、読みやすさと将来の互換性のため、原則として文末記号を書くことを推奨します。
+現在の処理系では文末記号を省略できる場合もありますが、原則として文末記号を書くことを推奨します。
 
 空白と改行は、文字列の外では基本的に区切りとして扱われます。
 
@@ -73,7 +72,7 @@ Takute kas 1 + 2. # ここもコメント
 -42
 ```
 
-負号は数値そのものではなく単項演算として扱われます。
+負号は単項演算として扱われます。
 
 ### 4.2 実数
 
@@ -94,13 +93,13 @@ Takute kas 1 + 2. # ここもコメント
 "Kisite"
 ```
 
-莉語の文章などを書きやすいように、曲がった二重引用符も使用できます。
+曲がった二重引用符も使用できます。
 
 ```kisite
 “jaa”
 ```
 
-通常の文字列では、次のエスケープを使用できます。
+使用できる主なエスケープは次の通りです。
 
 | 表記 | 意味 |
 |---|---|
@@ -113,16 +112,11 @@ Takute kas 1 + 2. # ここもコメント
 
 現在、真偽値リテラルはありません。
 
-真偽値は `kate` などの式の結果として得られます。表示時は次の文字列になります。
-
-```text
-true
-false
-```
+真偽値は `kate` などの式の結果として得られ、表示時は `true` または `false` になります。
 
 ## 5. 変数
 
-変数名には英数字と `_` を使用できます。ただし、先頭は数字にできません。
+変数名には英数字と `_` を使用できます。ただし先頭は数字にできません。
 
 変数名の大文字・小文字は区別されます。
 
@@ -142,12 +136,7 @@ Sonome kas x tas 3.
 sonome kas <変数名> tas <式>
 ```
 
-`sonome` は未初期化の変数にのみ使用できます。同じ変数をもう一度 `sonome` するとエラーになります。
-
-```kisite
-Sonome kas x tas 3.
-Sonome kas x tas 4. # エラー
-```
+`sonome` は未初期化の変数にのみ使用できます。同じ変数を再度 `sonome` するとエラーになります。
 
 ### 5.2 設定: `kemese`
 
@@ -166,11 +155,7 @@ Kemese kas x tas 10.
 kemese kas <変数名> tas <式>
 ```
 
-`kemese` はすでに初期化されている変数にのみ使用できます。
-
-```kisite
-Kemese kas x tas 3. # x が存在しないのでエラー
-```
+`kemese` はすでに存在する変数にのみ使用できます。
 
 自己参照を含む更新も可能です。
 
@@ -190,23 +175,7 @@ Kemese kas x tas x + 1.
 | `*` | 乗算 |
 | `/` | 除算 |
 
-```kisite
-Takute kas 3 + 5.
-Takute kas 10 - 4.
-Takute kas 6 * 7.
-Takute kas 20 / 5.
-```
-
-出力:
-
-```text
-8
-6
-42
-4
-```
-
-`+ - * /` は暫定構文です。莉語側の算術語彙・Kisite の文法が固まった段階で、莉語らしい表現を追加または置き換える可能性があります。
+`+ - * /` は暫定構文です。莉語側の算術語彙と Kisite の文法が固まった段階で変更する可能性があります。
 
 ### 6.1 優先順位
 
@@ -218,25 +187,29 @@ Takute kas 20 / 5.
 4. `+` / `-`
 5. `kate`
 
-したがって、
-
 ```kisite
 Takute kas 2 + 3 * 4.
 ```
 
 は `14` になります。
 
-括弧も使用できます。
-
 ```kisite
 Takute kas (2 + 3) * 4.
 ```
 
-これは `20` になります。
+は `20` になります。
 
 ## 7. 等値比較: `kate`
 
 `kate` は Kisite では「〜である」を等値比較として扱います。
+
+一般形:
+
+```text
+<式> kate <式>
+```
+
+例:
 
 ```kisite
 Takute kas 3 kate 3.
@@ -250,34 +223,9 @@ true
 false
 ```
 
-一般形:
-
-```text
-<式> kate <式>
-```
-
 数値同士では整数と実数をまたいで値を比較します。それ以外では型と値の両方が一致したときに `true` になります。
 
-`kate` は四則演算より優先順位が低いため、
-
-```kisite
-Takute kas 2 + 3 kate 1 + 4.
-```
-
-は次と同じ意味です。
-
-```text
-(2 + 3) kate (1 + 4)
-```
-
-結果は `true` です。
-
 ## 8. 出力: `takute`
-
-```kisite
-Takute kas "Hello".
-Takute kas 1 + 2.
-```
 
 一般形:
 
@@ -287,21 +235,24 @@ takute kas <式>
 
 式を評価し、その値を標準出力へ1行として出力します。
 
-整数値と等しい実数は、小数点以下を付けずに表示されます。
-
 ```kisite
-Takute kas 20 / 5.
+Takute kas "Hello".
+Takute kas 1 + 2.
 ```
 
-出力:
-
-```text
-4
-```
+整数値と等しい実数は、小数点以下を付けずに表示されます。
 
 ## 9. 条件付き実行: `palusta`
 
-`palusta` は Kisite では「もし〜ならば」を表し、**直前の1文**を条件付きで実行します。
+`palusta` は Kisite では「もし〜ならば」を表し、直前の1文を条件付きで実行します。
+
+一般形:
+
+```text
+<実行する文> palusta <真偽値の式>
+```
+
+例:
 
 ```kisite
 Sonome kas x tas 8.
@@ -312,39 +263,21 @@ Takute kas "yes" palusta x kate 8.
 
 > `x` が `8` ならば `"yes"` と言う。
 
-一般形:
-
-```text
-<実行する文> palusta <真偽値の式>
-```
-
 条件は真偽値でなければなりません。
 
 ```kisite
 Takute kas "bad" palusta 1. # エラー
 ```
 
-変数の変更にも使用できます。
+現在は複数文をまとめるブロックや `else` 相当の構文は未実装です。
 
-```kisite
-Sonome kas x tas 1.
-Kemese kas x tas 2 palusta x kate 1.
-Takute kas x.
-```
-
-出力:
-
-```text
-2
-```
-
-現在は複数文をまとめるブロック、`else` 相当の構文は未実装です。
-
-## 10. 標準入力: `polike`
+## 10. ストリーム入力: `polike`
 
 `polike` は Kisite ではストリームから値を「読む」操作として扱います。
 
 現在対応しているストリームは `stdin` のみです。
+
+### 10.1 1つ読む
 
 ```kisite
 Polike kas x vos stdin.
@@ -360,27 +293,57 @@ Polike kas x vos stdin.
 polike kas <変数名> vos stdin
 ```
 
-入力は空白文字で区切られ、1回の `polike` で1要素を読みます。
+### 10.2 複数読む: `kasta`
+
+複数の値を一度に読む場合は、読み取り先を `kasta` でつなぎます。
 
 ```kisite
-Polike kas a vos stdin.
-Polike kas b vos stdin.
-Takute kas a + b.
+Polike kas a kasta b vos stdin.
 ```
 
-入力:
+意味:
+
+> `stdin` から `a` と `b` を読む。
+
+入力が
 
 ```text
 3 5
 ```
 
-出力:
+なら、`a` に `3`、`b` に `5` が入ります。
 
-```text
-8
+3個以上も同様に連結できます。
+
+```kisite
+Polike kas a kasta b kasta c vos stdin.
 ```
 
-読み取った値は次の順序で型が決まります。
+一般形:
+
+```text
+polike kas <変数名> (kasta <変数名>)* vos stdin
+```
+
+このため、Python の
+
+```python
+a, b = map(int, input().split())
+```
+
+に近い処理は Kisite では
+
+```kisite
+Polike kas a kasta b vos stdin.
+```
+
+と書けます。
+
+### 10.3 入力の分割と型
+
+入力は空白文字で区切られます。`polike` は指定された変数の個数だけ、先頭から順に要素を消費します。
+
+読み取った各値は次の順序で型が決まります。
 
 1. 整数として解釈できる → 整数
 2. 実数として解釈できる → 実数
@@ -388,9 +351,9 @@ Takute kas a + b.
 
 `polike` は、対象の変数が未定義なら新しく作成し、すでに存在するなら上書きします。
 
-入力を最後まで読み切った後にさらに `polike` するとエラーになります。
+入力を最後まで読み切った後にさらに値を要求するとエラーになります。
 
-### 10.1 `palusta` との組み合わせ
+### 10.4 `palusta` との組み合わせ
 
 ```kisite
 Polike kas x vos stdin palusta flag kate 1.
@@ -398,9 +361,15 @@ Polike kas x vos stdin palusta flag kate 1.
 
 条件が `false` の場合は `polike` 自体が実行されないため、入力も消費されません。
 
+複数入力でも同様です。
+
+```kisite
+Polike kas a kasta b vos stdin palusta flag kate 1.
+```
+
 ## 11. 予約語
 
-Kisite 0.0.5 では、少なくとも次の語を変数名として使用できません。
+Kisite 0.0.6 では、少なくとも次の語を変数名として使用できません。
 
 ```text
 takute
@@ -409,6 +378,7 @@ kemese
 polike
 kate
 palusta
+kasta
 kas
 tas
 vos
@@ -417,13 +387,13 @@ stdin
 
 キーワードの大文字・小文字は区別されません。
 
-したがって、次は同じ命令として扱われます。
-
 ```kisite
 Takute kas 1.
 takute kas 1.
 TAKUTE KAS 1.
 ```
+
+はいずれも同じ命令として扱われます。
 
 ## 12. 実行方法
 
@@ -445,7 +415,7 @@ python -m unittest discover -s tests
 
 ## 13. 現在未実装の主な機能
 
-Kisite 0.0.5 では、次の機能はまだ実装されていません。
+Kisite 0.0.6 では、次の機能はまだ実装されていません。
 
 - 大小比較（`<`, `>`, `<=`, `>=` 相当）
 - 論理演算
@@ -469,6 +439,7 @@ Kisite 0.0.5 では、次の機能はまだ実装されていません。
 | `kate` | 等値比較 | 〜である |
 | `palusta` | 条件付き実行 | もし〜ならば |
 | `polike` | ストリームから読み取る | 読む / スキャンする |
+| `kasta` | 複数の読み取り先をつなぐ | 〜と〜 / そして |
 | `kas` | 主な対象を示す | 〜を |
 | `tas` | 設定先・到達値を示す | 〜に / 〜へ |
 | `vos` | 読み取り元を示す | 〜から |
