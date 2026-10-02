@@ -1,13 +1,13 @@
 # Kisite 言語仕様（日本語）
 
-この文書は Kisite 0.0.9 の現在の実装仕様をまとめたものです。
+この文書は Kisite 0.0.10 の現在の実装仕様をまとめたものです。
 
 Kisite は、莉語（Lisatopa）の語彙・文法を土台にした実験的なプログラミング言語です。莉語そのものを完全に再現することよりも、莉語らしさを残しながらプログラムとして読み書きしやすいことを優先します。
 
 言語名 `Kisite` は、莉語の `kisite`（処理する）に由来します。
 
 > [!NOTE]
-> `sonome`、`kemese`、`kate`、`palusta`、`polike` などのプログラミング言語としての意味は Kisite 側で定義したものです。元の莉語での意味・用法と完全に同一とは限りません。
+> `sonome`、`kemese`、`kate`、`palusta`、`japalusta`、`polike` などのプログラミング言語としての意味は Kisite 側で定義したものです。元の莉語での意味・用法と完全に同一とは限りません。
 
 ## 1. 最小例
 
@@ -212,7 +212,7 @@ Takute kas x.
 
 ## 9. 条件付き実行: `palusta`
 
-Kisite 0.0.9 では、条件を先に書き、その後ろに実行するブロックを置きます。
+条件を先に書き、その後ろに実行するブロックを置きます。
 
 一般形:
 
@@ -258,7 +258,45 @@ Palusta 1 {
 
 また、`palusta` の後ろには必ずブロックが必要です。
 
-### 9.1 0.0.8 以前との非互換変更
+### 9.1 `japalusta`: else 相当
+
+Kisite 0.0.10 では、`palusta` の条件が `false` だった場合に実行するブロックを `japalusta` で書けます。
+
+```kisite
+Palusta x > 0 {
+    Takute kas "positive".
+} Japalusta {
+    Takute kas "non-positive".
+}
+```
+
+一般形:
+
+```text
+palusta <真偽値の式> {
+    <true の場合の文>
+} japalusta {
+    <false の場合の文>
+}
+```
+
+`japalusta` は直前の `palusta` に属し、単独では使用できません。`japalusta` の後ろにも必ずブロックが必要です。
+
+どちらか一方のブロックだけが実行されるため、実行されない側の `polike` は入力を消費しません。
+
+現時点では `else if` 専用構文はありません。必要なら `japalusta` ブロック内に `palusta` を入れ子にできます。
+
+```kisite
+Palusta x > 0 {
+    Takute kas "positive".
+} Japalusta {
+    Palusta x kate 0 {
+        Takute kas "zero".
+    }
+}
+```
+
+### 9.2 0.0.8 以前との非互換変更
 
 旧構文:
 
@@ -316,17 +354,19 @@ polike kas <変数名> (kasta <変数名>)* vos stdin
 
 `polike` は未定義の変数を作成でき、既存の変数なら上書きします。
 
-`palusta` が `false` の場合、ブロック内の `polike` は実行されないため入力も消費しません。
+`palusta` が `false` の場合、`palusta` 側のブロック内の `polike` は実行されません。`japalusta` がある場合は代わりにそちらが実行されます。
 
 ```kisite
 Palusta flag kate 1 {
     Polike kas x vos stdin.
+} Japalusta {
+    Polike kas y vos stdin.
 }
 ```
 
 ## 11. 予約語
 
-Kisite 0.0.9 では、少なくとも次の語を変数名として使用できません。
+Kisite 0.0.10 では、少なくとも次の語を変数名として使用できません。
 
 ```text
 takute
@@ -335,6 +375,7 @@ kemese
 polike
 kate
 palusta
+japalusta
 kasta
 kas
 tas
@@ -364,7 +405,6 @@ python -m unittest discover -s tests
 
 ## 13. 現在未実装の主な機能
 
-- `else` 相当
 - 論理演算
 - 繰り返し
 - 配列
@@ -372,6 +412,7 @@ python -m unittest discover -s tests
 - `stdin` 以外のストリーム
 - 明示的な型指定
 - 真偽値リテラル
+- `else if` 専用構文
 
 ## 14. 設計上の現在の対応関係
 
@@ -382,6 +423,7 @@ python -m unittest discover -s tests
 | `kemese` | 既存変数の設定 | セットする / 設定する |
 | `kate` | 等値比較 | 〜である |
 | `palusta` | 条件付き実行 | もし〜ならば |
+| `japalusta` | `palusta` の偽側 | そうでなければ / else |
 | `polike` | ストリームから読み取る | 読む / スキャンする |
 | `kasta` | 複数の読み取り先をつなぐ | 〜と〜 / そして |
 | `kas` | 主な対象を示す | 〜を |
