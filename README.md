@@ -8,7 +8,7 @@ Japanese language specification: [`docs/spec-ja.md`](docs/spec-ja.md)
 
 ## Current milestone
 
-Kisite 0.0.8 currently supports:
+Kisite 0.0.9 currently supports:
 
 - output with `takute kas ...`
 - numeric and string literals
@@ -20,7 +20,7 @@ Kisite 0.0.8 currently supports:
 - equality with `kate`
 - comparisons with `<`, `>`, `<=`, `>=`, `!=`
 - statement blocks with `{ ... }`
-- conditionals with `<statement-or-block> palusta <condition>`
+- prefix conditionals with `palusta <condition> { ... }`
 - token input from standard input with `polike kas <name> vos stdin`
 - multi-value input with `kasta`, such as `polike kas a kasta b vos stdin`
 
@@ -35,22 +35,29 @@ Sonome kas x tas 3.
 Kemese kas x tas x + 5.
 Takute kas x.
 Takute kas x kate 8.
-
-Takute kas "x is large" palusta x > 5.
 ```
 
-Multiple statements can be grouped with braces and controlled by one `palusta` condition:
+Conditions now come before their blocks:
 
 ```kisite
 Sonome kas x tas 3.
-{
+
+Palusta x > 0 {
     Takute kas "positive".
     Kemese kas x tas x + 1.
     Takute kas x.
-} palusta x > 0.
+}
 ```
 
-Blocks execute their statements in order and currently do not create a separate variable scope.
+The old postfix form
+
+```kisite
+Takute kas "positive" palusta x > 0.
+```
+
+was removed in 0.0.9.
+
+Blocks execute their statements in order and currently do not create a separate variable scope. They can also be used on their own.
 
 Input can be read as whitespace-separated tokens:
 
@@ -75,7 +82,7 @@ Polike kas a kasta b kasta c vos stdin.
 
 `polike` currently supports only `stdin`. Integer-looking tokens become integers, decimal-looking tokens become floating-point values, and other tokens remain strings. Reading into an existing variable overwrites it.
 
-`palusta` can control either one statement or an entire block. An `else` equivalent is not implemented yet.
+An `else` equivalent is not implemented yet.
 
 ## Run
 
