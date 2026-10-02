@@ -41,12 +41,8 @@ class KisiteTests(unittest.TestCase):
         self.assertEqual(kisite.run(source), ["3", "8"])
 
     def test_sonome_rejects_reinitialization(self):
-        source = """
-        Sonome kas x tas 3.
-        Sonome kas x tas 4.
-        """
         with self.assertRaisesRegex(kisite.KisiteError, "already initialized"):
-            kisite.run(source)
+            kisite.run("Sonome kas x tas 3. Sonome kas x tas 4.")
 
     def test_kemese_updates_existing_variable(self):
         source = """
@@ -135,28 +131,32 @@ class KisiteTests(unittest.TestCase):
         with self.assertRaisesRegex(kisite.KisiteError, "unterminated block"):
             kisite.run('{ Takute kas "oops".')
 
-    def test_palusta_executes_statement_when_true(self):
+    def test_palusta_executes_block_when_true(self):
         source = """
         Sonome kas x tas 8.
-        Takute kas "yes" palusta x kate 8.
+        Palusta x kate 8 {
+            Takute kas "yes".
+        }
         """
         self.assertEqual(kisite.run(source), ["yes"])
 
     def test_palusta_accepts_ordering_comparison(self):
         source = """
         Sonome kas x tas 11.
-        Takute kas "big" palusta x > 10.
+        Palusta x > 10 {
+            Takute kas "big".
+        }
         """
         self.assertEqual(kisite.run(source), ["big"])
 
-    def test_palusta_executes_block_when_true(self):
+    def test_palusta_executes_multiple_statements_when_true(self):
         source = """
         Sonome kas x tas 2.
-        {
+        Palusta x > 0 {
             Takute kas "positive".
             Kemese kas x tas x + 1.
             Takute kas x.
-        } palusta x > 0.
+        }
         Takute kas x.
         """
         self.assertEqual(kisite.run(source), ["positive", "3", "3"])
@@ -164,10 +164,10 @@ class KisiteTests(unittest.TestCase):
     def test_palusta_skips_block_when_false(self):
         source = """
         Sonome kas x tas 0.
-        {
+        Palusta x > 0 {
             Polike kas skipped vos stdin.
             Takute kas "bad".
-        } palusta x > 0.
+        }
         Polike kas actual vos stdin.
         Takute kas actual.
         """
@@ -176,19 +176,21 @@ class KisiteTests(unittest.TestCase):
     def test_nested_conditional_blocks(self):
         source = """
         Sonome kas x tas 2.
-        {
-            {
+        Palusta x > 0 {
+            Palusta x > 1 {
                 Takute kas "inner".
-            } palusta x > 1.
+            }
             Takute kas "outer".
-        } palusta x > 0.
+        }
         """
         self.assertEqual(kisite.run(source), ["inner", "outer"])
 
-    def test_palusta_skips_statement_when_false(self):
+    def test_palusta_skips_when_false(self):
         source = """
         Sonome kas x tas 7.
-        Takute kas "yes" palusta x kate 8.
+        Palusta x kate 8 {
+            Takute kas "yes".
+        }
         Takute kas "done".
         """
         self.assertEqual(kisite.run(source), ["done"])
@@ -196,14 +198,24 @@ class KisiteTests(unittest.TestCase):
     def test_palusta_can_mutate_state(self):
         source = """
         Sonome kas x tas 1.
-        Kemese kas x tas 2 palusta x kate 1.
+        Palusta x kate 1 {
+            Kemese kas x tas 2.
+        }
         Takute kas x.
         """
         self.assertEqual(kisite.run(source), ["2"])
 
     def test_palusta_requires_boolean_condition(self):
         with self.assertRaisesRegex(kisite.KisiteError, "condition must be boolean"):
-            kisite.run('Takute kas "bad" palusta 1.')
+            kisite.run('Palusta 1 { Takute kas "bad". }')
+
+    def test_palusta_requires_block(self):
+        with self.assertRaisesRegex(kisite.KisiteError, "must be followed by a block"):
+            kisite.run('Palusta 1 kate 1 Takute kas "bad".')
+
+    def test_postfix_palusta_is_rejected(self):
+        with self.assertRaisesRegex(kisite.KisiteError, "postfix palusta syntax was removed"):
+            kisite.run('Takute kas "yes" palusta 1 kate 1.')
 
     def test_polike_reads_integer_from_stdin(self):
         source = """
@@ -250,7 +262,9 @@ class KisiteTests(unittest.TestCase):
     def test_polike_can_be_conditional_without_consuming_input_when_false(self):
         source = """
         Sonome kas x tas 0.
-        Polike kas y vos stdin palusta x kate 1.
+        Palusta x kate 1 {
+            Polike kas y vos stdin.
+        }
         Takute kas x.
         """
         self.assertEqual(kisite.run(source, "99"), ["0"])
