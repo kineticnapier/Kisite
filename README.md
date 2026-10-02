@@ -8,7 +8,7 @@ Japanese language specification: [`docs/spec-ja.md`](docs/spec-ja.md)
 
 ## Current milestone
 
-Kisite 0.0.5 currently supports:
+Kisite 0.0.6 currently supports:
 
 - output with `takute kas ...`
 - numeric and string literals
@@ -20,6 +20,7 @@ Kisite 0.0.5 currently supports:
 - equality with `kate`
 - single-statement conditionals with `<statement> palusta <condition>`
 - token input from standard input with `polike kas <name> vos stdin`
+- multi-value input with `kasta`, such as `polike kas a kasta b vos stdin`
 
 The arithmetic symbols are temporary surface syntax. Kisite will move toward Lisatopian vocabulary and grammar as the language design is settled.
 
@@ -39,8 +40,7 @@ Takute kas "x is eight" palusta x kate 8.
 Input can be read as whitespace-separated tokens:
 
 ```kisite
-Polike kas a vos stdin.
-Polike kas b vos stdin.
+Polike kas a kasta b vos stdin.
 Takute kas a + b.
 ```
 
@@ -51,6 +51,12 @@ With input:
 ```
 
 this prints `8`.
+
+More values can be chained with `kasta`:
+
+```kisite
+Polike kas a kasta b kasta c vos stdin.
+```
 
 `polike` currently supports only `stdin`. Integer-looking tokens become integers, decimal-looking tokens become floating-point values, and other tokens remain strings. Reading into an existing variable overwrites it.
 
