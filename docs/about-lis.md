@@ -47,15 +47,19 @@ Takute kas x kate 5.
 
 Pas Kisite, `x kate 5` pasale kasasta x kate 5.
 
-## Palusta
+## Palusta / Japalusta
 
 ```kisite
 Palusta x kate 5 {
     Takute kas "yes".
+} Japalusta {
+    Takute kas "no".
 }
 ```
 
 Pas Kisite, `palusta` lapi kas sapaki kisita, kasta pata kisita lupe pas `{ ... }`.
+
+`japalusta` pase pas Kisite masasta takuta pasta "else".
 
 ## Polike
 
