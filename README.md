@@ -6,7 +6,7 @@ The name comes from the Lisatopian verb `kisite`, meaning “to process”.
 
 ## Current milestone
 
-Kisite 0.0.4 currently supports:
+Kisite 0.0.5 currently supports:
 
 - output with `takute kas ...`
 - numeric and string literals
@@ -17,6 +17,7 @@ Kisite 0.0.4 currently supports:
   - `kemese kas <name> tas <value>` changes an initialized variable
 - equality with `kate`
 - single-statement conditionals with `<statement> palusta <condition>`
+- token input from standard input with `polike kas <name> vos stdin`
 
 The arithmetic symbols are temporary surface syntax. Kisite will move toward Lisatopian vocabulary and grammar as the language design is settled.
 
@@ -33,14 +34,23 @@ Takute kas x kate 8.
 Takute kas "x is eight" palusta x kate 8.
 ```
 
-Output:
+Input can be read as whitespace-separated tokens:
+
+```kisite
+Polike kas a vos stdin.
+Polike kas b vos stdin.
+Takute kas a + b.
+```
+
+With input:
 
 ```text
-Hello World
-8
-true
-x is eight
+3 5
 ```
+
+this prints `8`.
+
+`polike` currently supports only `stdin`. Integer-looking tokens become integers, decimal-looking tokens become floating-point values, and other tokens remain strings. Reading into an existing variable overwrites it.
 
 `palusta` currently controls the statement immediately before it. Block syntax and an `else` equivalent are not implemented yet.
 
@@ -49,6 +59,7 @@ x is eight
 ```powershell
 python kisite.py examples/hello.kis
 python kisite.py examples/arithmetic.kis
+python kisite.py examples/input.kis
 ```
 
 Run tests with:
