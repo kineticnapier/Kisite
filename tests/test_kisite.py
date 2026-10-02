@@ -112,6 +112,29 @@ class KisiteTests(unittest.TestCase):
     def test_kate_result_can_be_compared(self):
         self.assertEqual(kisite.run("Takute kas (1 kate 1) kate (2 kate 2)."), ["true"])
 
+    def test_block_executes_statements_in_order(self):
+        source = """
+        {
+            Takute kas "a".
+            Takute kas "b".
+        }
+        """
+        self.assertEqual(kisite.run(source), ["a", "b"])
+
+    def test_block_shares_variable_scope(self):
+        source = """
+        {
+            Sonome kas x tas 3.
+            Kemese kas x tas x + 1.
+        }
+        Takute kas x.
+        """
+        self.assertEqual(kisite.run(source), ["4"])
+
+    def test_unterminated_block_is_an_error(self):
+        with self.assertRaisesRegex(kisite.KisiteError, "unterminated block"):
+            kisite.run('{ Takute kas "oops".')
+
     def test_palusta_executes_statement_when_true(self):
         source = """
         Sonome kas x tas 8.
@@ -125,6 +148,42 @@ class KisiteTests(unittest.TestCase):
         Takute kas "big" palusta x > 10.
         """
         self.assertEqual(kisite.run(source), ["big"])
+
+    def test_palusta_executes_block_when_true(self):
+        source = """
+        Sonome kas x tas 2.
+        {
+            Takute kas "positive".
+            Kemese kas x tas x + 1.
+            Takute kas x.
+        } palusta x > 0.
+        Takute kas x.
+        """
+        self.assertEqual(kisite.run(source), ["positive", "3", "3"])
+
+    def test_palusta_skips_block_when_false(self):
+        source = """
+        Sonome kas x tas 0.
+        {
+            Polike kas skipped vos stdin.
+            Takute kas "bad".
+        } palusta x > 0.
+        Polike kas actual vos stdin.
+        Takute kas actual.
+        """
+        self.assertEqual(kisite.run(source, "99"), ["99"])
+
+    def test_nested_conditional_blocks(self):
+        source = """
+        Sonome kas x tas 2.
+        {
+            {
+                Takute kas "inner".
+            } palusta x > 1.
+            Takute kas "outer".
+        } palusta x > 0.
+        """
+        self.assertEqual(kisite.run(source), ["inner", "outer"])
 
     def test_palusta_skips_statement_when_false(self):
         source = """
