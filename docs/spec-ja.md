@@ -1,6 +1,6 @@
 # Kisite 言語仕様（日本語）
 
-この文書は Kisite 0.0.7 の現在の実装仕様をまとめたものです。
+この文書は Kisite 0.0.8 の現在の実装仕様をまとめたものです。
 
 Kisite は、莉語（Lisatopa）の語彙・文法を土台にした実験的なプログラミング言語です。莉語そのものを完全に再現することよりも、莉語として自然な形を保ちながらプログラムを記述できることを目標としています。
 
@@ -276,31 +276,82 @@ Takute kas 1 + 2.
 
 整数値と等しい実数は、小数点以下を付けずに表示されます。
 
-## 9. 条件付き実行: `palusta`
+## 9. 文ブロック: `{ ... }`
 
-`palusta` は Kisite では「もし〜ならば」を表し、直前の1文を条件付きで実行します。
+複数の文を `{` と `}` でまとめて1つのブロックとして扱えます。
 
-一般形:
+```kisite
+{
+    Takute kas "first".
+    Takute kas "second".
+}
+```
+
+ブロック内の文は上から順に実行されます。
+
+ブロックは現在、新しい変数スコープを作りません。そのため、ブロック内で初期化・変更した変数は外側からもそのまま参照できます。
+
+```kisite
+{
+    Sonome kas x tas 3.
+    Kemese kas x tas x + 1.
+}
+Takute kas x.
+```
+
+出力:
+
+```text
+4
+```
+
+ブロックは入れ子にできます。
+
+## 10. 条件付き実行: `palusta`
+
+`palusta` は Kisite では「もし〜ならば」を表します。直前の1文、または直前のブロックを条件付きで実行します。
+
+1文の場合:
 
 ```text
 <実行する文> palusta <真偽値の式>
 ```
-
-例:
 
 ```kisite
 Sonome kas x tas 11.
 Takute kas "big" palusta x > 10.
 ```
 
-意味:
+ブロックの場合:
 
-> `x` が `10` より大きければ `"big"` と言う。
+```text
+{
+    <文>
+    <文>
+    ...
+} palusta <真偽値の式>
+```
 
-`kate` も条件として使用できます。
+例:
 
 ```kisite
-Takute kas "yes" palusta x kate 11.
+Sonome kas x tas 3.
+{
+    Takute kas "positive".
+    Kemese kas x tas x + 1.
+    Takute kas x.
+} palusta x > 0.
+```
+
+条件が `true` の場合はブロック全体を上から順に実行し、`false` の場合はブロック内の文を1つも実行しません。
+
+したがって、条件が `false` ならブロック内の `polike` も入力を消費しません。
+
+```kisite
+{
+    Polike kas x vos stdin.
+    Takute kas x.
+} palusta flag > 0.
 ```
 
 条件は真偽値でなければなりません。
@@ -309,15 +360,15 @@ Takute kas "yes" palusta x kate 11.
 Takute kas "bad" palusta 1. # エラー
 ```
 
-現在は複数文をまとめるブロックや `else` 相当の構文は未実装です。
+現在 `else` 相当の構文は未実装です。
 
-## 10. ストリーム入力: `polike`
+## 11. ストリーム入力: `polike`
 
 `polike` は Kisite ではストリームから値を「読む」操作として扱います。
 
 現在対応しているストリームは `stdin` のみです。
 
-### 10.1 1つ読む
+### 11.1 1つ読む
 
 ```kisite
 Polike kas x vos stdin.
@@ -333,7 +384,7 @@ Polike kas x vos stdin.
 polike kas <変数名> vos stdin
 ```
 
-### 10.2 複数読む: `kasta`
+### 11.2 複数読む: `kasta`
 
 複数の値を一度に読む場合は、読み取り先を `kasta` でつなぎます。
 
@@ -379,7 +430,7 @@ Polike kas a kasta b vos stdin.
 
 と書けます。
 
-### 10.3 入力の分割と型
+### 11.3 入力の分割と型
 
 入力は空白文字で区切られます。`polike` は指定された変数の個数だけ、先頭から順に要素を消費します。
 
@@ -393,13 +444,13 @@ Polike kas a kasta b vos stdin.
 
 入力を最後まで読み切った後にさらに値を要求するとエラーになります。
 
-### 10.4 `palusta` との組み合わせ
+### 11.4 `palusta` との組み合わせ
+
+1文だけ条件付きで読むこともできます。
 
 ```kisite
 Polike kas x vos stdin palusta flag kate 1.
 ```
-
-条件が `false` の場合は `polike` 自体が実行されないため、入力も消費されません。
 
 複数入力でも同様です。
 
@@ -407,9 +458,9 @@ Polike kas x vos stdin palusta flag kate 1.
 Polike kas a kasta b vos stdin palusta flag > 0.
 ```
 
-## 11. 予約語
+## 12. 予約語
 
-Kisite 0.0.7 では、少なくとも次の語を変数名として使用できません。
+Kisite 0.0.8 では、少なくとも次の語を変数名として使用できません。
 
 ```text
 takute
@@ -435,7 +486,7 @@ TAKUTE KAS 1.
 
 はいずれも同じ命令として扱われます。
 
-## 12. 実行方法
+## 13. 実行方法
 
 ```powershell
 python kisite.py path/to/program.kis
@@ -453,12 +504,11 @@ python kisite.py --version
 python -m unittest discover -s tests
 ```
 
-## 13. 現在未実装の主な機能
+## 14. 現在未実装の主な機能
 
-Kisite 0.0.7 では、次の機能はまだ実装されていません。
+Kisite 0.0.8 では、次の機能はまだ実装されていません。
 
 - 論理演算
-- 複数文ブロック
 - `else` 相当
 - 繰り返し
 - 配列
@@ -467,7 +517,7 @@ Kisite 0.0.7 では、次の機能はまだ実装されていません。
 - 明示的な型指定
 - 真偽値リテラル
 
-## 14. 設計上の現在の対応関係
+## 15. 設計上の現在の対応関係
 
 | Kisite | 現在の役割 | おおまかな日本語 |
 |---|---|---|
@@ -482,4 +532,4 @@ Kisite 0.0.7 では、次の機能はまだ実装されていません。
 | `tas` | 設定先・到達値を示す | 〜に / 〜へ |
 | `vos` | 読み取り元を示す | 〜から |
 
-比較演算や四則演算などの数式部分では、Kisite 独自の語を無理に増やさず、一般的な数学記号を使う方針です。
+比較演算や四則演算などの数式部分では、Kisite 独自の語を無理に増やさず、一般的な数学記号を使う方針です。ブロックについても、将来の配列構文と区別しやすいよう `{ ... }` を使用します。
