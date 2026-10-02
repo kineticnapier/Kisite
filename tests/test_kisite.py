@@ -106,6 +106,43 @@ class KisiteTests(unittest.TestCase):
         with self.assertRaisesRegex(kisite.KisiteError, "condition must be boolean"):
             kisite.run('Takute kas "bad" palusta 1.')
 
+    def test_polike_reads_integer_from_stdin(self):
+        source = """
+        Polike kas a vos stdin.
+        Polike kas b vos stdin.
+        Takute kas a + b.
+        """
+        self.assertEqual(kisite.run(source, "3 5"), ["8"])
+
+    def test_polike_reads_float_and_string(self):
+        source = """
+        Polike kas x vos stdin.
+        Polike kas y vos stdin.
+        Takute kas x.
+        Takute kas y.
+        """
+        self.assertEqual(kisite.run(source, "2.5 hello"), ["2.5", "hello"])
+
+    def test_polike_overwrites_existing_variable(self):
+        source = """
+        Sonome kas x tas 1.
+        Polike kas x vos stdin.
+        Takute kas x.
+        """
+        self.assertEqual(kisite.run(source, "9"), ["9"])
+
+    def test_polike_exhausted_stdin_is_an_error(self):
+        with self.assertRaisesRegex(kisite.KisiteError, "stdin is exhausted"):
+            kisite.run("Polike kas x vos stdin.", "")
+
+    def test_polike_can_be_conditional_without_consuming_input_when_false(self):
+        source = """
+        Sonome kas x tas 0.
+        Polike kas y vos stdin palusta x kate 1.
+        Takute kas x.
+        """
+        self.assertEqual(kisite.run(source, "99"), ["0"])
+
 
 if __name__ == "__main__":
     unittest.main()
