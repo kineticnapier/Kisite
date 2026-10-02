@@ -8,27 +8,25 @@ Japanese language specification: [`docs/spec-ja.md`](docs/spec-ja.md)
 
 ## Current milestone
 
-Kisite 0.0.11 currently supports:
+Kisite 0.0.12 currently supports:
 
 - output with `takute kas ...`
 - numeric and string literals
 - array literals such as `[1, 2, 3]`
-- zero-based indexing such as `a[0]`
-- indexed assignment such as `kemese kas a[1] tas 99`
+- zero-based indexing and indexed assignment
 - `+`, `-`, `*`, `/`
-- parentheses and normal arithmetic precedence
-- variables
-  - `sonome kas <name> tas <value>` initializes a variable
-  - `kemese kas <target> tas <value>` changes an initialized variable or array element
+- variables with `sonome` / `kemese`
 - equality with `kate`
 - comparisons with `<`, `>`, `<=`, `>=`, `!=`
-- statement blocks with `{ ... }`
-- prefix conditionals with `palusta <condition> { ... }`
-- fallback branches with `japalusta { ... }`
-- while-style loops with `pilike palusta <condition> { ... }`
-- foreach-style loops with `pilike kas <name> pas <array-or-string> { ... }`
-- token input from standard input with `polike kas <name> vos stdin`
-- multi-value input with `kasta`, such as `polike kas a kasta b vos stdin`
+- blocks with `{ ... }`
+- `palusta` / `japalusta` conditionals
+- `pilike palusta` while-style loops
+- `pilike kas ... pas ...` foreach-style loops
+- whitespace-token input with `polike`
+- function calls with `kisite`
+- function definitions with `kalivisku musope`
+- returns with `jasepe`
+- explicit number conversion with the builtin `minika`
 
 Kisite keeps Lisatopian vocabulary and sentence structure where practical, while ordinary mathematical notation stays concise.
 
@@ -40,72 +38,87 @@ Takute kas "Hello World".
 Sonome kas x tas 3.
 Kemese kas x tas x + 5.
 Takute kas x.
-Takute kas x kate 8.
 ```
 
-Conditions come before their blocks, and `japalusta` is the `else`-equivalent branch:
-
-```kisite
-Sonome kas x tas 3.
-
-Palusta x > 0 {
-    Takute kas "positive".
-} Japalusta {
-    Takute kas "non-positive".
-}
-```
-
-Arrays use ordinary bracket notation:
+Arrays and loops:
 
 ```kisite
 Sonome kas T tas [10, 20, 30].
-Takute kas T[0].
-Kemese kas T[1] tas 99.
-Takute kas T[1].
-```
 
-`pilike` supports both condition-controlled repetition and foreach-style iteration:
-
-```kisite
-Sonome kas x tas 0.
-
-Pilike palusta x < 3 {
-    Takute kas x.
-    Kemese kas x tas x + 1.
-}
-
-Sonome kas T tas [10, 20, 30].
 Pilike kas i pas T {
     Takute kas i.
 }
+
+Sonome kas x tas 0.
+Pilike palusta x < 3 {
+    Kemese kas x tas x + 1.
+}
 ```
 
-The foreach form also accepts strings:
+### Input is string-valued in 0.0.12
+
+`polike` still reads whitespace-separated tokens, but every token is now a string.
 
 ```kisite
-Pilike kas c pas "abc" {
+Polike kas S vos stdin.
+Pilike kas c pas S {
     Takute kas c.
 }
 ```
 
-Blocks execute their statements in order and currently do not create a separate variable scope. Loop variables therefore remain available after a loop and are overwritten on each iteration.
+With input `101`, `S` is the string `"101"` and the loop prints `1`, `0`, `1`.
 
-Input can be read as whitespace-separated tokens:
+Use `minika` through the normal function-call syntax when a number is needed:
 
 ```kisite
 Polike kas a kasta b vos stdin.
-Takute kas a + b.
+Sonome kas x tas Kisite kas minika vis a.
+Sonome kas y tas Kisite kas minika vis b.
+Takute kas x + y.
 ```
 
-With input:
+`minika` produces an integer when the text is integer-shaped and otherwise tries a floating-point value.
 
-```text
-3 5
+### Functions
+
+Function calls use `kisite`:
+
+```kisite
+Kisite kas f vis a kasta b
 ```
 
-this prints `8`.
+Function definitions use `kalivisku musope`:
 
-`polike` currently supports only `stdin`. Integer-looking tokens become integers, decimal-looking tokens become floating-point values, and other tokens remain strings. Reading into an existing variable overwrites it.
+```kisite
+Kalivisku musope kas add vis a kasta b {
+    Jasepe kas a + b.
+}
+
+Sonome kas answer tas Kisite kas add vis 2 kasta 3.
+Takute kas answer.
+```
+
+A zero-argument function omits `vis`:
+
+```kisite
+Kalivisku musope kas answer {
+    Jasepe kas 42.
+}
+
+Takute kas Kisite kas answer.
+```
+
+A function call can also be used as a statement when its return value is not needed:
+
+```kisite
+Kalivisku musope kas greet vis name {
+    Takute kas name.
+}
+
+Kisite kas greet vis "hello".
+```
+
+Function variables are local. Parameters and variables initialized inside a function do not overwrite same-named variables in the caller. Functions do not implicitly capture caller/global variables; pass required values as arguments. Recursion is supported.
 
 ## Run
 
@@ -114,6 +127,7 @@ python kisite.py examples/hello.kis
 python kisite.py examples/arithmetic.kis
 python kisite.py examples/input.kis
 python kisite.py examples/arrays_loops.kis
+python kisite.py examples/functions.kis
 ```
 
 Run tests with:
