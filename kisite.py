@@ -6,7 +6,7 @@ import argparse
 import sys
 
 
-VERSION = "0.0.3"
+VERSION = "0.0.4"
 
 
 class KisiteError(Exception):
@@ -178,7 +178,7 @@ RESERVED_WORDS = {
     "sonome",
     "kemese",
     "kate",
-    "kuesta",
+    "palusta",
     "kas",
     "tas",
 }
@@ -229,38 +229,42 @@ class Parser:
         return statements
 
     def statement(self) -> object:
-        if self.current.kind == "WORD":
-            verb_name = str(self.current.value).lower()
+        body = self.simple_statement()
 
-            if verb_name == "takute":
-                self.pos += 1
-                self.take_word("kas")
-                value = self.expression()
-                self.match("DOT")
-                return Say(value)
+        if self.current_word_is("palusta"):
+            self.pos += 1
+            condition = self.expression()
+            self.match("DOT")
+            return Conditional(condition, body)
 
-            if verb_name in ("sonome", "kemese"):
-                self.pos += 1
-                self.take_word("kas")
-                name_token = self.take("WORD")
-                name = str(name_token.value)
-                if name.lower() in RESERVED_WORDS:
-                    raise KisiteError(
-                        f"{name_token.line}:{name_token.column}: '{name}' is reserved and cannot be a variable name"
-                    )
-                self.take_word("tas")
-                value = self.expression()
-                self.match("DOT")
-                if verb_name == "sonome":
-                    return Initialize(name, value)
-                return SetValue(name, value)
+        self.match("DOT")
+        return body
 
-        # Lisatopian uses "A kuesta B" for an A-then-B / when-A-B relation.
-        # Kisite uses the same shape for a single-statement conditional.
-        condition = self.expression()
-        self.take_word("kuesta")
-        body = self.statement()
-        return Conditional(condition, body)
+    def simple_statement(self) -> object:
+        verb = self.take("WORD")
+        verb_name = str(verb.value).lower()
+
+        if verb_name == "takute":
+            self.take_word("kas")
+            return Say(self.expression())
+
+        if verb_name in ("sonome", "kemese"):
+            self.take_word("kas")
+            name_token = self.take("WORD")
+            name = str(name_token.value)
+            if name.lower() in RESERVED_WORDS:
+                raise KisiteError(
+                    f"{name_token.line}:{name_token.column}: '{name}' is reserved and cannot be a variable name"
+                )
+            self.take_word("tas")
+            value = self.expression()
+            if verb_name == "sonome":
+                return Initialize(name, value)
+            return SetValue(name, value)
+
+        raise KisiteError(
+            f"{verb.line}:{verb.column}: unsupported statement '{verb.value}'"
+        )
 
     def expression(self) -> object:
         node = self.additive()
@@ -400,7 +404,7 @@ def execute_statement(
     if isinstance(statement, Conditional):
         condition = evaluate(statement.condition, variables)
         if not isinstance(condition, bool):
-            raise KisiteError("kuesta condition must be boolean")
+            raise KisiteError("palusta condition must be boolean")
         if condition:
             execute_statement(statement.body, variables, output)
         return
