@@ -6,7 +6,7 @@ import argparse
 import sys
 
 
-VERSION = "0.0.10"
+VERSION = "0.0.11"
 
 
 class KisiteError(Exception):
@@ -110,8 +110,11 @@ def tokenize(source: str) -> list[Token]:
             "/": "SLASH",
             "(": "LPAREN",
             ")": "RPAREN",
+            "[": "LBRACKET",
+            "]": "RBRACKET",
             "{": "LBRACE",
             "}": "RBRACE",
+            ",": "COMMA",
             "<": "LT",
             ">": "GT",
             ".": "DOT",
@@ -145,8 +148,19 @@ class Literal:
 
 
 @dataclass(frozen=True)
+class ArrayLiteral:
+    items: tuple[object, ...]
+
+
+@dataclass(frozen=True)
 class Variable:
     name: str
+
+
+@dataclass(frozen=True)
+class Index:
+    value: object
+    index: object
 
 
 @dataclass(frozen=True)
@@ -175,7 +189,7 @@ class Initialize:
 
 @dataclass(frozen=True)
 class SetValue:
-    name: str
+    target: object
     value: object
 
 
@@ -197,17 +211,32 @@ class Conditional:
     otherwise: Block | None = None
 
 
+@dataclass(frozen=True)
+class RepeatWhile:
+    condition: object
+    body: Block
+
+
+@dataclass(frozen=True)
+class RepeatEach:
+    name: str
+    iterable: object
+    body: Block
+
+
 RESERVED_WORDS = {
     "takute",
     "sonome",
     "kemese",
     "polike",
+    "pilike",
     "kate",
     "palusta",
     "japalusta",
     "kasta",
     "kas",
     "tas",
+    "pas",
     "vos",
     "stdin",
 }
@@ -270,6 +299,9 @@ class Parser:
         if self.current_word_is("palusta"):
             return self.conditional_statement()
 
+        if self.current_word_is("pilike"):
+            return self.loop_statement()
+
         if self.current_word_is("japalusta"):
             token = self.current
             raise KisiteError(
@@ -294,25 +326,47 @@ class Parser:
     def conditional_statement(self) -> Conditional:
         self.take_word("palusta")
         condition = self.expression()
-        if self.current.kind != "LBRACE":
-            token = self.current
-            raise KisiteError(
-                f"{token.line}:{token.column}: palusta condition must be followed by a block"
-            )
-        body = self.block()
+        body = self.required_block("palusta condition")
 
         otherwise = None
         if self.current_word_is("japalusta"):
             self.pos += 1
-            if self.current.kind != "LBRACE":
-                token = self.current
-                raise KisiteError(
-                    f"{token.line}:{token.column}: japalusta must be followed by a block"
-                )
-            otherwise = self.block()
+            otherwise = self.required_block("japalusta")
 
         self.match("DOT")
         return Conditional(condition, body, otherwise)
+
+    def loop_statement(self) -> object:
+        self.take_word("pilike")
+
+        if self.current_word_is("palusta"):
+            self.pos += 1
+            condition = self.expression()
+            body = self.required_block("pilike palusta condition")
+            self.match("DOT")
+            return RepeatWhile(condition, body)
+
+        if self.current_word_is("kas"):
+            self.pos += 1
+            name = self.variable_name()
+            self.take_word("pas")
+            iterable = self.expression()
+            body = self.required_block("pilike foreach expression")
+            self.match("DOT")
+            return RepeatEach(name, iterable, body)
+
+        token = self.current
+        raise KisiteError(
+            f"{token.line}:{token.column}: pilike must be followed by 'palusta' or 'kas'"
+        )
+
+    def required_block(self, owner: str) -> Block:
+        if self.current.kind != "LBRACE":
+            token = self.current
+            raise KisiteError(
+                f"{token.line}:{token.column}: {owner} must be followed by a block"
+            )
+        return self.block()
 
     def block(self) -> Block:
         opening = self.take("LBRACE")
@@ -334,14 +388,17 @@ class Parser:
             self.take_word("kas")
             return Say(self.expression())
 
-        if verb_name in ("sonome", "kemese"):
+        if verb_name == "sonome":
             self.take_word("kas")
             name = self.variable_name()
             self.take_word("tas")
-            value = self.expression()
-            if verb_name == "sonome":
-                return Initialize(name, value)
-            return SetValue(name, value)
+            return Initialize(name, self.expression())
+
+        if verb_name == "kemese":
+            self.take_word("kas")
+            target = self.assignment_target()
+            self.take_word("tas")
+            return SetValue(target, self.expression())
 
         if verb_name == "polike":
             self.take_word("kas")
@@ -353,13 +410,21 @@ class Parser:
             stream = str(self.take("WORD").value).lower()
             if stream != "stdin":
                 raise KisiteError(
-                    f"unsupported stream '{stream}'; Kisite 0.0.10 supports only stdin"
+                    f"unsupported stream '{stream}'; Kisite 0.0.11 supports only stdin"
                 )
             return ReadFrom(tuple(names), stream)
 
         raise KisiteError(
             f"{verb.line}:{verb.column}: unsupported statement '{verb.value}'"
         )
+
+    def assignment_target(self) -> object:
+        node: object = Variable(self.variable_name())
+        while self.match("LBRACKET"):
+            index = self.expression()
+            self.take("RBRACKET")
+            node = Index(node, index)
+        return node
 
     def expression(self) -> object:
         node = self.additive()
@@ -396,7 +461,15 @@ class Parser:
             return Unary("MINUS", self.unary())
         if self.match("PLUS"):
             return Unary("PLUS", self.unary())
-        return self.primary()
+        return self.postfix()
+
+    def postfix(self) -> object:
+        node = self.primary()
+        while self.match("LBRACKET"):
+            index = self.expression()
+            self.take("RBRACKET")
+            node = Index(node, index)
+        return node
 
     def primary(self) -> object:
         token = self.current
@@ -415,8 +488,19 @@ class Parser:
             node = self.expression()
             self.take("RPAREN")
             return node
+        if self.match("LBRACKET"):
+            items: list[object] = []
+            if self.current.kind != "RBRACKET":
+                while True:
+                    items.append(self.expression())
+                    if not self.match("COMMA"):
+                        break
+                    if self.current.kind == "RBRACKET":
+                        break
+            self.take("RBRACKET")
+            return ArrayLiteral(tuple(items))
         raise KisiteError(
-            f"{token.line}:{token.column}: expected a number, string, variable, or parenthesized expression"
+            f"{token.line}:{token.column}: expected a number, string, array, variable, or parenthesized expression"
         )
 
 
@@ -430,14 +514,33 @@ def values_equal(left: object, right: object) -> bool:
     return type(left) is type(right) and left == right
 
 
+def checked_index(value: object, index: object) -> tuple[object, int]:
+    if not isinstance(index, int) or isinstance(index, bool):
+        raise KisiteError("array index must be an integer")
+    if not isinstance(value, (list, str)):
+        raise KisiteError("indexing requires an array or string")
+    if index < 0 or index >= len(value):
+        raise KisiteError("index out of range")
+    return value, index
+
+
 def evaluate(node: object, variables: dict[str, object]) -> object:
     if isinstance(node, Literal):
         return node.value
+
+    if isinstance(node, ArrayLiteral):
+        return [evaluate(item, variables) for item in node.items]
 
     if isinstance(node, Variable):
         if node.name not in variables:
             raise KisiteError(f"variable '{node.name}' is not initialized")
         return variables[node.name]
+
+    if isinstance(node, Index):
+        value = evaluate(node.value, variables)
+        index = evaluate(node.index, variables)
+        value, index = checked_index(value, index)
+        return value[index]
 
     if isinstance(node, Unary):
         value = evaluate(node.value, variables)
@@ -479,6 +582,28 @@ def evaluate(node: object, variables: dict[str, object]) -> object:
             return left / right
 
     raise KisiteError(f"cannot evaluate {type(node).__name__}")
+
+
+def assign(target: object, value: object, variables: dict[str, object]) -> None:
+    if isinstance(target, Variable):
+        if target.name not in variables:
+            raise KisiteError(f"variable '{target.name}' is not initialized")
+        variables[target.name] = value
+        return
+
+    if isinstance(target, Index):
+        container = evaluate(target.value, variables)
+        index = evaluate(target.index, variables)
+        if not isinstance(index, int) or isinstance(index, bool):
+            raise KisiteError("array index must be an integer")
+        if not isinstance(container, list):
+            raise KisiteError("indexed assignment requires an array")
+        if index < 0 or index >= len(container):
+            raise KisiteError("index out of range")
+        container[index] = value
+        return
+
+    raise KisiteError("invalid assignment target")
 
 
 def parse_input_value(text: str) -> object:
@@ -538,11 +663,7 @@ def execute_statement(
         return
 
     if isinstance(statement, SetValue):
-        if statement.name not in variables:
-            raise KisiteError(
-                f"variable '{statement.name}' is not initialized"
-            )
-        variables[statement.name] = evaluate(statement.value, variables)
+        assign(statement.target, evaluate(statement.value, variables), variables)
         return
 
     if isinstance(statement, ReadFrom):
@@ -564,6 +685,25 @@ def execute_statement(
             execute_statement(statement.body, variables, output, input_reader)
         elif statement.otherwise is not None:
             execute_statement(statement.otherwise, variables, output, input_reader)
+        return
+
+    if isinstance(statement, RepeatWhile):
+        while True:
+            condition = evaluate(statement.condition, variables)
+            if not isinstance(condition, bool):
+                raise KisiteError("pilike palusta condition must be boolean")
+            if not condition:
+                break
+            execute_statement(statement.body, variables, output, input_reader)
+        return
+
+    if isinstance(statement, RepeatEach):
+        iterable = evaluate(statement.iterable, variables)
+        if not isinstance(iterable, (list, str)):
+            raise KisiteError("pilike foreach requires an array or string")
+        for item in iterable:
+            variables[statement.name] = item
+            execute_statement(statement.body, variables, output, input_reader)
         return
 
     raise KisiteError(f"unknown statement {type(statement).__name__}")
