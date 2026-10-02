@@ -6,7 +6,7 @@ import argparse
 import sys
 
 
-VERSION = "0.0.7"
+VERSION = "0.0.8"
 
 
 class KisiteError(Exception):
@@ -114,6 +114,8 @@ def tokenize(source: str) -> list[Token]:
             "/": "SLASH",
             "(": "LPAREN",
             ")": "RPAREN",
+            "{": "LBRACE",
+            "}": "RBRACE",
             "<": "LT",
             ">": "GT",
             ".": "DOT",
@@ -185,6 +187,11 @@ class SetValue:
 class ReadFrom:
     names: tuple[str, ...]
     stream: str
+
+
+@dataclass(frozen=True)
+class Block:
+    statements: tuple[object, ...]
 
 
 @dataclass(frozen=True)
@@ -262,7 +269,10 @@ class Parser:
         return statements
 
     def statement(self) -> object:
-        body = self.simple_statement()
+        if self.current.kind == "LBRACE":
+            body = self.block()
+        else:
+            body = self.simple_statement()
 
         if self.current_word_is("palusta"):
             self.pos += 1
@@ -272,6 +282,18 @@ class Parser:
 
         self.match("DOT")
         return body
+
+    def block(self) -> Block:
+        opening = self.take("LBRACE")
+        statements: list[object] = []
+        while self.current.kind != "RBRACE":
+            if self.current.kind == "EOF":
+                raise KisiteError(
+                    f"{opening.line}:{opening.column}: unterminated block"
+                )
+            statements.append(self.statement())
+        self.take("RBRACE")
+        return Block(tuple(statements))
 
     def simple_statement(self) -> object:
         verb = self.take("WORD")
@@ -300,7 +322,7 @@ class Parser:
             stream = str(self.take("WORD").value).lower()
             if stream != "stdin":
                 raise KisiteError(
-                    f"unsupported stream '{stream}'; Kisite 0.0.7 supports only stdin"
+                    f"unsupported stream '{stream}'; Kisite 0.0.8 supports only stdin"
                 )
             return ReadFrom(tuple(names), stream)
 
@@ -496,6 +518,11 @@ def execute_statement(
         values = [input_reader.read() for _ in statement.names]
         for name, value in zip(statement.names, values):
             variables[name] = value
+        return
+
+    if isinstance(statement, Block):
+        for child in statement.statements:
+            execute_statement(child, variables, output, input_reader)
         return
 
     if isinstance(statement, Conditional):
