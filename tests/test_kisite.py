@@ -5,10 +5,7 @@ import kisite
 
 class KisiteTests(unittest.TestCase):
     def test_hello_world(self):
-        self.assertEqual(
-            kisite.run('Takute kas "Hello World".'),
-            ["Hello World"],
-        )
+        self.assertEqual(kisite.run('Takute kas "Hello World".'), ["Hello World"])
 
     def test_four_arithmetic_operations(self):
         source = """
@@ -34,6 +31,53 @@ class KisiteTests(unittest.TestCase):
     def test_division_by_zero_is_an_error(self):
         with self.assertRaisesRegex(kisite.KisiteError, "division by zero"):
             kisite.run("Takute kas 1 / 0.")
+
+    def test_sonome_initializes_variable(self):
+        source = """
+        Sonome kas x tas 3.
+        Takute kas x.
+        Takute kas x + 5.
+        """
+        self.assertEqual(kisite.run(source), ["3", "8"])
+
+    def test_sonome_rejects_reinitialization(self):
+        source = """
+        Sonome kas x tas 3.
+        Sonome kas x tas 4.
+        """
+        with self.assertRaisesRegex(kisite.KisiteError, "already initialized"):
+            kisite.run(source)
+
+    def test_kemese_updates_existing_variable(self):
+        source = """
+        Sonome kas x tas 3.
+        Kemese kas x tas x + 5.
+        Takute kas x.
+        """
+        self.assertEqual(kisite.run(source), ["8"])
+
+    def test_kemese_rejects_unknown_variable(self):
+        with self.assertRaisesRegex(kisite.KisiteError, "not initialized"):
+            kisite.run("Kemese kas x tas 3.")
+
+    def test_unknown_variable_is_an_error(self):
+        with self.assertRaisesRegex(kisite.KisiteError, "not initialized"):
+            kisite.run("Takute kas x.")
+
+    def test_kate_returns_boolean(self):
+        source = """
+        Takute kas 3 kate 3.
+        Takute kas 3 kate 4.
+        Takute kas "a" kate "a".
+        Takute kas "a" kate "b".
+        """
+        self.assertEqual(kisite.run(source), ["true", "false", "true", "false"])
+
+    def test_kate_has_lower_precedence_than_arithmetic(self):
+        self.assertEqual(kisite.run("Takute kas 2 + 3 kate 1 + 4."), ["true"])
+
+    def test_kate_result_can_be_compared(self):
+        self.assertEqual(kisite.run("Takute kas (1 kate 1) kate (2 kate 2)."), ["true"])
 
 
 if __name__ == "__main__":
