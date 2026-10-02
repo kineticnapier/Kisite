@@ -6,7 +6,7 @@ import argparse
 import sys
 
 
-VERSION = "0.0.2"
+VERSION = "0.0.3"
 
 
 class KisiteError(Exception):
@@ -62,7 +62,7 @@ def tokenize(source: str) -> list[Token]:
                     esc = source[i + 1]
                     escapes = {"n": "\n", "t": "\t", "\\": "\\", '"': '"'}
                     chars.append(escapes.get(esc, esc))
-                    advance(source[i:i+2])
+                    advance(source[i:i + 2])
                     i += 2
                     continue
                 chars.append(source[i])
@@ -167,6 +167,23 @@ class SetValue:
     value: object
 
 
+@dataclass(frozen=True)
+class Conditional:
+    condition: object
+    body: object
+
+
+RESERVED_WORDS = {
+    "takute",
+    "sonome",
+    "kemese",
+    "kate",
+    "kuesta",
+    "kas",
+    "tas",
+}
+
+
 class Parser:
     def __init__(self, tokens: list[Token]) -> None:
         self.tokens = tokens
@@ -199,6 +216,12 @@ class Parser:
             )
         return token
 
+    def current_word_is(self, value: str) -> bool:
+        return (
+            self.current.kind == "WORD"
+            and str(self.current.value).lower() == value
+        )
+
     def parse(self) -> list[object]:
         statements: list[object] = []
         while self.current.kind != "EOF":
@@ -206,40 +229,42 @@ class Parser:
         return statements
 
     def statement(self) -> object:
-        verb = self.take("WORD")
-        verb_name = str(verb.value).lower()
+        if self.current.kind == "WORD":
+            verb_name = str(self.current.value).lower()
 
-        if verb_name == "takute":
-            self.take_word("kas")
-            value = self.expression()
-            self.match("DOT")
-            return Say(value)
+            if verb_name == "takute":
+                self.pos += 1
+                self.take_word("kas")
+                value = self.expression()
+                self.match("DOT")
+                return Say(value)
 
-        if verb_name in ("sonome", "kemese"):
-            self.take_word("kas")
-            name_token = self.take("WORD")
-            name = str(name_token.value)
-            if name.lower() in {"takute", "sonome", "kemese", "kate", "kas", "tas"}:
-                raise KisiteError(
-                    f"{name_token.line}:{name_token.column}: '{name}' is reserved and cannot be a variable name"
-                )
-            self.take_word("tas")
-            value = self.expression()
-            self.match("DOT")
-            if verb_name == "sonome":
-                return Initialize(name, value)
-            return SetValue(name, value)
+            if verb_name in ("sonome", "kemese"):
+                self.pos += 1
+                self.take_word("kas")
+                name_token = self.take("WORD")
+                name = str(name_token.value)
+                if name.lower() in RESERVED_WORDS:
+                    raise KisiteError(
+                        f"{name_token.line}:{name_token.column}: '{name}' is reserved and cannot be a variable name"
+                    )
+                self.take_word("tas")
+                value = self.expression()
+                self.match("DOT")
+                if verb_name == "sonome":
+                    return Initialize(name, value)
+                return SetValue(name, value)
 
-        raise KisiteError(
-            f"{verb.line}:{verb.column}: unsupported statement '{verb.value}'"
-        )
+        # Lisatopian uses "A kuesta B" for an A-then-B / when-A-B relation.
+        # Kisite uses the same shape for a single-statement conditional.
+        condition = self.expression()
+        self.take_word("kuesta")
+        body = self.statement()
+        return Conditional(condition, body)
 
     def expression(self) -> object:
         node = self.additive()
-        while (
-            self.current.kind == "WORD"
-            and str(self.current.value).lower() == "kate"
-        ):
+        while self.current_word_is("kate"):
             self.pos += 1
             node = Binary("KATE", node, self.additive())
         return node
@@ -274,7 +299,12 @@ class Parser:
         if self.match("STRING"):
             return Literal(token.value)
         if self.match("WORD"):
-            return Variable(str(token.value))
+            name = str(token.value)
+            if name.lower() in RESERVED_WORDS:
+                raise KisiteError(
+                    f"{token.line}:{token.column}: expected a value, got reserved word '{name}'"
+                )
+            return Variable(name)
         if self.match("LPAREN"):
             node = self.expression()
             self.take("RPAREN")
@@ -342,33 +372,49 @@ def display(value: object) -> str:
     return str(value)
 
 
+def execute_statement(
+    statement: object,
+    variables: dict[str, object],
+    output: list[str],
+) -> None:
+    if isinstance(statement, Say):
+        output.append(display(evaluate(statement.value, variables)))
+        return
+
+    if isinstance(statement, Initialize):
+        if statement.name in variables:
+            raise KisiteError(
+                f"variable '{statement.name}' is already initialized"
+            )
+        variables[statement.name] = evaluate(statement.value, variables)
+        return
+
+    if isinstance(statement, SetValue):
+        if statement.name not in variables:
+            raise KisiteError(
+                f"variable '{statement.name}' is not initialized"
+            )
+        variables[statement.name] = evaluate(statement.value, variables)
+        return
+
+    if isinstance(statement, Conditional):
+        condition = evaluate(statement.condition, variables)
+        if not isinstance(condition, bool):
+            raise KisiteError("kuesta condition must be boolean")
+        if condition:
+            execute_statement(statement.body, variables, output)
+        return
+
+    raise KisiteError(f"unknown statement {type(statement).__name__}")
+
+
 def run(source: str) -> list[str]:
     parser = Parser(tokenize(source))
     output: list[str] = []
     variables: dict[str, object] = {}
 
     for statement in parser.parse():
-        if isinstance(statement, Say):
-            output.append(display(evaluate(statement.value, variables)))
-            continue
-
-        if isinstance(statement, Initialize):
-            if statement.name in variables:
-                raise KisiteError(
-                    f"variable '{statement.name}' is already initialized"
-                )
-            variables[statement.name] = evaluate(statement.value, variables)
-            continue
-
-        if isinstance(statement, SetValue):
-            if statement.name not in variables:
-                raise KisiteError(
-                    f"variable '{statement.name}' is not initialized"
-                )
-            variables[statement.name] = evaluate(statement.value, variables)
-            continue
-
-        raise KisiteError(f"unknown statement {type(statement).__name__}")
+        execute_statement(statement, variables, output)
 
     return output
 
