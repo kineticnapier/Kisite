@@ -8,7 +8,7 @@ Japanese language specification: [`docs/spec-ja.md`](docs/spec-ja.md)
 
 ## Current milestone
 
-Kisite 0.0.9 currently supports:
+Kisite 0.0.10 currently supports:
 
 - output with `takute kas ...`
 - numeric and string literals
@@ -21,6 +21,7 @@ Kisite 0.0.9 currently supports:
 - comparisons with `<`, `>`, `<=`, `>=`, `!=`
 - statement blocks with `{ ... }`
 - prefix conditionals with `palusta <condition> { ... }`
+- fallback branches with `japalusta { ... }`
 - token input from standard input with `polike kas <name> vos stdin`
 - multi-value input with `kasta`, such as `polike kas a kasta b vos stdin`
 
@@ -37,17 +38,19 @@ Takute kas x.
 Takute kas x kate 8.
 ```
 
-Conditions now come before their blocks:
+Conditions come before their blocks, and `japalusta` is the `else`-equivalent branch:
 
 ```kisite
 Sonome kas x tas 3.
 
 Palusta x > 0 {
     Takute kas "positive".
-    Kemese kas x tas x + 1.
-    Takute kas x.
+} Japalusta {
+    Takute kas "non-positive".
 }
 ```
+
+`japalusta` must immediately follow a `palusta` block and also requires a block.
 
 The old postfix form
 
@@ -81,8 +84,6 @@ Polike kas a kasta b kasta c vos stdin.
 ```
 
 `polike` currently supports only `stdin`. Integer-looking tokens become integers, decimal-looking tokens become floating-point values, and other tokens remain strings. Reading into an existing variable overwrites it.
-
-An `else` equivalent is not implemented yet.
 
 ## Run
 
