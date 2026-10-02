@@ -6,7 +6,7 @@ import argparse
 import sys
 
 
-VERSION = "0.0.6"
+VERSION = "0.0.7"
 
 
 class KisiteError(Exception):
@@ -95,6 +95,18 @@ def tokenize(source: str) -> list[Token]:
             tokens.append(Token("NUMBER", value, start_line, start_col))
             continue
 
+        two = source[i:i + 2]
+        multi = {
+            "<=": "LE",
+            ">=": "GE",
+            "!=": "NE",
+        }
+        if two in multi:
+            tokens.append(Token(multi[two], two, line, column))
+            advance(two)
+            i += 2
+            continue
+
         single = {
             "+": "PLUS",
             "-": "MINUS",
@@ -102,6 +114,8 @@ def tokenize(source: str) -> list[Token]:
             "/": "SLASH",
             "(": "LPAREN",
             ")": "RPAREN",
+            "<": "LT",
+            ">": "GT",
             ".": "DOT",
             "。": "DOT",
         }
@@ -286,7 +300,7 @@ class Parser:
             stream = str(self.take("WORD").value).lower()
             if stream != "stdin":
                 raise KisiteError(
-                    f"unsupported stream '{stream}'; Kisite 0.0.6 supports only stdin"
+                    f"unsupported stream '{stream}'; Kisite 0.0.7 supports only stdin"
                 )
             return ReadFrom(tuple(names), stream)
 
@@ -296,9 +310,16 @@ class Parser:
 
     def expression(self) -> object:
         node = self.additive()
-        while self.current_word_is("kate"):
-            self.pos += 1
-            node = Binary("KATE", node, self.additive())
+        while True:
+            if self.current_word_is("kate"):
+                self.pos += 1
+                op = "KATE"
+            elif self.current.kind in ("LT", "GT", "LE", "GE", "NE"):
+                op = self.current.kind
+                self.pos += 1
+            else:
+                break
+            node = Binary(op, node, self.additive())
         return node
 
     def additive(self) -> object:
@@ -346,6 +367,16 @@ class Parser:
         )
 
 
+def is_number(value: object) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def values_equal(left: object, right: object) -> bool:
+    if is_number(left) and is_number(right):
+        return left == right
+    return type(left) is type(right) and left == right
+
+
 def evaluate(node: object, variables: dict[str, object]) -> object:
     if isinstance(node, Literal):
         return node.value
@@ -357,7 +388,7 @@ def evaluate(node: object, variables: dict[str, object]) -> object:
 
     if isinstance(node, Unary):
         value = evaluate(node.value, variables)
-        if not isinstance(value, (int, float)) or isinstance(value, bool):
+        if not is_number(value):
             raise KisiteError("unary arithmetic requires a number")
         return +value if node.op == "PLUS" else -value
 
@@ -366,21 +397,22 @@ def evaluate(node: object, variables: dict[str, object]) -> object:
         right = evaluate(node.right, variables)
 
         if node.op == "KATE":
-            if (
-                isinstance(left, (int, float))
-                and not isinstance(left, bool)
-                and isinstance(right, (int, float))
-                and not isinstance(right, bool)
-            ):
-                return left == right
-            return type(left) is type(right) and left == right
+            return values_equal(left, right)
+        if node.op == "NE":
+            return not values_equal(left, right)
 
-        if (
-            not isinstance(left, (int, float))
-            or isinstance(left, bool)
-            or not isinstance(right, (int, float))
-            or isinstance(right, bool)
-        ):
+        if node.op in ("LT", "GT", "LE", "GE"):
+            if not is_number(left) or not is_number(right):
+                raise KisiteError("ordering comparison requires numbers")
+            if node.op == "LT":
+                return left < right
+            if node.op == "GT":
+                return left > right
+            if node.op == "LE":
+                return left <= right
+            return left >= right
+
+        if not is_number(left) or not is_number(right):
             raise KisiteError("arithmetic requires numbers")
         if node.op == "PLUS":
             return left + right
