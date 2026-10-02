@@ -6,7 +6,7 @@ The name comes from the Lisatopian verb `kisite`, meaning “to process”.
 
 ## Current milestone
 
-Kisite 0.0.3 currently supports:
+Kisite 0.0.4 currently supports:
 
 - output with `takute kas ...`
 - numeric and string literals
@@ -16,7 +16,7 @@ Kisite 0.0.3 currently supports:
   - `sonome kas <name> tas <value>` initializes a variable
   - `kemese kas <name> tas <value>` changes an initialized variable
 - equality with `kate`
-- single-statement conditionals with `A kuesta B`
+- single-statement conditionals with `<statement> palusta <condition>`
 
 The arithmetic symbols are temporary surface syntax. Kisite will move toward Lisatopian vocabulary and grammar as the language design is settled.
 
@@ -30,7 +30,7 @@ Kemese kas x tas x + 5.
 Takute kas x.
 Takute kas x kate 8.
 
-x kate 8 kuesta Takute kas "x is eight".
+Takute kas "x is eight" palusta x kate 8.
 ```
 
 Output:
@@ -42,7 +42,7 @@ true
 x is eight
 ```
 
-`kuesta` currently controls one following statement. Block syntax and an `else` equivalent are not implemented yet.
+`palusta` currently controls the statement immediately before it. Block syntax and an `else` equivalent are not implemented yet.
 
 ## Run
 
