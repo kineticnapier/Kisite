@@ -1,0 +1,10 @@
+# Kisite 0.0.12 function demo
+Kalivisku musope kas add vis a kasta b {
+    Jasepe kas a + b.
+}
+
+Polike kas left kasta right vos stdin.
+Sonome kas a tas Kisite kas minika vis left.
+Sonome kas b tas Kisite kas minika vis right.
+Sonome kas answer tas Kisite kas add vis a kasta b.
+Takute kas answer.
