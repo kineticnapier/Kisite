@@ -6,7 +6,7 @@ import argparse
 import sys
 
 
-VERSION = "0.0.8"
+VERSION = "0.0.9"
 
 
 class KisiteError(Exception):
@@ -197,7 +197,7 @@ class Block:
 @dataclass(frozen=True)
 class Conditional:
     condition: object
-    body: object
+    body: Block
 
 
 RESERVED_WORDS = {
@@ -269,19 +269,35 @@ class Parser:
         return statements
 
     def statement(self) -> object:
+        if self.current_word_is("palusta"):
+            return self.conditional_statement()
+
         if self.current.kind == "LBRACE":
-            body = self.block()
+            body: object = self.block()
         else:
             body = self.simple_statement()
 
         if self.current_word_is("palusta"):
-            self.pos += 1
-            condition = self.expression()
-            self.match("DOT")
-            return Conditional(condition, body)
+            token = self.current
+            raise KisiteError(
+                f"{token.line}:{token.column}: postfix palusta syntax was removed in Kisite 0.0.9; "
+                "use 'palusta <condition> { ... }'"
+            )
 
         self.match("DOT")
         return body
+
+    def conditional_statement(self) -> Conditional:
+        self.take_word("palusta")
+        condition = self.expression()
+        if self.current.kind != "LBRACE":
+            token = self.current
+            raise KisiteError(
+                f"{token.line}:{token.column}: palusta condition must be followed by a block"
+            )
+        body = self.block()
+        self.match("DOT")
+        return Conditional(condition, body)
 
     def block(self) -> Block:
         opening = self.take("LBRACE")
@@ -322,7 +338,7 @@ class Parser:
             stream = str(self.take("WORD").value).lower()
             if stream != "stdin":
                 raise KisiteError(
-                    f"unsupported stream '{stream}'; Kisite 0.0.8 supports only stdin"
+                    f"unsupported stream '{stream}'; Kisite 0.0.9 supports only stdin"
                 )
             return ReadFrom(tuple(names), stream)
 
