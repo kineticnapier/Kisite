@@ -173,12 +173,69 @@ class KisiteTests(unittest.TestCase):
         """
         self.assertEqual(kisite.run(source, "99"), ["99"])
 
+    def test_japalusta_runs_when_condition_is_false(self):
+        source = """
+        Sonome kas x tas 0.
+        Palusta x > 0 {
+            Takute kas "positive".
+        } Japalusta {
+            Takute kas "non-positive".
+        }
+        """
+        self.assertEqual(kisite.run(source), ["non-positive"])
+
+    def test_japalusta_is_skipped_when_condition_is_true(self):
+        source = """
+        Sonome kas x tas 3.
+        Palusta x > 0 {
+            Takute kas "positive".
+        } Japalusta {
+            Takute kas "bad".
+        }
+        """
+        self.assertEqual(kisite.run(source), ["positive"])
+
+    def test_japalusta_can_mutate_state(self):
+        source = """
+        Sonome kas x tas 0.
+        Palusta x > 0 {
+            Kemese kas x tas 10.
+        } Japalusta {
+            Kemese kas x tas -1.
+        }
+        Takute kas x.
+        """
+        self.assertEqual(kisite.run(source), ["-1"])
+
+    def test_japalusta_skipped_branch_does_not_consume_input(self):
+        source = """
+        Sonome kas x tas 1.
+        Palusta x > 0 {
+            Takute kas "yes".
+        } Japalusta {
+            Polike kas skipped vos stdin.
+        }
+        Polike kas actual vos stdin.
+        Takute kas actual.
+        """
+        self.assertEqual(kisite.run(source, "99"), ["yes", "99"])
+
+    def test_japalusta_requires_block(self):
+        with self.assertRaisesRegex(kisite.KisiteError, "japalusta must be followed by a block"):
+            kisite.run('Palusta 1 kate 2 { Takute kas "no". } Japalusta Takute kas "bad".')
+
+    def test_standalone_japalusta_is_rejected(self):
+        with self.assertRaisesRegex(kisite.KisiteError, "japalusta must follow a palusta block"):
+            kisite.run('Japalusta { Takute kas "bad". }')
+
     def test_nested_conditional_blocks(self):
         source = """
         Sonome kas x tas 2.
         Palusta x > 0 {
             Palusta x > 1 {
                 Takute kas "inner".
+            } Japalusta {
+                Takute kas "not-inner".
             }
             Takute kas "outer".
         }
