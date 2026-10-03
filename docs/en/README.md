@@ -91,7 +91,7 @@ Kisite currently has numbers, strings, booleans, arrays, and `pilika` ranges.
 3.14
 "hello"
 Kati
-Kixkati
+Jakati
 [1, 2, 3]
 ```
 
