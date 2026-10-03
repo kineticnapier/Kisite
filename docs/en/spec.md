@@ -2,7 +2,7 @@
 
 [Guide](README.md) · [日本語仕様](../ja/spec.md)
 
-This document describes the current implementation of **Kisite 0.0.14**.
+This document describes the current implementation of **Kisite 0.0.15**.
 
 Kisite is an experimental programming language based on Lisatopian (莉語 / Lisatopa) vocabulary and sentence structure. The goal is not to reproduce Lisatopian perfectly, but to preserve its character while remaining usable as a programming language.
 
@@ -126,7 +126,9 @@ kemese kas <target> tas <expression>
 
 ## 5. Arithmetic, comparison, and logic
 
-Arithmetic operators are `+ - * /`.
+Arithmetic operators are `+ - * / // %`.
+
+`//` is integer floor division and `%` is remainder. Both require integer operands and reject division/remainder by zero. Floor division follows floor semantics, so for example `-7 // 3` is `-3`.
 
 Comparisons use `kate`, `!=`, `<`, `>`, `<=`, and `>=`. Ordering operators currently require numeric operands.
 
@@ -144,7 +146,7 @@ Approximate precedence, from highest to lowest:
 
 1. Parentheses `(...)` and indexing `[...]`
 2. Unary `+`, `-`, `kix`
-3. `*`, `/`
+3. `*`, `/`, `//`, `%`
 4. `+`, `-`
 5. `kate`, `!=`, `<`, `>`, `<=`, `>=`
 6. Logical AND `kasta`
@@ -391,6 +393,35 @@ Pilike kas i pas Kisite kas pilika vis 2 kasta 10 kasta 2 {
 
 This outputs `2, 4, 6, 8` in order.
 
+### 15.4 `paline`
+
+Returns a new sorted array without modifying the input array.
+
+```kisite
+Kisite kas paline vis [5, 1, 4, 2, 3]
+Kisite kas paline vis [[7, 8], [2, 5], [1, 5]]
+```
+
+Current ordering support is for numbers and arrays recursively composed of comparable numbers/arrays. Arrays are compared lexicographically. Strings are not currently accepted by `paline`.
+
+### 15.5 `japonavi` / `ponavi`
+
+`japonavi` selects the minimum and `ponavi` selects the maximum.
+
+```kisite
+Kisite kas japonavi vis 9 kasta 2 kasta 7
+Kisite kas ponavi vis 9 kasta 2 kasta 7
+```
+
+With exactly one argument, that argument must be an array or `pilika` range and its elements are compared:
+
+```kisite
+Kisite kas japonavi vis [9, 2, 7]
+Kisite kas ponavi vis (Kisite kas pilika vis 3 kasta 10 kasta 2)
+```
+
+Empty sequences are errors. The same number/nested-array ordering rules as `paline` are used.
+
 ## 16. Reserved words
 
 At minimum, the following words cannot be used as ordinary variable names:
@@ -411,6 +442,9 @@ jasepe
 minika
 kipala
 pilika
+paline
+japonavi
+ponavi
 takuta
 kineska
 kati
@@ -442,9 +476,9 @@ python -m unittest discover -s tests
 
 ## 18. Major features not yet implemented
 
-Features added in 0.0.13 include logic, length, array append/delete, break/continue, range, file input streams, runtime type annotations, boolean literals, and else-if chains.
+0.0.15 added integer floor division/remainder, sorted-array copies, and minimum/maximum selection after practical AtCoder use exposed those gaps.
 
-Possible future work includes integer division and modulo, sorting, slicing, dictionaries/sets, output streams, and more precise types.
+Possible future work includes slicing, dictionaries/sets, combinations or other combinatorial iterators when needed, output streams, and more precise types.
 
 ## 19. Kisite vocabulary mapping
 
@@ -473,6 +507,9 @@ Possible future work includes integer division and modulo, sorting, slicing, dic
 | `minika` | explicit number conversion |
 | `kipala` | length |
 | `pilika` | range |
+| `paline` | sorted copy |
+| `japonavi` | minimum selection |
+| `ponavi` | maximum selection |
 | `pas` | foreach target |
 | `vis` | function argument side |
 | `vos` | input source |
