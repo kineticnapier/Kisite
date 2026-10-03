@@ -302,7 +302,7 @@ RESERVED_WORDS = {
     "takuta",
     "kineska",
     "kati",
-    "kixkati",
+    "jakati",
     "kix",
     "kate",
     "palusta",
@@ -659,7 +659,7 @@ class Parser:
         if self.current_word_is("kati"):
             self.pos += 1
             return Literal(True)
-        if self.current_word_is("kixkati"):
+        if self.current_word_is("jakati"):
             self.pos += 1
             return Literal(False)
         if self.match("NUMBER"):
