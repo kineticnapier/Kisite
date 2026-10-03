@@ -5,7 +5,7 @@ from pathlib import Path
 import kisite
 
 
-class Kisite013Tests(unittest.TestCase):
+class Kisite014Tests(unittest.TestCase):
     def test_regression_arithmetic_variables_and_conditions(self):
         source = """
         Sonome kas x tas 2 + 3 * 4.
@@ -227,7 +227,7 @@ class Kisite013Tests(unittest.TestCase):
 
     def test_typed_minika(self):
         source = """
-        Sonome kas x pasta minika tas 3.
+        Sonome kas x sis minika tas 3.
         Kemese kas x tas 2.5.
         Takute kas x.
         """
@@ -235,33 +235,33 @@ class Kisite013Tests(unittest.TestCase):
 
     def test_typed_takuta(self):
         self.assertEqual(
-            kisite.run('Sonome kas s pasta takuta tas "abc". Takute kas s.'),
+            kisite.run('Sonome kas s sis takuta tas "abc". Takute kas s.'),
             ["abc"],
         )
 
     def test_typed_kineska(self):
         self.assertEqual(
-            kisite.run("Sonome kas a pasta kineska tas [1]. Putike kas 2 tas a. Takute kas a[1]."),
+            kisite.run("Sonome kas a sis kineska tas [1]. Putike kas 2 tas a. Takute kas a[1]."),
             ["2"],
         )
 
     def test_typed_kati(self):
         self.assertEqual(
-            kisite.run("Sonome kas b pasta kati tas Kati. Takute kas b."),
+            kisite.run("Sonome kas b sis kati tas Kati. Takute kas b."),
             ["true"],
         )
 
     def test_type_mismatch_on_initialize(self):
         with self.assertRaisesRegex(kisite.KisiteError, "requires type minika"):
-            kisite.run('Sonome kas x pasta minika tas "3".')
+            kisite.run('Sonome kas x sis minika tas "3".')
 
     def test_type_mismatch_on_assignment(self):
         with self.assertRaisesRegex(kisite.KisiteError, "requires type kati"):
-            kisite.run("Sonome kas b pasta kati tas Kati. Kemese kas b tas 1.")
+            kisite.run("Sonome kas b sis kati tas Kati. Kemese kas b tas 1.")
 
     def test_polike_respects_existing_type(self):
         with self.assertRaisesRegex(kisite.KisiteError, "requires type minika"):
-            kisite.run("Sonome kas x pasta minika tas 0. Polike kas x vos stdin.", "5")
+            kisite.run("Sonome kas x sis minika tas 0. Polike kas x vos stdin.", "5")
 
     def test_else_if_first_branch(self):
         source = """
