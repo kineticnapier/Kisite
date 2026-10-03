@@ -2,6 +2,12 @@
 
 Kisite is still experimental, so syntax and semantics may change between 0.x releases.
 
+## 0.0.15
+
+- Added integer floor division `//` and remainder `%`.
+- Added `paline` for returning a sorted copy of an array, including lexicographic sorting of nested arrays.
+- Added `japonavi` / `ponavi` for minimum / maximum selection.
+
 ## 0.0.14
 
 - Replaced the runtime type-annotation keyword `pasta` with `sis`.
