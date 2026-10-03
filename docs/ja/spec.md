@@ -52,7 +52,7 @@ Takute kas "Hello World".
 
 ```kisite
 Kati
-Kixkati
+Jakati
 ```
 
 表示時はそれぞれ `true` / `false` になります。
@@ -414,7 +414,7 @@ pilika
 takuta
 kineska
 kati
-kixkati
+jakati
 kix
 kate
 palusta
@@ -468,7 +468,7 @@ python -m unittest discover -s tests
 | `kasta` | 論理 AND / 複数項目の区切り |
 | `vista` | 論理 OR |
 | `kix` | 論理 NOT |
-| `kati`, `kixkati` | true / false |
+| `kati`, `jakati` | true / false |
 | `palusta` | 条件 |
 | `japalusta` | else 側 |
 | `japalusta palusta` | else-if |
