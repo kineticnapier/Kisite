@@ -47,13 +47,13 @@ class Kisite014Tests(unittest.TestCase):
 
     def test_bool_literals(self):
         self.assertEqual(
-            kisite.run("Takute kas Kati. Takute kas Kixkati."),
+            kisite.run("Takute kas Kati. Takute kas Jakati."),
             ["true", "false"],
         )
 
     def test_kix_not(self):
         self.assertEqual(
-            kisite.run("Takute kas Kix Kati. Takute kas Kix Kixkati."),
+            kisite.run("Takute kas Kix Kati. Takute kas Kix Jakati."),
             ["false", "true"],
         )
 
@@ -64,21 +64,21 @@ class Kisite014Tests(unittest.TestCase):
     def test_kasta_and_vista(self):
         source = """
         Takute kas Kati kasta Kati.
-        Takute kas Kati kasta Kixkati.
-        Takute kas Kixkati vista Kati.
-        Takute kas Kixkati vista Kixkati.
+        Takute kas Kati kasta Jakati.
+        Takute kas Jakati vista Kati.
+        Takute kas Jakati vista Jakati.
         """
         self.assertEqual(kisite.run(source), ["true", "false", "true", "false"])
 
     def test_logical_precedence(self):
         self.assertEqual(
-            kisite.run("Takute kas Kati vista Kixkati kasta Kixkati."),
+            kisite.run("Takute kas Kati vista Jakati kasta Jakati."),
             ["true"],
         )
 
     def test_logical_short_circuit(self):
         source = """
-        Takute kas Kixkati kasta (Kisite kas nope).
+        Takute kas Jakati kasta (Kisite kas nope).
         Takute kas Kati vista (Kisite kas nope).
         """
         self.assertEqual(kisite.run(source), ["false", "true"])
@@ -88,14 +88,14 @@ class Kisite014Tests(unittest.TestCase):
         Kalivisku musope kas both vis a kasta b {
             Jasepe kas a kasta b.
         }
-        Takute kas Kisite kas both vis Kati kasta Kixkati.
+        Takute kas Kisite kas both vis Kati kasta Jakati.
         """
         self.assertEqual(kisite.run(source), ["false"])
 
     def test_logical_and_can_be_passed_with_parentheses(self):
         source = """
         Kalivisku musope kas echo vis x { Jasepe kas x. }
-        Takute kas Kisite kas echo vis (Kati kasta Kixkati).
+        Takute kas Kisite kas echo vis (Kati kasta Jakati).
         """
         self.assertEqual(kisite.run(source), ["false"])
 
