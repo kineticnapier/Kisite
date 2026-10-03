@@ -5,6 +5,7 @@ Kisite is still experimental, so syntax and semantics may change between 0.x rel
 ## 0.0.14
 
 - Replaced the runtime type-annotation keyword `pasta` with `sis`.
+- Replaced the false literal `Kixkati` with `Jakati`.
 - Reorganized documentation into English and Japanese guides/specifications under `docs/en/` and `docs/ja/`.
 
 ## 0.0.13
