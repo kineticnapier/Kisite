@@ -1,0 +1,15 @@
+# AtCoder ABC047 C - 1D Reversi
+# https://atcoder.jp/contests/abc047/tasks/arc063_a
+
+Polike kas S vos stdin.
+Sonome kas prev tas S[0].
+Sonome kas ans tas 0.
+
+Pilike kas c pas S {
+    Palusta c != prev {
+        Kemese kas ans tas ans + 1.
+    }
+    Kemese kas prev tas c.
+}
+
+Takute kas ans.
