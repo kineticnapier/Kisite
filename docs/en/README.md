@@ -7,7 +7,7 @@ Kisite is an experimental programming language inspired by **Lisatopian (莉語 
 The name comes from the Lisatopian verb `kisite`, meaning **“to process”**.
 
 > [!IMPORTANT]
-> Kisite is still experimental. This guide describes **Kisite 0.0.14**. Syntax may change between versions.
+> Kisite is still experimental. This guide describes **Kisite 0.0.15**. Syntax may change between versions.
 >
 > Kisite assigns programming-language roles to Lisatopian words. Those roles are not always identical to their use in Lisatopian itself.
 
@@ -71,11 +71,15 @@ Output:
 | Initialize with a runtime type | `Sonome kas x sis minika tas 0.` |
 | Assign a new value | `Kemese kas x tas x + 1.` |
 | Equality | `x kate y` |
+| Integer floor division | `x // y` |
+| Remainder | `x % y` |
 | `if` | `Palusta condition { ... }` |
 | `else if` | `Japalusta palusta condition { ... }` |
 | `else` | `Japalusta { ... }` |
 | `while` | `Pilike palusta condition { ... }` |
 | `for x in xs` | `Pilike kas x pas xs { ... }` |
+| Sorted copy | `Kisite kas paline vis xs` |
+| Minimum / maximum | `Kisite kas japonavi vis xs` / `Kisite kas ponavi vis xs` |
 | Define a function | `Kalivisku musope kas f vis x { ... }` |
 | Call a function | `Kisite kas f vis x` |
 | Return a value | `Jasepe kas x.` |
@@ -102,7 +106,11 @@ x + y
 x - y
 x * y
 x / y
+x // y
+x % y
 ```
+
+`//` is integer floor division and `%` is remainder. Both require integer operands.
 
 Comparisons use `kate` for equality and the usual symbols for ordering:
 
@@ -223,6 +231,14 @@ Delete an element with `kinise kas`:
 Kinise kas a[1].
 ```
 
+For sorting, `paline` returns a new sorted array and leaves the input unchanged:
+
+```kisite
+Sonome kas sorted tas Kisite kas paline vis [5, 1, 4, 2, 3].
+```
+
+It supports numbers and nested arrays of comparable numbers/arrays, using lexicographic ordering for arrays.
+
 ## Input and streams
 
 Read one or more whitespace-separated tokens from standard input:
@@ -294,6 +310,24 @@ Kisite kas pilika vis 2 kasta 10 kasta 2
 ```
 
 These correspond roughly to Python's `range(5)`, `range(2, 6)`, and `range(2, 10, 2)`.
+
+### `paline` — sorted copy
+
+```kisite
+Kisite kas paline vis [5, 1, 4, 2, 3]
+Kisite kas paline vis [[7, 8], [2, 5], [1, 5]]
+```
+
+### `japonavi` / `ponavi` — minimum / maximum
+
+```kisite
+Kisite kas japonavi vis 9 kasta 2 kasta 7
+Kisite kas ponavi vis 9 kasta 2 kasta 7
+Kisite kas japonavi vis [9, 2, 7]
+Kisite kas ponavi vis [9, 2, 7]
+```
+
+With one argument they accept an array or `pilika` range; with multiple arguments they compare the arguments directly.
 
 ## Run the included examples
 
