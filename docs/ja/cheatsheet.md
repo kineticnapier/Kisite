@@ -2,7 +2,7 @@
 
 [ガイド](README.md) · [言語仕様](spec.md) · [English](../en/cheatsheet.md)
 
-**Kisite 0.0.14** のクイックリファレンスです。
+**Kisite 0.0.15** のクイックリファレンスです。
 
 ## 基本
 
@@ -45,6 +45,8 @@ x + y
 x - y
 x * y
 x / y
+x // y       # 整数の床除算
+x % y        # 剰余
 
 x kate y
 x != y
@@ -58,7 +60,7 @@ a vista b    # OR
 Kix a        # NOT
 ```
 
-`kasta` と `vista` は真偽値のみを受け取り、短絡評価します。
+`//` と `%` のオペランドは整数のみです。`kasta` と `vista` は真偽値のみを受け取り、短絡評価します。
 
 ### 優先順位
 
@@ -66,7 +68,7 @@ Kix a        # NOT
 
 1. `(...)`、添字 `[...]`
 2. 単項 `+`、`-`、`kix`
-3. `*`、`/`
+3. `*`、`/`、`//`、`%`
 4. `+`、`-`
 5. `kate`、`!=`、`<`、`<=`、`>`、`>=`
 6. `kasta`
@@ -214,9 +216,31 @@ Kisite kas pilika vis 2 kasta 10 kasta 2
 
 形としては Python の `range(stop)`、`range(start, stop)`、`range(start, stop, step)` に対応します。`stop` は含みません。
 
+### `paline` — ソート済みコピー
+
+```kisite
+Kisite kas paline vis [5, 1, 4, 2, 3]
+Kisite kas paline vis [[7, 8], [2, 5], [1, 5]]
+```
+
+新しい配列を返し、元の配列は変更しません。数値、および比較可能な数値・配列からなる入れ子配列を辞書順で並べられます。
+
+### `japonavi` / `ponavi` — 最小 / 最大
+
+```kisite
+Kisite kas japonavi vis 9 kasta 2 kasta 7
+Kisite kas ponavi vis 9 kasta 2 kasta 7
+Kisite kas japonavi vis [9, 2, 7]
+Kisite kas ponavi vis [9, 2, 7]
+```
+
+複数の値の代わりに、1個の配列または `pilika` 範囲を渡すこともできます。
+
 ## よくある注意
 
 - `Polike` の戻り値は文字列。数値が必要なら `minika` を使う。
+- `//` と `%` は整数のみ。
+- `paline` は元配列を破壊せず、新しいソート済み配列を返す。
 - 真偽値リテラルは `Kati` / `Jakati`。
 - 条件式に暗黙の truthy / falsy 判定はない。
 - 実行時型注釈は `sis`。
