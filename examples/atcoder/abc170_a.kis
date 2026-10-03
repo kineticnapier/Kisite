@@ -1,0 +1,14 @@
+# AtCoder ABC170 A - Five Variables
+# https://atcoder.jp/contests/abc170/tasks/abc170_a
+
+Polike kas x1 kasta x2 kasta x3 kasta x4 kasta x5 vos stdin.
+Sonome kas values tas [x1, x2, x3, x4, x5].
+Sonome kas i tas 1.
+
+Pilike kas x pas values {
+    Palusta x kate "0" {
+        Takute kas i.
+        Kinise.
+    }
+    Kemese kas i tas i + 1.
+}
