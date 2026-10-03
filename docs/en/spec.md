@@ -52,7 +52,7 @@ Boolean literals are:
 
 ```kisite
 Kati
-Kixkati
+Jakati
 ```
 
 They are displayed as `true` and `false`.
@@ -414,7 +414,7 @@ pilika
 takuta
 kineska
 kati
-kixkati
+jakati
 kix
 kate
 palusta
@@ -458,7 +458,7 @@ Possible future work includes integer division and modulo, sorting, slicing, dic
 | `kasta` | logical AND / item separator |
 | `vista` | logical OR |
 | `kix` | logical NOT |
-| `kati`, `kixkati` | true / false |
+| `kati`, `jakati` | true / false |
 | `palusta` | condition |
 | `japalusta` | else branch |
 | `japalusta palusta` | else-if |
