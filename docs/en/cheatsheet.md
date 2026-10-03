@@ -2,7 +2,7 @@
 
 [Guide](README.md) · [Language specification](spec.md) · [日本語](../ja/cheatsheet.md)
 
-Quick reference for **Kisite 0.0.14**.
+Quick reference for **Kisite 0.0.15**.
 
 ## Basics
 
@@ -45,6 +45,8 @@ x + y
 x - y
 x * y
 x / y
+x // y       # integer floor division
+x % y        # remainder
 
 x kate y
 x != y
@@ -58,7 +60,7 @@ a vista b    # OR
 Kix a        # NOT
 ```
 
-`kasta` and `vista` require boolean operands and short-circuit.
+`//` and `%` require integer operands. `kasta` and `vista` require boolean operands and short-circuit.
 
 ### Precedence
 
@@ -66,7 +68,7 @@ Highest to lowest:
 
 1. `(...)`, indexing `[...]`
 2. unary `+`, `-`, `kix`
-3. `*`, `/`
+3. `*`, `/`, `//`, `%`
 4. `+`, `-`
 5. `kate`, `!=`, `<`, `<=`, `>`, `>=`
 6. `kasta`
@@ -214,9 +216,31 @@ Kisite kas pilika vis 2 kasta 10 kasta 2
 
 Equivalent in shape to Python's `range(stop)`, `range(start, stop)`, and `range(start, stop, step)`. `stop` is excluded.
 
+### `paline` — sorted copy
+
+```kisite
+Kisite kas paline vis [5, 1, 4, 2, 3]
+Kisite kas paline vis [[7, 8], [2, 5], [1, 5]]
+```
+
+Returns a new array. Numbers and nested arrays of comparable numbers/arrays are ordered lexicographically. The input array is not modified.
+
+### `japonavi` / `ponavi` — minimum / maximum
+
+```kisite
+Kisite kas japonavi vis 9 kasta 2 kasta 7
+Kisite kas ponavi vis 9 kasta 2 kasta 7
+Kisite kas japonavi vis [9, 2, 7]
+Kisite kas ponavi vis [9, 2, 7]
+```
+
+A single array or `pilika` range may be passed instead of multiple values.
+
 ## Common gotchas
 
 - `Polike` returns strings; use `minika` when a number is needed.
+- `//` and `%` accept integers only.
+- `paline` returns a new array; it does not sort the original array in place.
 - Boolean literals are `Kati` and `Jakati`.
 - Conditions do not use implicit truthy/falsy conversion.
 - Runtime type annotations use `sis`.
