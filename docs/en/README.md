@@ -1,6 +1,6 @@
 # Kisite Guide
 
-[日本語](../ja/README.md) · [Language specification](spec.md) · [Examples](../../examples/)
+[日本語](../ja/README.md) · [Cheat sheet](cheatsheet.md) · [Language specification](spec.md) · [Examples](../../examples/)
 
 Kisite is an experimental programming language inspired by **Lisatopian (莉語 / Lisatopa)**. It keeps Lisatopian vocabulary and sentence structure where practical, while using familiar mathematical notation for arithmetic and comparisons.
 
@@ -313,4 +313,4 @@ Run the test suite with:
 python -m unittest discover -s tests
 ```
 
-For exact, version-specific syntax and semantics, see the [language specification](spec.md).
+For quick syntax lookup, see the [cheat sheet](cheatsheet.md). For exact, version-specific syntax and semantics, see the [language specification](spec.md).
