@@ -1,6 +1,6 @@
 # Kisite ガイド
 
-[English](../en/README.md) · [言語仕様](spec.md) · [サンプル](../../examples/)
+[English](../en/README.md) · [チートシート](cheatsheet.md) · [言語仕様](spec.md) · [サンプル](../../examples/)
 
 Kisite は **莉語（Lisatopa）** をもとにした実験的なプログラミング言語です。できるだけ莉語の語彙や語順を残しつつ、算術や比較には普通の数学記号を使います。
 
@@ -313,4 +313,4 @@ python kisite.py examples/functions.kis
 python -m unittest discover -s tests
 ```
 
-正確な構文と実装仕様は [言語仕様](spec.md) を参照してください。
+構文をすぐ確認したい場合は [チートシート](cheatsheet.md)、正確な構文と実装仕様は [言語仕様](spec.md) を参照してください。
