@@ -8,14 +8,14 @@ Japanese language specification: [`docs/spec-ja.md`](docs/spec-ja.md)
 
 ## Current milestone
 
-Kisite 0.0.13 currently supports:
+Kisite 0.0.14 currently supports:
 
 - output with `takute kas ...`
 - numeric, string, boolean, and array literals
 - zero-based indexing and indexed assignment
 - `+`, `-`, `*`, `/`
 - variables with `sonome` / `kemese`
-- optional runtime type annotations with `pasta`
+- optional runtime type annotations with `sis`
 - equality with `kate`
 - comparisons with `<`, `>`, `<=`, `>=`, `!=`
 - logical `kasta` / `vista` / `kix`
@@ -130,10 +130,10 @@ Repeated reads from the same file continue from the previous position. Relative 
 ### Runtime type annotations
 
 ```kisite
-Sonome kas n pasta minika tas 0.
-Sonome kas s pasta takuta tas "abc".
-Sonome kas a pasta kineska tas [1, 2, 3].
-Sonome kas b pasta kati tas Kati.
+Sonome kas n sis minika tas 0.
+Sonome kas s sis takuta tas "abc".
+Sonome kas a sis kineska tas [1, 2, 3].
+Sonome kas b sis kati tas Kati.
 ```
 
 The current type names mean number, string, array, and boolean respectively. The annotation is checked on initialization and later whole-variable assignment/input.
