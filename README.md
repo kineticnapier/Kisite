@@ -5,7 +5,7 @@ Kisite is an experimental programming language inspired by **Lisatopian (莉語 
 It keeps Lisatopian vocabulary and sentence structure where practical, while using familiar mathematical notation for arithmetic and comparisons. The name comes from the Lisatopian verb `kisite`, meaning **“to process”**.
 
 > [!IMPORTANT]
-> Kisite is still experimental. The current interpreter is **0.0.14**, and syntax may change between versions.
+> Kisite is still experimental. The current interpreter is **0.0.15**, and syntax may change between versions.
 
 ## Documentation
 
