@@ -5,7 +5,7 @@ Kisite is an experimental programming language inspired by **Lisatopian (莉語 
 It keeps Lisatopian vocabulary and sentence structure where practical, while using familiar mathematical notation for arithmetic and comparisons. The name comes from the Lisatopian verb `kisite`, meaning **“to process”**.
 
 > [!IMPORTANT]
-> Kisite is still experimental. The current interpreter is **0.0.15**, and syntax may change between versions.
+> Kisite is still experimental. The current interpreter is **0.0.16**, and syntax may change between versions.
 
 ## Documentation
 
@@ -46,6 +46,8 @@ Takute kas total.
 ```
 
 Input `5` produces `10`.
+
+0.0.16 also adds sets, dictionaries, membership with `pas`, `sum` / `abs`, and collection output with a separator. The canonical boolean vocabulary is now `Tuni` / `Jatuni`, with `tuna` as the runtime type name.
 
 ## Development
 
