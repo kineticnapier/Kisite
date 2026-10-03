@@ -11,7 +11,8 @@ It keeps Lisatopian vocabulary and sentence structure where practical, while usi
 
 - **English:** [Guide](docs/en/README.md) · [Language specification](docs/en/spec.md)
 - **日本語:** [ガイド](docs/ja/README.md) · [言語仕様](docs/ja/spec.md)
-- [Examples](examples/)
+- [Examples](examples/) · [AtCoder examples](examples/atcoder/)
+- [Changelog](CHANGELOG.md)
 
 ## Quick start
 
