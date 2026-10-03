@@ -1,6 +1,6 @@
 # Kisite 言語仕様（日本語）
 
-この文書は Kisite 0.0.13 の現在の実装仕様をまとめたものです。
+この文書は Kisite 0.0.14 の現在の実装仕様をまとめたものです。
 
 Kisite は、莉語（Lisatopa）の語彙・文法を土台にした実験的なプログラミング言語です。莉語そのものを完全に再現することよりも、莉語らしさを残しながらプログラムとして読み書きしやすいことを優先します。
 
@@ -82,20 +82,20 @@ Sonome kas x tas 3.
 ```
 
 ```text
-sonome kas <変数名> [pasta <型>] tas <式>
+sonome kas <変数名> [sis <型>] tas <式>
 ```
 
 同じスコープで再初期化するとエラーです。
 
 ### 4.2 明示的な型指定
 
-`pasta` で実行時型注釈を付けられます。
+`sis` で実行時型注釈を付けられます。
 
 ```kisite
-Sonome kas n pasta minika tas 0.
-Sonome kas s pasta takuta tas "abc".
-Sonome kas a pasta kineska tas [1, 2, 3].
-Sonome kas b pasta kati tas Kati.
+Sonome kas n sis minika tas 0.
+Sonome kas s sis takuta tas "abc".
+Sonome kas a sis kineska tas [1, 2, 3].
+Sonome kas b sis kati tas Kati.
 ```
 
 現在の型名:
@@ -108,6 +108,8 @@ Sonome kas b pasta kati tas Kati.
 | `kati` | 真偽値 |
 
 注釈は初期化時と、その後の変数全体への `kemese` / `polike` で検査されます。配列要素ごとの要素型は現在指定しません。
+
+0.0.14 で型注釈キーワードは `pasta` から `sis` に変更されました。旧 `pasta` 構文は使用できません。
 
 ### 4.3 設定: `kemese`
 
@@ -420,7 +422,7 @@ vista
 kas
 tas
 pas
-pasta
+sis
 vis
 vos
 stdin
@@ -459,7 +461,7 @@ python -m unittest discover -s tests
 | `takute` | 出力 |
 | `sonome` | 変数の初期化 |
 | `kemese` | 値の設定 |
-| `pasta` | 型注釈 |
+| `sis` | 型注釈 |
 | `kate` | 等値比較 |
 | `kasta` | 論理 AND / 複数項目の区切り |
 | `vista` | 論理 OR |
