@@ -1,0 +1,13 @@
+# AtCoder ABC081 A - Placing Marbles
+# https://atcoder.jp/contests/abc081/tasks/abc081_a
+
+Polike kas S vos stdin.
+Sonome kas ans tas 0.
+
+Pilike kas c pas S {
+    Palusta c kate "1" {
+        Kemese kas ans tas ans + 1.
+    }
+}
+
+Takute kas ans.
