@@ -2,6 +2,18 @@
 
 Kisite is still experimental, so syntax and semantics may change between 0.x releases.
 
+## 0.0.16
+
+- Changed the canonical boolean vocabulary to `Tuni` / `Jatuni`, with `tuna` as the boolean runtime type name. `Kati` / `Jakati` and `sis kati` remain accepted as migration aliases in 0.0.16.
+- Added set literals such as `{1, 2, 3}` and the empty set `{}`.
+- Added dictionary literals such as `{"a": 1}` and the empty dictionary `{:}`.
+- Added membership tests with `pas` for arrays, strings, ranges, sets, and dictionaries.
+- Extended `putike` and `kinise kas` to add/remove set members, and indexed assignment/deletion to dictionaries.
+- Extended `kipala`, foreach, and minimum/maximum helpers to the new collection types where applicable.
+- Added provisional `sum` and `abs` built-ins pending suitable Lisatopian vocabulary.
+- Added separator-based collection output, for example `Takute kas a vis " ".` for AtCoder-style space-separated output.
+- Split the interpreter internals into syntax, parser, value, and runtime modules while keeping `import kisite` and the CLI entry point compatible.
+
 ## 0.0.15
 
 - Added integer floor division `//` and remainder `%`.
