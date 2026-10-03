@@ -9,8 +9,8 @@ It keeps Lisatopian vocabulary and sentence structure where practical, while usi
 
 ## Documentation
 
-- **English:** [Guide](docs/en/README.md) · [Language specification](docs/en/spec.md)
-- **日本語:** [ガイド](docs/ja/README.md) · [言語仕様](docs/ja/spec.md)
+- **English:** [Guide](docs/en/README.md) · [Cheat sheet](docs/en/cheatsheet.md) · [Language specification](docs/en/spec.md)
+- **日本語:** [ガイド](docs/ja/README.md) · [チートシート](docs/ja/cheatsheet.md) · [言語仕様](docs/ja/spec.md)
 - [Examples](examples/) · [AtCoder examples](examples/atcoder/)
 - [Changelog](CHANGELOG.md)
 
