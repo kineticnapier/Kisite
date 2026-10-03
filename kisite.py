@@ -6,7 +6,7 @@ import argparse
 import sys
 
 
-VERSION = "0.0.13"
+VERSION = "0.0.14"
 
 
 class KisiteError(Exception):
@@ -312,7 +312,7 @@ RESERVED_WORDS = {
     "kas",
     "tas",
     "pas",
-    "pasta",
+    "sis",
     "vis",
     "vos",
     "stdin",
@@ -522,7 +522,7 @@ class Parser:
             self.take_word("kas")
             name = self.variable_name()
             annotation = None
-            if self.current_word_is("pasta"):
+            if self.current_word_is("sis"):
                 self.pos += 1
                 annotation = self.type_name()
             self.take_word("tas")
