@@ -7,7 +7,7 @@ Kisite は **莉語（Lisatopa）** をもとにした実験的なプログラ�
 名前の `Kisite` は、莉語の動詞 `kisite`（「処理する」）から取っています。
 
 > [!IMPORTANT]
-> Kisite はまだ実験段階です。このガイドは **Kisite 0.0.14** の実装を説明しています。今後、構文が変更される可能性があります。
+> Kisite はまだ実験段階です。このガイドは **Kisite 0.0.15** の実装を説明しています。今後、構文が変更される可能性があります。
 >
 > Kisite では莉語の単語にプログラミング言語としての役割を割り当てています。その役割は、元の莉語での意味・用法と完全に同じとは限りません。
 
@@ -71,11 +71,15 @@ Takute kas total.
 | 型を指定して初期化 | `Sonome kas x sis minika tas 0.` |
 | 変数を更新 | `Kemese kas x tas x + 1.` |
 | 等値比較 | `x kate y` |
+| 整数の床除算 | `x // y` |
+| 剰余 | `x % y` |
 | `if` | `Palusta condition { ... }` |
 | `else if` | `Japalusta palusta condition { ... }` |
 | `else` | `Japalusta { ... }` |
 | `while` | `Pilike palusta condition { ... }` |
 | `for x in xs` | `Pilike kas x pas xs { ... }` |
+| ソート済みコピー | `Kisite kas paline vis xs` |
+| 最小 / 最大 | `Kisite kas japonavi vis xs` / `Kisite kas ponavi vis xs` |
 | 関数定義 | `Kalivisku musope kas f vis x { ... }` |
 | 関数呼び出し | `Kisite kas f vis x` |
 | 値を返す | `Jasepe kas x.` |
@@ -102,7 +106,11 @@ x + y
 x - y
 x * y
 x / y
+x // y
+x % y
 ```
+
+`//` は整数の床除算、`%` は剰余です。どちらも整数同士でのみ使えます。
 
 等値比較には `kate`、大小比較には通常の記号を使います。
 
@@ -223,6 +231,14 @@ Putike kas 40 tas a.
 Kinise kas a[1].
 ```
 
+ソートには `paline` を使えます。新しい配列を返し、元の配列は変更しません。
+
+```kisite
+Sonome kas sorted tas Kisite kas paline vis [5, 1, 4, 2, 3].
+```
+
+数値、および比較可能な数値・配列からなる入れ子配列を扱え、配列同士は辞書順で比較します。
+
 ## 入力とストリーム
 
 標準入力から空白区切りのトークンを読みます。
@@ -294,6 +310,24 @@ Kisite kas pilika vis 2 kasta 10 kasta 2
 ```
 
 それぞれ Python の `range(5)`, `range(2, 6)`, `range(2, 10, 2)` にだいたい対応します。
+
+### `paline` — ソート済みコピー
+
+```kisite
+Kisite kas paline vis [5, 1, 4, 2, 3]
+Kisite kas paline vis [[7, 8], [2, 5], [1, 5]]
+```
+
+### `japonavi` / `ponavi` — 最小 / 最大
+
+```kisite
+Kisite kas japonavi vis 9 kasta 2 kasta 7
+Kisite kas ponavi vis 9 kasta 2 kasta 7
+Kisite kas japonavi vis [9, 2, 7]
+Kisite kas ponavi vis [9, 2, 7]
+```
+
+1引数なら配列または `pilika` 範囲を受け取り、複数引数なら各引数を直接比較します。
 
 ## 付属サンプルを実行
 
