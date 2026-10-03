@@ -91,7 +91,7 @@ Takute kas total.
 3.14
 "hello"
 Kati
-Kixkati
+Jakati
 [1, 2, 3]
 ```
 
