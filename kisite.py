@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import cmp_to_key
 from pathlib import Path
 import argparse
 import sys
 
 
-VERSION = "0.0.14"
+VERSION = "0.0.15"
 
 
 class KisiteError(Exception):
@@ -110,7 +111,7 @@ def tokenize(source: str) -> list[Token]:
             continue
 
         two = source[i:i + 2]
-        multi = {"<=": "LE", ">=": "GE", "!=": "NE"}
+        multi = {"<=": "LE", ">=": "GE", "!=": "NE", "//": "FLOORDIV"}
         if two in multi:
             tokens.append(Token(multi[two], two, line, column))
             advance(two)
@@ -122,6 +123,7 @@ def tokenize(source: str) -> list[Token]:
             "-": "MINUS",
             "*": "STAR",
             "/": "SLASH",
+            "%": "PERCENT",
             "(": "LPAREN",
             ")": "RPAREN",
             "[": "LBRACKET",
@@ -299,6 +301,9 @@ RESERVED_WORDS = {
     "minika",
     "kipala",
     "pilika",
+    "paline",
+    "japonavi",
+    "ponavi",
     "takuta",
     "kineska",
     "kati",
@@ -319,7 +324,14 @@ RESERVED_WORDS = {
 }
 
 
-BUILTIN_FUNCTIONS = {"minika", "kipala", "pilika"}
+BUILTIN_FUNCTIONS = {
+    "minika",
+    "kipala",
+    "pilika",
+    "paline",
+    "japonavi",
+    "ponavi",
+}
 TYPE_NAMES = {"minika", "takuta", "kineska", "kati"}
 
 
@@ -628,7 +640,7 @@ class Parser:
 
     def term(self) -> object:
         node = self.unary()
-        while self.current.kind in ("STAR", "SLASH"):
+        while self.current.kind in ("STAR", "SLASH", "FLOORDIV", "PERCENT"):
             op = self.current.kind
             self.pos += 1
             node = Binary(op, node, self.unary())
@@ -708,6 +720,10 @@ class Parser:
 
 def is_number(value: object) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def is_integer(value: object) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
 
 
 def values_equal(left: object, right: object) -> bool:
@@ -853,6 +869,52 @@ def make_pilika(arguments: list[object]) -> range:
     return range(arguments[0], arguments[1], arguments[2])
 
 
+def compare_orderable(left: object, right: object) -> int:
+    if is_number(left) and is_number(right):
+        return (left > right) - (left < right)
+
+    if isinstance(left, list) and isinstance(right, list):
+        for left_item, right_item in zip(left, right):
+            comparison = compare_orderable(left_item, right_item)
+            if comparison != 0:
+                return comparison
+        return (len(left) > len(right)) - (len(left) < len(right))
+
+    raise KisiteError("ordering helpers require comparable numbers or arrays")
+
+
+def make_paline(arguments: list[object]) -> list[object]:
+    if len(arguments) != 1:
+        raise KisiteError(
+            f"function 'paline' expects 1 argument, got {len(arguments)}"
+        )
+    value = arguments[0]
+    if not isinstance(value, list):
+        raise KisiteError("paline requires an array")
+    return sorted(value, key=cmp_to_key(compare_orderable))
+
+
+def choose_extreme(name: str, arguments: list[object]) -> object:
+    if not arguments:
+        raise KisiteError(f"function '{name}' expects at least 1 argument")
+
+    if len(arguments) == 1:
+        source = arguments[0]
+        if not isinstance(source, (list, range)):
+            raise KisiteError(
+                f"function '{name}' with 1 argument requires an array or pilika range"
+            )
+        values = list(source)
+    else:
+        values = arguments
+
+    if not values:
+        raise KisiteError(f"function '{name}' cannot use an empty sequence")
+
+    key = cmp_to_key(compare_orderable)
+    return min(values, key=key) if name == "japonavi" else max(values, key=key)
+
+
 def invoke_function(
     name: str,
     argument_nodes: tuple[object, ...],
@@ -883,6 +945,12 @@ def invoke_function(
 
     if lowered == "pilika":
         return make_pilika(arguments)
+
+    if lowered == "paline":
+        return make_paline(arguments)
+
+    if lowered in ("japonavi", "ponavi"):
+        return choose_extreme(lowered, arguments)
 
     if name not in runtime.functions:
         raise KisiteError(f"function '{name}' is not defined")
@@ -988,6 +1056,17 @@ def evaluate(node: object, env: Environment, runtime: Runtime) -> object:
             if node.op == "LE":
                 return left <= right
             return left >= right
+
+        if node.op in ("FLOORDIV", "PERCENT"):
+            if not is_integer(left) or not is_integer(right):
+                raise KisiteError("// and % require integer operands")
+            if right == 0:
+                if node.op == "FLOORDIV":
+                    raise KisiteError("integer division by zero")
+                raise KisiteError("remainder by zero")
+            if node.op == "FLOORDIV":
+                return left // right
+            return left % right
 
         if not is_number(left) or not is_number(right):
             raise KisiteError("arithmetic requires numbers")
