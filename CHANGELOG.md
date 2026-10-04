@@ -2,6 +2,15 @@
 
 Kisite is still experimental, so syntax and semantics may change between 0.x releases.
 
+## 0.1.1 - Unreleased
+
+- Added live CLI output so `Takute` is emitted while the program is still running instead of only after execution finishes.
+- Added statement-only `flush` for interactive judges; `Kisite kas flush.` flushes the current CLI output stream before waiting for more input.
+- Added provisional math helpers `pi`, `sin`, `cos`, `tan`, `sqrt`, `atan2`, `hypot`, `floor`, and `ceil`.
+- Added provisional min-heap helpers `heapify`, `heappush`, `heappop`, and `heappeek`; heaps support numbers and nested numeric arrays such as pair-like `[priority, value]` entries.
+- Added `bisectleft` and `bisectright` for lower-bound / upper-bound style binary searches on sorted arrays.
+- Kept `run()` capture semantics for tests while adding an optional `output_stream` for live-output testing and embedding.
+
 ## 0.1.0 - 2026-10-04
 
 - First public release of Kisite.
