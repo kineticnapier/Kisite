@@ -1,5 +1,21 @@
 from kisite_syntax import *
 
+
+AUGMENTED_OPERATORS = {
+    "PLUS_EQ": "PLUS",
+    "MINUS_EQ": "MINUS",
+    "STAR_EQ": "STAR",
+    "SLASH_EQ": "SLASH",
+    "FLOORDIV_EQ": "FLOORDIV",
+    "PERCENT_EQ": "PERCENT",
+    "BITAND_EQ": "BITAND",
+    "BITOR_EQ": "BITOR",
+    "BITXOR_EQ": "BITXOR",
+    "LSHIFT_EQ": "LSHIFT",
+    "RSHIFT_EQ": "RSHIFT",
+}
+
+
 class Parser:
     def __init__(self, tokens: list[Token]) -> None:
         self.tokens = tokens
@@ -76,6 +92,11 @@ class Parser:
             token = self.current
             raise KisiteError(f"{token.line}:{token.column}: japalusta must follow a palusta block")
 
+        if self.current.kind == "WORD" and str(self.current.value).lower() not in RESERVED_WORDS:
+            body = self.augmented_assignment_statement()
+            self.match("DOT")
+            return body
+
         if self.current.kind == "LBRACE":
             body: object = self.block()
         else:
@@ -114,12 +135,15 @@ class Parser:
             return RepeatWhile(condition, body)
         if self.current_word_is("kas"):
             self.pos += 1
-            name = self.variable_name()
+            names = [self.variable_name()]
+            while self.current_word_is("kasta"):
+                self.pos += 1
+                names.append(self.variable_name())
             self.take_word("pas")
             iterable = self.expression()
             body = self.required_block("pilike foreach expression")
             self.match("DOT")
-            return RepeatEach(name, iterable, body)
+            return RepeatEach(tuple(names), iterable, body)
         token = self.current
         raise KisiteError(f"{token.line}:{token.column}: pilike must be followed by 'palusta' or 'kas'")
 
@@ -172,13 +196,16 @@ class Parser:
 
         if verb_name == "sonome":
             self.take_word("kas")
-            name = self.variable_name()
+            names = [self.variable_name()]
+            while self.current_word_is("kasta"):
+                self.pos += 1
+                names.append(self.variable_name())
             annotation = None
             if self.current_word_is("sis"):
                 self.pos += 1
                 annotation = self.type_name()
             self.take_word("tas")
-            return Initialize(name, self.expression(), annotation)
+            return Initialize(tuple(names), self.expression(), annotation)
 
         if verb_name == "kemese":
             self.take_word("kas")
@@ -226,10 +253,21 @@ class Parser:
 
         raise KisiteError(f"{verb.line}:{verb.column}: unsupported statement '{verb.value}'")
 
+    def augmented_assignment_statement(self) -> AugmentValue:
+        target = self.assignment_target()
+        token = self.current
+        if token.kind not in AUGMENTED_OPERATORS:
+            raise KisiteError(f"{token.line}:{token.column}: expected an augmented assignment operator")
+        self.pos += 1
+        return AugmentValue(target, AUGMENTED_OPERATORS[token.kind], self.expression())
+
     def assignment_target(self) -> object:
         node: object = Variable(self.variable_name())
         while self.match("LBRACKET"):
             index = self.expression()
+            if self.current.kind == "COLON":
+                token = self.current
+                raise KisiteError(f"{token.line}:{token.column}: slice assignment is not supported")
             self.take("RBRACKET")
             node = Index(node, index)
         return node
@@ -253,7 +291,7 @@ class Parser:
         return node
 
     def comparison(self) -> object:
-        node = self.additive()
+        node = self.bitwise_or()
         while True:
             if self.current_word_is("kate"):
                 self.pos += 1
@@ -266,6 +304,32 @@ class Parser:
                 self.pos += 1
             else:
                 break
+            node = Binary(op, node, self.bitwise_or())
+        return node
+
+    def bitwise_or(self) -> object:
+        node = self.bitwise_xor()
+        while self.match("BITOR"):
+            node = Binary("BITOR", node, self.bitwise_xor())
+        return node
+
+    def bitwise_xor(self) -> object:
+        node = self.bitwise_and()
+        while self.match("BITXOR"):
+            node = Binary("BITXOR", node, self.bitwise_and())
+        return node
+
+    def bitwise_and(self) -> object:
+        node = self.shift()
+        while self.match("BITAND"):
+            node = Binary("BITAND", node, self.shift())
+        return node
+
+    def shift(self) -> object:
+        node = self.additive()
+        while self.current.kind in ("LSHIFT", "RSHIFT"):
+            op = self.current.kind
+            self.pos += 1
             node = Binary(op, node, self.additive())
         return node
 
@@ -290,6 +354,8 @@ class Parser:
             return Unary("MINUS", self.unary())
         if self.match("PLUS"):
             return Unary("PLUS", self.unary())
+        if self.match("BITNOT"):
+            return Unary("BITNOT", self.unary())
         if self.current_word_is("kix"):
             self.pos += 1
             return Unary("NOT", self.unary())
@@ -298,10 +364,30 @@ class Parser:
     def postfix(self) -> object:
         node = self.primary()
         while self.match("LBRACKET"):
-            index = self.expression()
-            self.take("RBRACKET")
-            node = Index(node, index)
+            node = self.finish_subscript(node)
         return node
+
+    def finish_subscript(self, node: object) -> object:
+        if self.match("COLON"):
+            start = None
+            stop = None if self.current.kind in ("COLON", "RBRACKET") else self.expression()
+            step = None
+            if self.match("COLON"):
+                step = None if self.current.kind == "RBRACKET" else self.expression()
+            self.take("RBRACKET")
+            return Slice(node, start, stop, step)
+
+        first = self.expression()
+        if not self.match("COLON"):
+            self.take("RBRACKET")
+            return Index(node, first)
+
+        stop = None if self.current.kind in ("COLON", "RBRACKET") else self.expression()
+        step = None
+        if self.match("COLON"):
+            step = None if self.current.kind == "RBRACKET" else self.expression()
+        self.take("RBRACKET")
+        return Slice(node, first, stop, step)
 
     def primary(self) -> object:
         token = self.current
