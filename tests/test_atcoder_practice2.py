@@ -161,6 +161,24 @@ class AtCoderPractice2Tests(unittest.TestCase):
         self.assert_practice2_e_output(compiled, values, 2, 50)
         self.assertEqual(compiled, reference)
 
+    def test_practice2_f_sample_1(self):
+        source = (EXAMPLES / "practice2_f.kis").read_text(encoding="utf-8")
+        input_data = """\
+4 5
+1 2 3 4
+5 6 7 8 9
+"""
+        self.assert_backends_equal(source, input_data, ["5 16 34 60 70 70 59 36"])
+
+    def test_practice2_f_sample_2(self):
+        source = (EXAMPLES / "practice2_f.kis").read_text(encoding="utf-8")
+        input_data = """\
+1 1
+10000000
+10000000
+"""
+        self.assert_backends_equal(source, input_data, ["871938225"])
+
 
 if __name__ == "__main__":
     unittest.main()
