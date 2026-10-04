@@ -1,0 +1,41 @@
+# AtCoder Library Practice Contest A - Disjoint Set Union
+# https://atcoder.jp/contests/practice2/tasks/practice2_a
+
+Kalivisku musope kas root vis parent kasta x {
+    Pilike palusta parent[x] != x {
+        Kemese kas parent[x] tas parent[parent[x]].
+        Kemese kas x tas parent[x].
+    }
+    Jasepe kas x.
+}
+
+Sonome kas N kasta Q tas Kisite kas readints vis 2.
+Sonome kas parent tas [i Pilike kas i pas (Kisite kas pilika vis N)].
+Sonome kas size tas Kisite kas fill vis 1 kasta N.
+Sonome kas query tas [0, 0, 0].
+Sonome kas ru tas 0.
+Sonome kas rv tas 0.
+
+Pilike kas i pas Kisite kas pilika vis Q {
+    Kemese kas query tas Kisite kas readints vis 3.
+    Kemese kas ru tas Kisite kas root vis parent kasta query[1].
+    Kemese kas rv tas Kisite kas root vis parent kasta query[2].
+
+    Palusta query[0] kate 0 {
+        Palusta ru != rv {
+            Palusta size[ru] < size[rv] {
+                Kemese kas parent[ru] tas rv.
+                size[rv] += size[ru].
+            } Japalusta {
+                Kemese kas parent[rv] tas ru.
+                size[ru] += size[rv].
+            }
+        }
+    } Japalusta {
+        Palusta ru kate rv {
+            Takute kas 1.
+        } Japalusta {
+            Takute kas 0.
+        }
+    }
+}
