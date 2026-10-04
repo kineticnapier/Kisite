@@ -1,0 +1,77 @@
+{
+  "Initialize variable": {
+    "prefix": "sonome",
+    "body": [
+      "Sonome kas ${1:name} tas ${2:value}."
+    ],
+    "description": "Initialize a Kisite variable"
+  },
+  "Set variable": {
+    "prefix": "kemese",
+    "body": [
+      "Kemese kas ${1:name} tas ${2:value}."
+    ],
+    "description": "Set an existing Kisite variable"
+  },
+  "If block": {
+    "prefix": "palusta",
+    "body": [
+      "Palusta ${1:condition} {",
+      "    ${0}",
+      "}"
+    ],
+    "description": "Kisite conditional block"
+  },
+  "If else block": {
+    "prefix": "japalusta",
+    "body": [
+      "Palusta ${1:condition} {",
+      "    ${2}",
+      "} Japalusta {",
+      "    ${0}",
+      "}"
+    ],
+    "description": "Kisite conditional with else block"
+  },
+  "While loop": {
+    "prefix": "pilike-while",
+    "body": [
+      "Pilike palusta ${1:condition} {",
+      "    ${0}",
+      "}"
+    ],
+    "description": "Kisite while loop"
+  },
+  "Foreach loop": {
+    "prefix": "pilike-each",
+    "body": [
+      "Pilike kas ${1:item} pas ${2:iterable} {",
+      "    ${0}",
+      "}"
+    ],
+    "description": "Kisite foreach loop"
+  },
+  "Function": {
+    "prefix": "kalivisku",
+    "body": [
+      "Kalivisku musope kas ${1:name} vis ${2:arg} {",
+      "    ${0}",
+      "}"
+    ],
+    "description": "Define a Kisite function"
+  },
+  "Print": {
+    "prefix": "takute",
+    "body": [
+      "Takute kas ${1:value}."
+    ],
+    "description": "Print a value"
+  },
+  "Builtin call": {
+    "prefix": "kisite-call",
+    "body": [
+      "Kisite kas ${1:function} vis ${2:argument}"
+    ],
+    "description": "Call a Kisite function or builtin"
+  }
+}

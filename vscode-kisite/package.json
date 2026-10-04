@@ -1,0 +1,92 @@
+{
+  "name": "kisite-language",
+  "displayName": "Kisite",
+  "description": "VS Code language support for Kisite.",
+  "version": "0.0.1",
+  "publisher": "kineticnapier",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:kisite",
+    "onCommand:kisite.run",
+    "onCommand:kisite.runCompiled"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "kisite",
+        "aliases": [
+          "Kisite",
+          "kisite"
+        ],
+        "extensions": [
+          ".kis"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "kisite",
+        "scopeName": "source.kisite",
+        "path": "./syntaxes/kisite.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "kisite",
+        "path": "./snippets/kisite.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "kisite.run",
+        "title": "Kisite: Run"
+      },
+      {
+        "command": "kisite.runCompiled",
+        "title": "Kisite: Run Compiled"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "kisite.run",
+          "when": "resourceLangId == kisite",
+          "group": "navigation@10"
+        },
+        {
+          "command": "kisite.runCompiled",
+          "when": "resourceLangId == kisite",
+          "group": "navigation@11"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Kisite",
+      "properties": {
+        "kisite.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Python executable used to run Kisite."
+        },
+        "kisite.interpreterPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to kisite.py. Leave empty to search parent directories of the active .kis file. ${workspaceFolder} is supported."
+        },
+        "kisite.saveBeforeRun": {
+          "type": "boolean",
+          "default": true,
+          "description": "Save the active Kisite file before running it."
+        }
+      }
+    }
+  }
+}
