@@ -1,0 +1,169 @@
+# AtCoder Library Practice Contest E - MinCostFlow
+# https://atcoder.jp/contests/practice2/tasks/practice2_e
+#
+# Send exactly N*K units.  A row-column edge for cell (i, j) has cost
+# BIG - A[i][j], while a direct source-sink edge has cost BIG.  Therefore
+# BIG*N*K - min_cost is the maximum selected-cell sum.
+
+Kalivisku musope kas add_edge vis g kasta u kasta v kasta cap kasta cost {
+    Sonome kas forward_rev tas Kisite kas kipala vis g[v].
+    Sonome kas reverse_rev tas Kisite kas kipala vis g[u].
+    Putike kas [v, forward_rev, cap, cost] tas g[u].
+    Putike kas [u, reverse_rev, 0, -cost] tas g[v].
+    Jasepe kas reverse_rev.
+}
+
+Kalivisku musope kas min_cost_flow vis g kasta s kasta t kasta required {
+    Sonome kas V tas Kisite kas kipala vis g.
+    Sonome kas INF tas 1000000000000000000000000000000.
+    Sonome kas potential tas Kisite kas fill vis 0 kasta V.
+    Sonome kas dist tas [].
+    Sonome kas prev_v tas [].
+    Sonome kas prev_e tas [].
+    Sonome kas heap tas [].
+    Sonome kas item tas [0, 0].
+    Sonome kas d tas 0.
+    Sonome kas v tas 0.
+    Sonome kas ei tas 0.
+    Sonome kas e tas [0, 0, 0, 0].
+    Sonome kas to tas 0.
+    Sonome kas nd tas 0.
+    Sonome kas add tas 0.
+    Sonome kas pv tas 0.
+    Sonome kas pe tas 0.
+    Sonome kas rev tas 0.
+    Sonome kas total_cost tas 0.
+    Sonome kas remaining tas required.
+
+    Pilike palusta remaining > 0 {
+        Kemese kas dist tas Kisite kas fill vis INF kasta V.
+        Kemese kas prev_v tas Kisite kas fill vis -1 kasta V.
+        Kemese kas prev_e tas Kisite kas fill vis -1 kasta V.
+        Kemese kas heap tas [].
+        Kemese kas dist[s] tas 0.
+        Kisite kas heappush vis heap kasta [0, s].
+
+        Pilike palusta (Kisite kas kipala vis heap) > 0 {
+            Kemese kas item tas Kisite kas heappop vis heap.
+            Kemese kas d tas item[0].
+            Kemese kas v tas item[1].
+            Palusta d kate dist[v] {
+                Kemese kas ei tas 0.
+                Pilike palusta ei < (Kisite kas kipala vis g[v]) {
+                    Kemese kas e tas g[v][ei].
+                    Palusta e[2] > 0 {
+                        Kemese kas to tas e[0].
+                        Kemese kas nd tas d + e[3] + potential[v] - potential[to].
+                        Palusta nd < dist[to] {
+                            Kemese kas dist[to] tas nd.
+                            Kemese kas prev_v[to] tas v.
+                            Kemese kas prev_e[to] tas ei.
+                            Kisite kas heappush vis heap kasta [nd, to].
+                        }
+                    }
+                    ei += 1.
+                }
+            }
+        }
+
+        Palusta dist[t] kate INF {
+            Jasepe kas -1.
+        }
+
+        Kemese kas v tas 0.
+        Pilike palusta v < V {
+            Palusta dist[v] < INF {
+                potential[v] += dist[v].
+            }
+            v += 1.
+        }
+
+        Kemese kas add tas remaining.
+        Kemese kas v tas t.
+        Pilike palusta v != s {
+            Kemese kas pv tas prev_v[v].
+            Kemese kas pe tas prev_e[v].
+            Kemese kas add tas Kisite kas japonavi vis add kasta g[pv][pe][2].
+            Kemese kas v tas pv.
+        }
+
+        remaining -= add.
+        total_cost += add * potential[t].
+        Kemese kas v tas t.
+        Pilike palusta v != s {
+            Kemese kas pv tas prev_v[v].
+            Kemese kas pe tas prev_e[v].
+            Kemese kas to tas g[pv][pe][0].
+            Kemese kas rev tas g[pv][pe][1].
+            g[pv][pe][2] -= add.
+            g[to][rev][2] += add.
+            Kemese kas v tas pv.
+        }
+    }
+
+    Jasepe kas total_cost.
+}
+
+Sonome kas N kasta K tas Kisite kas readints vis 2.
+Sonome kas A tas [].
+Sonome kas input_row tas [].
+Sonome kas BIG tas 1000000000.
+Sonome kas V tas 2 * N + 2.
+Sonome kas source tas 2 * N.
+Sonome kas sink tas source + 1.
+Sonome kas g tas Kisite kas fill vis [] kasta V.
+Sonome kas edge_pos tas Kisite kas fill vis (Kisite kas fill vis -1 kasta N) kasta N.
+Sonome kas board tas Kisite kas fill vis (Kisite kas fill vis "." kasta N) kasta N.
+Sonome kas i tas 0.
+Sonome kas j tas 0.
+Sonome kas row_node tas 0.
+Sonome kas col_node tas 0.
+Sonome kas idx tas 0.
+Sonome kas flow tas N * K.
+Sonome kas cost tas 0.
+Sonome kas answer tas 0.
+
+Pilike kas ri pas Kisite kas pilika vis N {
+    Kemese kas input_row tas Kisite kas readints vis N.
+    Putike kas input_row tas A.
+}
+
+Kemese kas i tas 0.
+Pilike palusta i < N {
+    Kisite kas add_edge vis g kasta source kasta i kasta K kasta 0.
+    Kisite kas add_edge vis g kasta N + i kasta sink kasta K kasta 0.
+    Kemese kas i tas i + 1.
+}
+
+Kemese kas i tas 0.
+Pilike palusta i < N {
+    Kemese kas j tas 0.
+    Pilike palusta j < N {
+        Kemese kas row_node tas i.
+        Kemese kas col_node tas N + j.
+        Kemese kas idx tas Kisite kas kipala vis g[row_node].
+        Kemese kas edge_pos[i][j] tas idx.
+        Kisite kas add_edge vis g kasta row_node kasta col_node kasta 1 kasta BIG - A[i][j].
+        j += 1.
+    }
+    i += 1.
+}
+
+Kisite kas add_edge vis g kasta source kasta sink kasta flow kasta BIG.
+Kemese kas cost tas Kisite kas min_cost_flow vis g kasta source kasta sink kasta flow.
+Kemese kas answer tas BIG * flow - cost.
+Takute kas answer.
+
+Kemese kas i tas 0.
+Pilike palusta i < N {
+    Kemese kas j tas 0.
+    Pilike palusta j < N {
+        Kemese kas idx tas edge_pos[i][j].
+        Palusta g[i][idx][2] kate 0 {
+            Kemese kas board[i][j] tas "X".
+        }
+        j += 1.
+    }
+    Takute kas board[i] vis "".
+    i += 1.
+}
