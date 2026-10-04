@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 
-VERSION = "0.0.16"
+VERSION = "0.0.17"
 
 
 class KisiteError(Exception):
@@ -106,32 +106,33 @@ def tokenize(source: str) -> list[Token]:
             tokens.append(Token("NUMBER", value, start_line, start_col))
             continue
 
+        three = source[i:i + 3]
+        multi3 = {"//=": "FLOORDIV_EQ", "<<=": "LSHIFT_EQ", ">>=": "RSHIFT_EQ"}
+        if three in multi3:
+            tokens.append(Token(multi3[three], three, line, column))
+            advance(three)
+            i += 3
+            continue
+
         two = source[i:i + 2]
-        multi = {"<=": "LE", ">=": "GE", "!=": "NE", "//": "FLOORDIV"}
-        if two in multi:
-            tokens.append(Token(multi[two], two, line, column))
+        multi2 = {
+            "<=": "LE", ">=": "GE", "!=": "NE", "//": "FLOORDIV",
+            "+=": "PLUS_EQ", "-=": "MINUS_EQ", "*=": "STAR_EQ", "/=": "SLASH_EQ",
+            "%=": "PERCENT_EQ", "&=": "BITAND_EQ", "|=": "BITOR_EQ", "^=": "BITXOR_EQ",
+            "<<": "LSHIFT", ">>": "RSHIFT",
+        }
+        if two in multi2:
+            tokens.append(Token(multi2[two], two, line, column))
             advance(two)
             i += 2
             continue
 
         single = {
-            "+": "PLUS",
-            "-": "MINUS",
-            "*": "STAR",
-            "/": "SLASH",
-            "%": "PERCENT",
-            "(": "LPAREN",
-            ")": "RPAREN",
-            "[": "LBRACKET",
-            "]": "RBRACKET",
-            "{": "LBRACE",
-            "}": "RBRACE",
-            ",": "COMMA",
-            ":": "COLON",
-            "<": "LT",
-            ">": "GT",
-            ".": "DOT",
-            "。": "DOT",
+            "+": "PLUS", "-": "MINUS", "*": "STAR", "/": "SLASH", "%": "PERCENT",
+            "&": "BITAND", "|": "BITOR", "^": "BITXOR", "~": "BITNOT",
+            "(": "LPAREN", ")": "RPAREN", "[": "LBRACKET", "]": "RBRACKET",
+            "{": "LBRACE", "}": "RBRACE", ",": "COMMA", ":": "COLON",
+            "<": "LT", ">": "GT", ".": "DOT", "。": "DOT",
         }
         if ch in single:
             tokens.append(Token(single[ch], ch, line, column))
@@ -187,6 +188,14 @@ class Index:
 
 
 @dataclass(frozen=True)
+class Slice:
+    value: object
+    start: object | None
+    stop: object | None
+    step: object | None
+
+
+@dataclass(frozen=True)
 class Unary:
     op: str
     value: object
@@ -213,7 +222,7 @@ class Say:
 
 @dataclass(frozen=True)
 class Initialize:
-    name: str
+    names: tuple[str, ...]
     value: object
     annotation: str | None = None
 
@@ -221,6 +230,13 @@ class Initialize:
 @dataclass(frozen=True)
 class SetValue:
     target: object
+    value: object
+
+
+@dataclass(frozen=True)
+class AugmentValue:
+    target: object
+    op: str
     value: object
 
 
@@ -271,7 +287,7 @@ class RepeatWhile:
 
 @dataclass(frozen=True)
 class RepeatEach:
-    name: str
+    names: tuple[str, ...]
     iterable: object
     body: Block
 
@@ -297,12 +313,16 @@ RESERVED_WORDS = {
     "takute", "sonome", "kemese", "polike", "pilike", "putike",
     "kinise", "kinate", "kisite", "kalivisku", "musope", "jasepe",
     "minika", "kipala", "pilika", "paline", "japonavi", "ponavi",
-    "sum", "abs", "takuta", "kineska", "tuna", "tuni", "jatuni",
-    "kix", "kate", "palusta", "japalusta", "kasta", "vista", "kas",
-    "tas", "pas", "sis", "vis", "vos", "stdin",
+    "sum", "abs", "fill", "reverse", "resize", "truncate", "combinations",
+    "gcd", "lcm", "set", "array", "readint", "readints", "modint",
+    "modpow", "modinv", "convolution", "takuta", "kineska", "tuna",
+    "tuni", "jatuni", "kix", "kate", "palusta", "japalusta", "kasta",
+    "vista", "kas", "tas", "pas", "sis", "vis", "vos", "stdin",
 }
 
 BUILTIN_FUNCTIONS = {
     "minika", "kipala", "pilika", "paline", "japonavi", "ponavi", "sum", "abs",
+    "fill", "reverse", "resize", "truncate", "combinations", "gcd", "lcm", "set",
+    "array", "readint", "readints", "modint", "modpow", "modinv", "convolution",
 }
 TYPE_NAMES = {"minika", "takuta", "kineska", "tuna"}
