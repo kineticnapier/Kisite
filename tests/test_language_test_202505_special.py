@@ -50,11 +50,17 @@ class InteractiveProcess:
             raise AssertionError("interactive output was not flushed in time") from exc
         if line is None:
             stderr = self.process.stderr.read() if self.process.stderr is not None else ""
+            self.close_pipes()
             raise AssertionError(f"interactive process ended early: {stderr}")
         return line
 
+    def close_pipes(self):
+        for stream in (self.process.stdin, self.process.stdout, self.process.stderr):
+            if stream is not None and not stream.closed:
+                stream.close()
+
     def finish(self, timeout: float = 3.0):
-        if self.process.stdin is not None:
+        if self.process.stdin is not None and not self.process.stdin.closed:
             self.process.stdin.close()
         try:
             returncode = self.process.wait(timeout=timeout)
@@ -62,12 +68,15 @@ class InteractiveProcess:
             self.kill()
             raise AssertionError("interactive process did not terminate") from exc
         stderr = self.process.stderr.read() if self.process.stderr is not None else ""
+        self.close_pipes()
         if returncode != 0:
             raise AssertionError(f"interactive process failed with {returncode}: {stderr}")
 
     def kill(self):
         if self.process.poll() is None:
             self.process.kill()
+            self.process.wait()
+        self.close_pipes()
 
 
 class LanguageTest202505SpecialTests(unittest.TestCase):
