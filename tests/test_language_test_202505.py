@@ -43,7 +43,11 @@ class LanguageTest202505Tests(unittest.TestCase):
         self.assert_both("abc085_b", "4\n10\n8\n8\n6\n", ["3"])
 
     def test_abc085_c(self):
-        self.assert_both("abc085_c", "9 45000\n", ["4 0 5"])
+        output = self.run_both("abc085_c", "9 45000\n")
+        x, y, z = map(int, output[0].split())
+        self.assertEqual(x + y + z, 9)
+        self.assertEqual(10000 * x + 5000 * y + 1000 * z, 45000)
+        self.assertGreaterEqual(min(x, y, z), 0)
 
     def test_abc049_c(self):
         self.assert_both("abc049_c", "erasedream\n", ["YES"])
