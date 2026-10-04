@@ -5,7 +5,7 @@ Kisite is an experimental programming language inspired by **Lisatopian (莉語 
 It keeps Lisatopian vocabulary and sentence structure where practical, while using familiar mathematical notation for arithmetic and comparisons. The name comes from the Lisatopian verb `kisite`, meaning **“to process”**.
 
 > [!IMPORTANT]
-> Kisite is still experimental. The current interpreter is **0.0.17**, and syntax may change between versions.
+> Kisite is still experimental. The current interpreter is **0.1.0**, and syntax may change between versions.
 
 ## Documentation
 
@@ -57,7 +57,7 @@ Sonome kas scaled tas [[10 * x, 10 * y] Pilike kas x kasta y pas [[1, 2], [3, 4]
 
 The initial comprehension syntax supports one generator. `Palusta` filtering is optional, destructuring bindings are supported, and comprehension bindings stay local to the expression.
 
-0.0.17 adds competitive-programming-oriented syntax and helpers including augmented assignment, destructuring, array comprehensions, slices, negative indexing, `combinations`, `gcd` / `lcm`, bitwise operations, modular arithmetic, and convolution with an NTT fast path for modulus `998244353`.
+0.1.0 is the first public release. It includes competitive-programming-oriented syntax and helpers including augmented assignment, destructuring, array comprehensions, slices, negative indexing, `combinations`, `gcd` / `lcm`, bitwise operations, modular arithmetic, and convolution with an NTT fast path for modulus `998244353`.
 
 The English helper names introduced for competitive programming are provisional where suitable Lisatopian vocabulary has not yet been chosen.
 
