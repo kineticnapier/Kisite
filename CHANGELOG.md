@@ -2,6 +2,14 @@
 
 Kisite is still experimental, so syntax and semantics may change between 0.x releases.
 
+## 0.1.0 - 2026-10-04
+
+- First public release of Kisite.
+- Promoted the language from the 0.0.x prototype series after the full 156-test suite passed locally.
+- Includes variables, conditions, loops, functions and recursion, arrays, sets, dictionaries, ranges, slices, destructuring, and array comprehensions.
+- Includes competitive-programming helpers for input, collection construction and transformation, combinations, `gcd` / `lcm`, modular arithmetic, and convolution with an NTT fast path for modulus `998244353`.
+- Keeps Lisatopian-inspired core vocabulary while some newer competitive-programming helper names remain provisional.
+
 ## 0.0.17
 
 - Added augmented assignment: `+=`, `-=`, `*=`, `/=`, `//=`, `%=`, `&=`, `|=`, `^=`, `<<=`, and `>>=`.
