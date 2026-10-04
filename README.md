@@ -5,7 +5,7 @@ Kisite is an experimental programming language inspired by **Lisatopian (莉語 
 It keeps Lisatopian vocabulary and sentence structure where practical, while using familiar mathematical notation for arithmetic and comparisons. The name comes from the Lisatopian verb `kisite`, meaning **“to process”**.
 
 > [!IMPORTANT]
-> Kisite is still experimental. The current interpreter is **0.0.16**, and syntax may change between versions.
+> Kisite is still experimental. The current interpreter is **0.0.17**, and syntax may change between versions.
 
 ## Documentation
 
@@ -31,23 +31,25 @@ A minimal Kisite program:
 Takute kas "Hello World".
 ```
 
-A slightly larger example:
+A compact competitive-programming example:
 
 ```kisite
-Polike kas raw vos stdin.
-Sonome kas n sis minika tas Kisite kas minika vis raw.
-Sonome kas total sis minika tas 0.
+Sonome kas N kasta M tas Kisite kas readints vis 2.
+Sonome kas a tas Kisite kas fill vis 0 kasta N.
+Sonome kas i tas 0.
 
-Pilike kas i pas Kisite kas pilika vis n {
-    Kemese kas total tas total + i.
+Pilike palusta M > 0 {
+    a[i % N] += 1.
+    i += 1.
+    M -= 1.
 }
 
-Takute kas total.
+Takute kas a vis " ".
 ```
 
-Input `5` produces `10`.
+0.0.17 adds competitive-programming-oriented syntax and helpers including augmented assignment, destructuring, slices, negative indexing, `combinations`, `gcd` / `lcm`, bitwise operations, modular arithmetic, and convolution with an NTT fast path for modulus `998244353`.
 
-0.0.16 also adds sets, dictionaries, membership with `pas`, `sum` / `abs`, and collection output with a separator. The canonical boolean vocabulary is now `Tuni` / `Jatuni`, with `tuna` as the runtime type name.
+The English helper names introduced for competitive programming are provisional where suitable Lisatopian vocabulary has not yet been chosen.
 
 ## Development
 
