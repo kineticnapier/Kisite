@@ -1,0 +1,46 @@
+# AtCoder Library Practice Contest B - Fenwick Tree
+# https://atcoder.jp/contests/practice2/tasks/practice2_b
+
+Kalivisku musope kas prefix_sum vis bit kasta r {
+    Sonome kas total tas 0.
+    Pilike palusta r > 0 {
+        total += bit[r].
+        r -= r & -r.
+    }
+    Jasepe kas total.
+}
+
+Sonome kas N kasta Q tas Kisite kas readints vis 2.
+Sonome kas a tas Kisite kas readints vis N.
+Sonome kas bit tas Kisite kas fill vis 0 kasta N + 1.
+Sonome kas i tas 1.
+Sonome kas j tas 0.
+
+# Build the Fenwick tree in O(N).
+Pilike palusta i <= N {
+    bit[i] += a[i - 1].
+    Kemese kas j tas i + (i & -i).
+    Palusta j <= N {
+        bit[j] += bit[i].
+    }
+    i += 1.
+}
+
+Sonome kas query tas [0, 0, 0].
+Sonome kas p tas 0.
+Sonome kas x tas 0.
+
+Pilike kas qi pas Kisite kas pilika vis Q {
+    Kemese kas query tas Kisite kas readints vis 3.
+
+    Palusta query[0] kate 0 {
+        Kemese kas p tas query[1] + 1.
+        Kemese kas x tas query[2].
+        Pilike palusta p <= N {
+            bit[p] += x.
+            p += p & -p.
+        }
+    } Japalusta {
+        Takute kas (Kisite kas prefix_sum vis bit kasta query[2]) - (Kisite kas prefix_sum vis bit kasta query[1]).
+    }
+}
