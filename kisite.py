@@ -1,10 +1,10 @@
 import kisite_syntax as _syntax
 import kisite_parser as _parser
 import kisite_values as _values
-from kisite_runtime import *
+import kisite_runtime as _runtime
 
-# 0.0.16 keeps the previous boolean spellings as migration aliases.
-# The canonical vocabulary is now tuna / Tuni / Jatuni.
+# Compatibility aliases introduced in 0.0.16 remain accepted.
+# The canonical vocabulary is tuna / Tuni / Jatuni.
 _syntax.RESERVED_WORDS.update({"kati", "jakati"})
 _syntax.TYPE_NAMES.add("kati")
 
@@ -33,9 +33,13 @@ def _type_matches_with_kati_alias(annotation, value):
 
 _values.type_matches = _type_matches_with_kati_alias
 
-# Install the 0.0.17 array-comprehension syntax after the compatibility aliases,
-# so both parser extensions compose in a predictable order.
+# Install parser/runtime extensions after the compatibility aliases so they compose
+# in a predictable order.
 import kisite_comprehension as _comprehension
+import kisite_stdlib_011 as _stdlib_011
+
+# Export the patched runtime surface.
+from kisite_runtime import *
 
 
 if __name__ == "__main__":
