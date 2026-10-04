@@ -1,0 +1,76 @@
+# AtCoder Library Practice Contest I - Number of Substrings
+# https://atcoder.jp/contests/practice2/tasks/practice2_i
+# Suffix automaton with a flat 26-way transition table.
+
+Kalivisku musope kas char_index vis ch {
+    Sonome kas alphabet tas "abcdefghijklmnopqrstuvwxyz".
+    Pilike kas i pas Kisite kas pilika vis 26 {
+        Palusta alphabet[i] kate ch {
+            Jasepe kas i.
+        }
+    }
+    Jasepe kas -1.
+}
+
+Sonome kas S tas "".
+Polike kas S vos stdin.
+Sonome kas N tas Kisite kas kipala vis S.
+Sonome kas max_states tas 2 * N.
+Sonome kas trans tas Kisite kas fill vis -1 kasta max_states * 26.
+Sonome kas link tas Kisite kas fill vis -1 kasta max_states.
+Sonome kas longest tas Kisite kas fill vis 0 kasta max_states.
+Sonome kas size tas 1.
+Sonome kas last tas 0.
+Sonome kas cur tas 0.
+Sonome kas p tas 0.
+Sonome kas q tas 0.
+Sonome kas clone tas 0.
+Sonome kas c tas 0.
+Sonome kas k tas 0.
+Sonome kas answer tas 0.
+
+Pilike kas ch pas S {
+    Kemese kas c tas Kisite kas char_index vis ch.
+    Kemese kas cur tas size.
+    size += 1.
+    Kemese kas longest[cur] tas longest[last] + 1.
+    Kemese kas p tas last.
+
+    Pilike palusta p >= 0 kasta trans[p * 26 + c] kate -1 {
+        Kemese kas trans[p * 26 + c] tas cur.
+        Kemese kas p tas link[p].
+    }
+
+    Palusta p < 0 {
+        Kemese kas link[cur] tas 0.
+    } Japalusta {
+        Kemese kas q tas trans[p * 26 + c].
+        Palusta longest[p] + 1 kate longest[q] {
+            Kemese kas link[cur] tas q.
+        } Japalusta {
+            Kemese kas clone tas size.
+            size += 1.
+            Kemese kas longest[clone] tas longest[p] + 1.
+            Kemese kas link[clone] tas link[q].
+            Kemese kas k tas 0.
+            Pilike palusta k < 26 {
+                Kemese kas trans[clone * 26 + k] tas trans[q * 26 + k].
+                k += 1.
+            }
+            Pilike palusta p >= 0 kasta trans[p * 26 + c] kate q {
+                Kemese kas trans[p * 26 + c] tas clone.
+                Kemese kas p tas link[p].
+            }
+            Kemese kas link[q] tas clone.
+            Kemese kas link[cur] tas clone.
+        }
+    }
+    Kemese kas last tas cur.
+}
+
+Kemese kas cur tas 1.
+Pilike palusta cur < size {
+    answer += longest[cur] - longest[link[cur]].
+    cur += 1.
+}
+Takute kas answer.
