@@ -1,0 +1,11 @@
+# Scalar loop / augmented-assignment benchmark.
+# Expected output: 1000000
+
+Sonome kas N tas 1000000.
+Sonome kas i tas 0.
+
+Pilike palusta i < N {
+    i += 1.
+}
+
+Takute kas i.
