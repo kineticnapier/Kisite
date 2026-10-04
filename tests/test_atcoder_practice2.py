@@ -42,6 +42,22 @@ class AtCoderPractice2Tests(unittest.TestCase):
 """
         self.assert_backends_equal(source, input_data, ["15", "7", "25", "6"])
 
+    def test_practice2_c_sample(self):
+        source = (EXAMPLES / "practice2_c.kis").read_text(encoding="utf-8")
+        input_data = """\
+5
+4 10 6 3
+6 5 4 3
+1 1 0 0
+31415 92653 58979 32384
+1000000000 1000000000 999999999 999999999
+"""
+        self.assert_backends_equal(
+            source,
+            input_data,
+            ["3", "13", "0", "314095480", "499999999500000000"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
