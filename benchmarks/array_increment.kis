@@ -1,0 +1,13 @@
+# Indexed read/modify/write benchmark.
+# Expected output: 1000000
+
+Sonome kas N tas 1000000.
+Sonome kas a tas [0].
+Sonome kas i tas 0.
+
+Pilike palusta i < N {
+    a[0] += 1.
+    i += 1.
+}
+
+Takute kas a[0].
