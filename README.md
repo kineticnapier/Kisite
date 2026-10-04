@@ -47,7 +47,17 @@ Pilike palusta M > 0 {
 Takute kas a vis " ".
 ```
 
-0.0.17 adds competitive-programming-oriented syntax and helpers including augmented assignment, destructuring, slices, negative indexing, `combinations`, `gcd` / `lcm`, bitwise operations, modular arithmetic, and convolution with an NTT fast path for modulus `998244353`.
+Array comprehensions reuse the existing `Pilike kas ... pas ...` and `Palusta` vocabulary:
+
+```kisite
+Sonome kas doubled tas [x * 2 Pilike kas x pas [1, 2, 3]].
+Sonome kas evens tas [x Pilike kas x pas (Kisite kas pilika vis 10) Palusta x % 2 kate 0].
+Sonome kas scaled tas [[10 * x, 10 * y] Pilike kas x kasta y pas [[1, 2], [3, 4]]].
+```
+
+The initial comprehension syntax supports one generator. `Palusta` filtering is optional, destructuring bindings are supported, and comprehension bindings stay local to the expression.
+
+0.0.17 adds competitive-programming-oriented syntax and helpers including augmented assignment, destructuring, array comprehensions, slices, negative indexing, `combinations`, `gcd` / `lcm`, bitwise operations, modular arithmetic, and convolution with an NTT fast path for modulus `998244353`.
 
 The English helper names introduced for competitive programming are provisional where suitable Lisatopian vocabulary has not yet been chosen.
 
