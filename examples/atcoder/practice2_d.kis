@@ -1,0 +1,146 @@
+# AtCoder Library Practice Contest D - Maxflow
+# https://atcoder.jp/contests/practice2/tasks/practice2_d
+#
+# The grid graph is bipartite by (row + column) parity.  Instead of adding a
+# maxflow builtin, find one augmenting path at a time with BFS using only the
+# existing Kisite array/control-flow features.
+
+Kalivisku musope kas augment vis grid kasta N kasta M kasta match kasta src {
+    Sonome kas V tas N * M.
+    Sonome kas prev_right tas Kisite kas fill vis -1 kasta V.
+    Sonome kas seen_left tas Kisite kas fill vis Jatuni kasta V.
+    Sonome kas queue tas [].
+    Sonome kas dr tas [-1, 0, 1, 0].
+    Sonome kas dc tas [0, -1, 0, 1].
+    Sonome kas head tas 0.
+    Sonome kas found tas -1.
+    Sonome kas left tas 0.
+    Sonome kas row tas 0.
+    Sonome kas col tas 0.
+    Sonome kas d tas 0.
+    Sonome kas nr tas 0.
+    Sonome kas nc tas 0.
+    Sonome kas right tas 0.
+    Sonome kas next_left tas 0.
+    Sonome kas cur_right tas 0.
+    Sonome kas old_right tas 0.
+
+    Putike kas src tas queue.
+    Kemese kas seen_left[src] tas Tuni.
+
+    Pilike palusta head < (Kisite kas kipala vis queue) kasta found < 0 {
+        Kemese kas left tas queue[head].
+        head += 1.
+        Kemese kas row tas left // M.
+        Kemese kas col tas left % M.
+        Kemese kas d tas 0.
+
+        Pilike palusta d < 4 kasta found < 0 {
+            Kemese kas nr tas row + dr[d].
+            Kemese kas nc tas col + dc[d].
+            Palusta nr >= 0 kasta nr < N kasta nc >= 0 kasta nc < M {
+                Kemese kas right tas nr * M + nc.
+                Palusta grid[nr][nc] kate "." kasta prev_right[right] kate -1 {
+                    Kemese kas prev_right[right] tas left.
+                    Palusta match[right] kate -1 {
+                        Kemese kas found tas right.
+                    } Japalusta {
+                        Kemese kas next_left tas match[right].
+                        Palusta kix seen_left[next_left] {
+                            Kemese kas seen_left[next_left] tas Tuni.
+                            Putike kas next_left tas queue.
+                        }
+                    }
+                }
+            }
+            d += 1.
+        }
+    }
+
+    Palusta found kate -1 {
+        Jasepe kas 0.
+    }
+
+    Kemese kas cur_right tas found.
+    Pilike palusta cur_right != -1 {
+        Kemese kas left tas prev_right[cur_right].
+        Kemese kas old_right tas match[left].
+        Kemese kas match[left] tas cur_right.
+        Kemese kas match[cur_right] tas left.
+        Kemese kas cur_right tas old_right.
+    }
+    Jasepe kas 1.
+}
+
+Sonome kas N kasta M tas Kisite kas readints vis 2.
+Sonome kas grid tas [].
+Sonome kas input_row tas "".
+Sonome kas V tas N * M.
+Sonome kas match tas Kisite kas fill vis -1 kasta V.
+Sonome kas answer tas 0.
+Sonome kas i tas 0.
+Sonome kas j tas 0.
+Sonome kas v tas 0.
+Sonome kas other tas 0.
+Sonome kas oi tas 0.
+Sonome kas oj tas 0.
+
+Pilike kas ri pas Kisite kas pilika vis N {
+    Polike kas input_row vos stdin.
+    Putike kas (Kisite kas array vis input_row) tas grid.
+}
+
+Kemese kas i tas 0.
+Pilike palusta i < N {
+    Kemese kas j tas 0.
+    Pilike palusta j < M {
+        Palusta grid[i][j] kate "." kasta (i + j) % 2 kate 0 {
+            Kemese kas v tas i * M + j.
+            Palusta match[v] kate -1 {
+                answer += Kisite kas augment vis grid kasta N kasta M kasta match kasta v.
+            }
+        }
+        j += 1.
+    }
+    i += 1.
+}
+
+Takute kas answer.
+
+Kemese kas i tas 0.
+Pilike palusta i < N {
+    Kemese kas j tas 0.
+    Pilike palusta j < M {
+        Palusta grid[i][j] kate "." kasta (i + j) % 2 kate 0 {
+            Kemese kas v tas i * M + j.
+            Kemese kas other tas match[v].
+            Palusta other != -1 {
+                Kemese kas oi tas other // M.
+                Kemese kas oj tas other % M.
+                Palusta i kate oi {
+                    Palusta j < oj {
+                        Kemese kas grid[i][j] tas ">".
+                        Kemese kas grid[oi][oj] tas "<".
+                    } Japalusta {
+                        Kemese kas grid[oi][oj] tas ">".
+                        Kemese kas grid[i][j] tas "<".
+                    }
+                } Japalusta {
+                    Palusta i < oi {
+                        Kemese kas grid[i][j] tas "v".
+                        Kemese kas grid[oi][oj] tas "^".
+                    } Japalusta {
+                        Kemese kas grid[oi][oj] tas "v".
+                        Kemese kas grid[i][j] tas "^".
+                    }
+                }
+            }
+        }
+        j += 1.
+    }
+    i += 1.
+}
+
+Pilike kas ri pas Kisite kas pilika vis N {
+    Takute kas grid[ri] vis "".
+}
