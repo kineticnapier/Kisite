@@ -76,8 +76,8 @@ Sonome kas i tas 0.
 Sonome kas j tas 0.
 Sonome kas ci tas 0.
 Sonome kas cj tas 0.
-Sonome kas pi tas 0.
-Sonome kas pj tas 0.
+Sonome kas pos_i tas 0.
+Sonome kas pos_j tas 0.
 Sonome kas ni tas 0.
 Sonome kas nj tas 0.
 Sonome kas oi tas 0.
@@ -98,18 +98,18 @@ Pilike palusta i < N {
         Kemese kas ci tas 0.
         Pilike palusta ci < 2 {
             Palusta ci kate 0 {
-                Kemese kas pi tas X[i].
+                Kemese kas pos_i tas X[i].
             } Japalusta {
-                Kemese kas pi tas Y[i].
+                Kemese kas pos_i tas Y[i].
             }
             Kemese kas cj tas 0.
             Pilike palusta cj < 2 {
                 Palusta cj kate 0 {
-                    Kemese kas pj tas X[j].
+                    Kemese kas pos_j tas X[j].
                 } Japalusta {
-                    Kemese kas pj tas Y[j].
+                    Kemese kas pos_j tas Y[j].
                 }
-                Palusta (Kisite kas abs vis pi - pj) < D {
+                Palusta (Kisite kas abs vis pos_i - pos_j) < D {
                     Kemese kas ni tas 2 * i + ci.
                     Kemese kas nj tas 2 * j + cj.
                     Kemese kas oi tas 2 * i + (1 - ci).
