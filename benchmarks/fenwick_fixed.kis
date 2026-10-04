@@ -1,0 +1,20 @@
+# Fenwick update benchmark with no input parsing.
+# 500000 updates start at p = 1, so each update takes the long path.
+# Expected output: 500000
+
+Sonome kas N tas 500000.
+Sonome kas Q tas 500000.
+Sonome kas bit tas Kisite kas fill vis 0 kasta N + 1.
+Sonome kas qi tas 0.
+Sonome kas p tas 0.
+
+Pilike palusta qi < Q {
+    Kemese kas p tas 1.
+    Pilike palusta p <= N {
+        bit[p] += 1.
+        p += p & -p.
+    }
+    qi += 1.
+}
+
+Takute kas bit[262144].
