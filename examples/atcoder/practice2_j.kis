@@ -1,0 +1,93 @@
+# AtCoder Library Practice Contest J - Segment Tree
+# https://atcoder.jp/contests/practice2/tasks/practice2_j
+
+Kalivisku musope kas range_max vis seg kasta size kasta l kasta r {
+    Sonome kas ans tas 0.
+    Kemese kas l tas l + size.
+    Kemese kas r tas r + size.
+    Pilike palusta l < r {
+        Palusta l % 2 kate 1 {
+            Kemese kas ans tas Kisite kas ponavi vis ans kasta seg[l].
+            l += 1.
+        }
+        Palusta r % 2 kate 1 {
+            r -= 1.
+            Kemese kas ans tas Kisite kas ponavi vis ans kasta seg[r].
+        }
+        l //= 2.
+        r //= 2.
+    }
+    Jasepe kas ans.
+}
+
+Kalivisku musope kas first_at_least vis seg kasta size kasta N kasta start kasta value {
+    Sonome kas pos tas start + size.
+    Sonome kas left tas 0.
+    Palusta start >= N {
+        Jasepe kas N.
+    }
+    Pilike palusta Tuni {
+        Pilike palusta pos % 2 kate 0 {
+            pos //= 2.
+        }
+        Palusta seg[pos] >= value {
+            Pilike palusta pos < size {
+                Kemese kas left tas pos * 2.
+                Palusta seg[left] >= value {
+                    Kemese kas pos tas left.
+                } Japalusta {
+                    Kemese kas pos tas left + 1.
+                }
+            }
+            Kemese kas pos tas pos - size.
+            Palusta pos < N {
+                Jasepe kas pos.
+            }
+            Jasepe kas N.
+        }
+        pos += 1.
+        Palusta (pos & -pos) kate pos {
+            Kinise.
+        }
+    }
+    Jasepe kas N.
+}
+
+Sonome kas N kasta Q tas Kisite kas readints vis 2.
+Sonome kas A tas Kisite kas readints vis N.
+Sonome kas size tas 1.
+Pilike palusta size < N {
+    size *= 2.
+}
+Sonome kas seg tas Kisite kas fill vis 0 kasta 2 * size.
+Sonome kas i tas 0.
+Sonome kas query tas [0, 0, 0].
+Sonome kas pos tas 0.
+
+Kemese kas i tas 0.
+Pilike palusta i < N {
+    Kemese kas seg[size + i] tas A[i].
+    i += 1.
+}
+Kemese kas i tas size - 1.
+Pilike palusta i > 0 {
+    Kemese kas seg[i] tas Kisite kas ponavi vis seg[2 * i] kasta seg[2 * i + 1].
+    i -= 1.
+}
+
+Pilike kas qi pas Kisite kas pilika vis Q {
+    Kemese kas query tas Kisite kas readints vis 3.
+    Palusta query[0] kate 1 {
+        Kemese kas pos tas size + query[1] - 1.
+        Kemese kas seg[pos] tas query[2].
+        pos //= 2.
+        Pilike palusta pos > 0 {
+            Kemese kas seg[pos] tas Kisite kas ponavi vis seg[2 * pos] kasta seg[2 * pos + 1].
+            pos //= 2.
+        }
+    } Japalusta Palusta query[0] kate 2 {
+        Takute kas Kisite kas range_max vis seg kasta size kasta query[1] - 1 kasta query[2].
+    } Japalusta {
+        Takute kas (Kisite kas first_at_least vis seg kasta size kasta N kasta query[1] - 1 kasta query[2]) + 1.
+    }
+}
