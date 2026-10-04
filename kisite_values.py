@@ -1,10 +1,19 @@
 from __future__ import annotations
 
+from copy import deepcopy
+from dataclasses import dataclass
 from functools import cmp_to_key
+from itertools import combinations as itertools_combinations
+from math import comb, gcd as math_gcd, lcm as math_lcm
 from pathlib import Path
 import sys
 
 from kisite_parser import *
+
+
+NTT_MOD = 998244353
+NTT_ROOT = 3
+
 
 def is_number(value: object) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
@@ -14,6 +23,42 @@ def is_integer(value: object) -> bool:
     return isinstance(value, int) and not isinstance(value, bool)
 
 
+@dataclass(frozen=True)
+class KisiteModInt:
+    value: int
+    modulus: int
+
+    def __post_init__(self) -> None:
+        if not is_integer(self.modulus) or self.modulus <= 1:
+            raise KisiteError("modint modulus must be an integer greater than 1")
+        if not is_integer(self.value):
+            raise KisiteError("modint value must be an integer")
+        object.__setattr__(self, "value", self.value % self.modulus)
+
+
+class KisiteCombinations:
+    def __init__(self, source: object, r: int) -> None:
+        if not is_integer(r) or r < 0:
+            raise KisiteError("combinations r must be a non-negative integer")
+        if isinstance(source, KisiteSet):
+            pool = source.values()
+        elif isinstance(source, (list, str, range)):
+            pool = list(source)
+        else:
+            raise KisiteError("combinations requires an array, string, set, or pilika range")
+        self.pool = pool
+        self.r = r
+
+    def __iter__(self):
+        for values in itertools_combinations(self.pool, self.r):
+            yield list(values)
+
+    def __len__(self) -> int:
+        if self.r > len(self.pool):
+            return 0
+        return comb(len(self.pool), self.r)
+
+
 def collection_key(value: object) -> tuple[str, object]:
     if isinstance(value, bool):
         return ("bool", value)
@@ -21,7 +66,11 @@ def collection_key(value: object) -> tuple[str, object]:
         return ("number", value)
     if isinstance(value, str):
         return ("string", value)
-    raise KisiteError("set elements and dictionary keys must be numbers, strings, or booleans")
+    if isinstance(value, KisiteModInt):
+        return ("modint", (value.modulus, value.value))
+    if isinstance(value, list):
+        return ("array", tuple(collection_key(item) for item in value))
+    raise KisiteError("set elements and dictionary keys must be scalar values or nested arrays of scalar values")
 
 
 class KisiteSet:
@@ -90,6 +139,8 @@ class KisiteDict:
 def values_equal(left: object, right: object) -> bool:
     if is_number(left) and is_number(right):
         return left == right
+    if isinstance(left, KisiteModInt) and isinstance(right, KisiteModInt):
+        return left.modulus == right.modulus and left.value == right.value
     if isinstance(left, list) and isinstance(right, list):
         return len(left) == len(right) and all(values_equal(a, b) for a, b in zip(left, right))
     if isinstance(left, KisiteSet) and isinstance(right, KisiteSet):
@@ -107,13 +158,23 @@ def values_equal(left: object, right: object) -> bool:
 
 
 def checked_index(value: object, index: object) -> tuple[object, int]:
-    if not isinstance(index, int) or isinstance(index, bool):
+    if not is_integer(index):
         raise KisiteError("array index must be an integer")
     if not isinstance(value, (list, str)):
         raise KisiteError("indexing requires an array or string")
+    if index < 0:
+        index += len(value)
     if index < 0 or index >= len(value):
         raise KisiteError("index out of range")
     return value, index
+
+
+def checked_slice_part(value: object, label: str) -> int | None:
+    if value is None:
+        return None
+    if not is_integer(value):
+        raise KisiteError(f"slice {label} must be an integer")
+    return value
 
 
 def type_matches(annotation: str, value: object) -> bool:
@@ -222,6 +283,13 @@ def convert_minika(value: object) -> object:
             raise KisiteError(f"minika cannot convert {value!r} to a number") from exc
 
 
+def convert_int_text(value: str) -> int:
+    try:
+        return int(value)
+    except ValueError as exc:
+        raise KisiteError(f"cannot convert input token {value!r} to an integer") from exc
+
+
 def make_pilika(arguments: list[object]) -> range:
     if not 1 <= len(arguments) <= 3:
         raise KisiteError(f"function 'pilika' expects 1 to 3 arguments, got {len(arguments)}")
@@ -252,8 +320,10 @@ def make_paline(arguments: list[object]) -> list[object]:
     if len(arguments) != 1:
         raise KisiteError(f"function 'paline' expects 1 argument, got {len(arguments)}")
     value = arguments[0]
+    if isinstance(value, KisiteSet):
+        value = value.values()
     if not isinstance(value, list):
-        raise KisiteError("paline requires an array")
+        raise KisiteError("paline requires an array or set")
     return sorted(value, key=cmp_to_key(compare_orderable))
 
 
@@ -262,8 +332,8 @@ def choose_extreme(name: str, arguments: list[object]) -> object:
         raise KisiteError(f"function '{name}' expects at least 1 argument")
     if len(arguments) == 1:
         source = arguments[0]
-        if not isinstance(source, (list, range, KisiteSet)):
-            raise KisiteError(f"function '{name}' with 1 argument requires an array, set, or pilika range")
+        if not isinstance(source, (list, range, KisiteSet, KisiteCombinations)):
+            raise KisiteError(f"function '{name}' with 1 argument requires an array, set, combinations, or pilika range")
         values = list(source)
     else:
         values = arguments
@@ -274,6 +344,185 @@ def choose_extreme(name: str, arguments: list[object]) -> object:
 
 
 def sequence_values(value: object, *, name: str) -> list[object]:
-    if isinstance(value, (list, range, KisiteSet)):
+    if isinstance(value, (list, range, KisiteSet, KisiteCombinations)):
         return list(value)
-    raise KisiteError(f"function '{name}' requires an array, set, or pilika range")
+    raise KisiteError(f"function '{name}' requires an array, set, combinations, or pilika range")
+
+
+def destructure_values(value: object, count: int) -> list[object]:
+    if isinstance(value, KisiteSet):
+        items = value.values()
+    elif isinstance(value, (list, str, range)):
+        items = list(value)
+    else:
+        raise KisiteError("destructuring requires an array, string, set, or pilika range")
+    if len(items) != count:
+        raise KisiteError(f"destructuring expected {count} values, got {len(items)}")
+    return items
+
+
+def make_fill(value: object, count: object) -> list[object]:
+    if not is_integer(count) or count < 0:
+        raise KisiteError("fill count must be a non-negative integer")
+    return [deepcopy(value) for _ in range(count)]
+
+
+def make_reverse(value: object) -> object:
+    if isinstance(value, str):
+        return value[::-1]
+    if isinstance(value, KisiteSet):
+        return list(reversed(value.values()))
+    if isinstance(value, (list, range, KisiteCombinations)):
+        return list(reversed(list(value)))
+    raise KisiteError("reverse requires an array, string, set, combinations, or pilika range")
+
+
+def make_resize(value: object, size: object, fill: object = 0) -> list[object]:
+    if not isinstance(value, list):
+        raise KisiteError("resize requires an array")
+    if not is_integer(size) or size < 0:
+        raise KisiteError("resize size must be a non-negative integer")
+    result = list(value[:size])
+    while len(result) < size:
+        result.append(deepcopy(fill))
+    return result
+
+
+def make_truncate(value: object, size: object) -> list[object]:
+    if not isinstance(value, list):
+        raise KisiteError("truncate requires an array")
+    if not is_integer(size) or size < 0:
+        raise KisiteError("truncate size must be a non-negative integer")
+    if size > len(value):
+        raise KisiteError("truncate size cannot exceed the array length")
+    return list(value[:size])
+
+
+def make_set(value: object) -> KisiteSet:
+    if isinstance(value, KisiteSet):
+        return KisiteSet(value.values())
+    if isinstance(value, (list, str, range, KisiteCombinations)):
+        return KisiteSet(list(value))
+    raise KisiteError("set requires an iterable collection")
+
+
+def make_array(value: object) -> list[object]:
+    if isinstance(value, KisiteDict):
+        return value.keys()
+    if isinstance(value, KisiteSet):
+        return value.values()
+    if isinstance(value, (list, str, range, KisiteCombinations)):
+        return list(value)
+    raise KisiteError("array requires an iterable collection")
+
+
+def modular_inverse(value: object, modulus: object) -> int:
+    if not is_integer(value) or not is_integer(modulus) or modulus <= 1:
+        raise KisiteError("modinv requires integer value and modulus > 1")
+    value %= modulus
+    if math_gcd(value, modulus) != 1:
+        raise KisiteError("modular inverse does not exist")
+    return pow(value, -1, modulus)
+
+
+def modular_pow(base: object, exponent: object, modulus: object) -> int:
+    if not is_integer(base) or not is_integer(exponent) or not is_integer(modulus):
+        raise KisiteError("modpow requires integer arguments")
+    if exponent < 0:
+        raise KisiteError("modpow exponent must be non-negative")
+    if modulus <= 1:
+        raise KisiteError("modpow modulus must be greater than 1")
+    return pow(base, exponent, modulus)
+
+
+def _ntt(values: list[int], invert: bool) -> None:
+    n = len(values)
+    j = 0
+    for i in range(1, n):
+        bit = n >> 1
+        while j & bit:
+            j ^= bit
+            bit >>= 1
+        j ^= bit
+        if i < j:
+            values[i], values[j] = values[j], values[i]
+
+    length = 2
+    while length <= n:
+        root = pow(NTT_ROOT, (NTT_MOD - 1) // length, NTT_MOD)
+        if invert:
+            root = pow(root, NTT_MOD - 2, NTT_MOD)
+        half = length >> 1
+        for offset in range(0, n, length):
+            w = 1
+            for j in range(offset, offset + half):
+                u = values[j]
+                v = values[j + half] * w % NTT_MOD
+                values[j] = (u + v) % NTT_MOD
+                values[j + half] = (u - v) % NTT_MOD
+                w = w * root % NTT_MOD
+        length <<= 1
+
+    if invert:
+        inv_n = pow(n, NTT_MOD - 2, NTT_MOD)
+        for i in range(n):
+            values[i] = values[i] * inv_n % NTT_MOD
+
+
+def convolution_mod(left: list[int], right: list[int], modulus: int) -> list[int]:
+    if not left or not right:
+        return []
+    if modulus <= 1:
+        raise KisiteError("convolution modulus must be greater than 1")
+
+    if min(len(left), len(right)) <= 32 or modulus != NTT_MOD:
+        result = [0] * (len(left) + len(right) - 1)
+        for i, a in enumerate(left):
+            a %= modulus
+            for j, b in enumerate(right):
+                result[i + j] = (result[i + j] + a * (b % modulus)) % modulus
+        return result
+
+    need = len(left) + len(right) - 1
+    size = 1
+    while size < need:
+        size <<= 1
+    if size > (1 << 23):
+        raise KisiteError("998244353 convolution length exceeds the NTT limit")
+    a = [value % NTT_MOD for value in left] + [0] * (size - len(left))
+    b = [value % NTT_MOD for value in right] + [0] * (size - len(right))
+    _ntt(a, False)
+    _ntt(b, False)
+    for i in range(size):
+        a[i] = a[i] * b[i] % NTT_MOD
+    _ntt(a, True)
+    return a[:need]
+
+
+def convolution_exact(left: list[int], right: list[int]) -> list[int]:
+    if not left or not right:
+        return []
+    result = [0] * (len(left) + len(right) - 1)
+    for i, a in enumerate(left):
+        for j, b in enumerate(right):
+            result[i + j] += a * b
+    return result
+
+
+def normalize_convolution_array(value: object, name: str) -> tuple[list[int], int | None]:
+    if not isinstance(value, list):
+        raise KisiteError(f"convolution {name} must be an array")
+    modulus: int | None = None
+    result: list[int] = []
+    for item in value:
+        if isinstance(item, KisiteModInt):
+            if modulus is None:
+                modulus = item.modulus
+            elif modulus != item.modulus:
+                raise KisiteError("convolution modint arrays must use one modulus")
+            result.append(item.value)
+        elif is_integer(item):
+            result.append(item)
+        else:
+            raise KisiteError("convolution arrays must contain integers or modints")
+    return result, modulus
