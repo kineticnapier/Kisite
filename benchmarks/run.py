@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 import subprocess
 import sys
@@ -14,14 +15,24 @@ CASES = [
 ]
 
 
-def main() -> int:
-    print(f"python={sys.version.split()[0]}")
+def main(argv: list[str] | None = None) -> int:
+    argp = argparse.ArgumentParser()
+    argp.add_argument("--compiled", action="store_true")
+    args = argp.parse_args(argv)
+
+    backend = "compiled" if args.compiled else "interpreter"
+    print(f"python={sys.version.split()[0]} backend={backend}")
     print("case\tseconds\tresult")
 
     for name, source, expected in CASES:
+        command = [sys.executable, str(ROOT / "kisite.py")]
+        if args.compiled:
+            command.append("--compiled")
+        command.append(str(source))
+
         started = time.perf_counter()
         completed = subprocess.run(
-            [sys.executable, str(ROOT / "kisite.py"), str(source)],
+            command,
             cwd=ROOT,
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
