@@ -4,6 +4,7 @@
 Kalivisku musope kas floor_sum vis n kasta m kasta a kasta b {
     Sonome kas answer tas 0.
     Sonome kas y_max tas 0.
+    Sonome kas old_m tas 0.
 
     Pilike palusta Tuni {
         Palusta a >= m {
@@ -22,7 +23,7 @@ Kalivisku musope kas floor_sum vis n kasta m kasta a kasta b {
 
         Kemese kas n tas y_max // m.
         Kemese kas b tas y_max % m.
-        Sonome kas old_m tas m.
+        Kemese kas old_m tas m.
         Kemese kas m tas a.
         Kemese kas a tas old_m.
     }
