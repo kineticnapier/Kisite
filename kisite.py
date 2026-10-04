@@ -37,9 +37,13 @@ _values.type_matches = _type_matches_with_kati_alias
 # in a predictable order.
 import kisite_comprehension as _comprehension
 import kisite_stdlib_011 as _stdlib_011
+import kisite_compiler as _compiler
 
-# Export the patched runtime surface.
+# Export the patched runtime surface plus the experimental compiled backend.
 from kisite_runtime import *
+
+run_compiled = _compiler.run_compiled
+CompiledBackendUnsupported = _compiler.CompiledBackendUnsupported
 
 
 if __name__ == "__main__":
