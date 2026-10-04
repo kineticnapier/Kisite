@@ -22,6 +22,19 @@ class AtCoderPractice2Tests(unittest.TestCase):
 """
         self.assertEqual(kisite.run(source, input_data), ["0", "1", "0", "1"])
 
+    def test_practice2_b_sample(self):
+        source = (EXAMPLES / "practice2_b.kis").read_text(encoding="utf-8")
+        input_data = """\
+5 5
+1 2 3 4 5
+1 0 5
+1 2 4
+0 3 10
+1 0 5
+1 0 3
+"""
+        self.assertEqual(kisite.run(source, input_data), ["15", "7", "25", "6"])
+
 
 if __name__ == "__main__":
     unittest.main()
