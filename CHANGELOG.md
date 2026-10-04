@@ -2,6 +2,19 @@
 
 Kisite is still experimental, so syntax and semantics may change between 0.x releases.
 
+## 0.0.17
+
+- Added augmented assignment: `+=`, `-=`, `*=`, `/=`, `//=`, `%=`, `&=`, `|=`, `^=`, `<<=`, and `>>=`.
+- Added negative indexing and Python-style read slices such as `a[1:-1]` and `a[::-1]`.
+- Added destructuring initialization (`Sonome kas a kasta b tas ...`) and foreach destructuring (`Pilike kas x kasta y pas ...`).
+- Added array concatenation with `+` and array repetition with `*`.
+- Added provisional competitive-programming helpers `readint`, `readints`, `fill`, `reverse`, `resize`, `truncate`, `combinations`, `gcd`, `lcm`, `set`, and `array` pending suitable Lisatopian vocabulary where needed.
+- Sets and dictionary keys can now use nested arrays of scalar values, making point-like arrays usable as set elements.
+- Added integer bitwise operators `&`, `|`, `^`, `~`, `<<`, and `>>`.
+- Added provisional modular arithmetic helpers `modint`, `modpow`, and `modinv`.
+- Added `convolution`; integer arrays use exact convolution unless a modulus is supplied, and modulus `998244353` uses an NTT fast path for larger inputs.
+- `convolution` can infer a modulus from `modint` arrays and returns `modint` values in that form.
+
 ## 0.0.16
 
 - Changed the canonical boolean vocabulary to `Tuni` / `Jatuni`, with `tuna` as the boolean runtime type name. `Kati` / `Jakati` and `sis kati` remain accepted as migration aliases in 0.0.16.
