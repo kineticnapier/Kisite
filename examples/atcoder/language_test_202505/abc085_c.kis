@@ -1,0 +1,23 @@
+# Language Test 202505 - ABC085C: Otoshidama
+Sonome kas N kasta Y tas Kisite kas readints vis 2.
+Sonome kas found tas Jatuni.
+Sonome kas ax tas -1.
+Sonome kas ay tas -1.
+Sonome kas az tas -1.
+Sonome kas z tas 0.
+Pilike kas x pas Kisite kas pilika vis N + 1 {
+    Palusta kix found {
+        Pilike kas y pas Kisite kas pilika vis N - x + 1 {
+            Palusta kix found {
+                Kemese kas z tas N - x - y.
+                Palusta 10000 * x + 5000 * y + 1000 * z kate Y {
+                    Kemese kas ax tas x.
+                    Kemese kas ay tas y.
+                    Kemese kas az tas z.
+                    Kemese kas found tas Tuni.
+                }
+            }
+        }
+    }
+}
+Takute kas [ax, ay, az] vis " ".

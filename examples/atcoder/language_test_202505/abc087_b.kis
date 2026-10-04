@@ -1,0 +1,16 @@
+# Language Test 202505 - ABC087B: Coins
+Sonome kas A tas Kisite kas readint.
+Sonome kas B tas Kisite kas readint.
+Sonome kas C tas Kisite kas readint.
+Sonome kas X tas Kisite kas readint.
+Sonome kas answer tas 0.
+Pilike kas a pas Kisite kas pilika vis A + 1 {
+    Pilike kas b pas Kisite kas pilika vis B + 1 {
+        Pilike kas c pas Kisite kas pilika vis C + 1 {
+            Palusta 500 * a + 100 * b + 50 * c kate X {
+                answer += 1.
+            }
+        }
+    }
+}
+Takute kas answer.

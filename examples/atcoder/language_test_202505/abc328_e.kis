@@ -1,0 +1,50 @@
+# Language Test 202505 - ABC328E: Modulo MST
+Kalivisku musope kas root vis parent kasta x {
+    Pilike palusta parent[x] != x {
+        Kemese kas parent[x] tas parent[parent[x]].
+        Kemese kas x tas parent[x].
+    }
+    Jasepe kas x.
+}
+
+Kalivisku musope kas evaluate_tree vis edges kasta N kasta K kasta chosen {
+    Sonome kas parent tas [i Pilike kas i pas (Kisite kas pilika vis N)].
+    Sonome kas total tas 0.
+    Sonome kas valid tas Tuni.
+    Sonome kas edge tas [0, 0, 0].
+    Sonome kas ru tas 0.
+    Sonome kas rv tas 0.
+    Pilike kas index pas chosen {
+        Kemese kas edge tas edges[index].
+        Kemese kas ru tas Kisite kas root vis parent kasta edge[0].
+        Kemese kas rv tas Kisite kas root vis parent kasta edge[1].
+        Palusta ru kate rv {
+            Kemese kas valid tas Jatuni.
+        } Japalusta {
+            Kemese kas parent[rv] tas ru.
+            Kemese kas total tas (total + edge[2]) % K.
+        }
+    }
+    Palusta valid {
+        Jasepe kas total.
+    }
+    Jasepe kas -1.
+}
+
+Sonome kas N kasta M kasta K tas Kisite kas readints vis 3.
+Sonome kas edges tas [].
+Sonome kas input_edge tas [0, 0, 0].
+Pilike kas i pas Kisite kas pilika vis M {
+    Kemese kas input_edge tas Kisite kas readints vis 3.
+    Putike kas [input_edge[0] - 1, input_edge[1] - 1, input_edge[2]] tas edges.
+}
+Sonome kas indices tas Kisite kas array vis (Kisite kas pilika vis M).
+Sonome kas best tas K.
+Sonome kas cost tas -1.
+Pilike kas chosen pas (Kisite kas combinations vis indices kasta N - 1) {
+    Kemese kas cost tas Kisite kas evaluate_tree vis edges kasta N kasta K kasta chosen.
+    Palusta cost >= 0 kasta cost < best {
+        Kemese kas best tas cost.
+    }
+}
+Takute kas best.

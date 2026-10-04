@@ -1,0 +1,23 @@
+# Language Test 202505 - ABC358D: Souvenirs
+Sonome kas N kasta M tas Kisite kas readints vis 2.
+Sonome kas A tas Kisite kas paline vis (Kisite kas readints vis N).
+Sonome kas B tas Kisite kas paline vis (Kisite kas readints vis M).
+Sonome kas ai tas 0.
+Sonome kas answer tas 0.
+Sonome kas possible tas Tuni.
+Pilike kas need pas B {
+    Pilike palusta ai < N kasta A[ai] < need {
+        ai += 1.
+    }
+    Palusta ai >= N {
+        Kemese kas possible tas Jatuni.
+    } Japalusta palusta possible {
+        answer += A[ai].
+        ai += 1.
+    }
+}
+Palusta possible {
+    Takute kas answer.
+} Japalusta {
+    Takute kas -1.
+}

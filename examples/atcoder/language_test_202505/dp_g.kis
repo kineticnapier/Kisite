@@ -1,0 +1,35 @@
+# Language Test 202505 - DP_G: Longest Path
+Sonome kas N kasta M tas Kisite kas readints vis 2.
+Sonome kas graph tas Kisite kas fill vis [] kasta N.
+Sonome kas indegree tas Kisite kas fill vis 0 kasta N.
+Sonome kas edge tas [0, 0].
+Sonome kas u tas 0.
+Sonome kas v tas 0.
+Pilike kas i pas Kisite kas pilika vis M {
+    Kemese kas edge tas Kisite kas readints vis 2.
+    Kemese kas u tas edge[0] - 1.
+    Kemese kas v tas edge[1] - 1.
+    Putike kas v tas graph[u].
+    indegree[v] += 1.
+}
+Sonome kas queue tas [].
+Pilike kas i pas Kisite kas pilika vis N {
+    Palusta indegree[i] kate 0 {
+        Putike kas i tas queue.
+    }
+}
+Sonome kas dp tas Kisite kas fill vis 0 kasta N.
+Sonome kas head tas 0.
+Sonome kas cur tas 0.
+Pilike palusta head < (Kisite kas kipala vis queue) {
+    Kemese kas cur tas queue[head].
+    head += 1.
+    Pilike kas to pas graph[cur] {
+        Kemese kas dp[to] tas Kisite kas ponavi vis dp[to] kasta dp[cur] + 1.
+        indegree[to] -= 1.
+        Palusta indegree[to] kate 0 {
+            Putike kas to tas queue.
+        }
+    }
+}
+Takute kas Kisite kas ponavi vis dp.

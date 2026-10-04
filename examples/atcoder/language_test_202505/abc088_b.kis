@@ -1,0 +1,13 @@
+# Language Test 202505 - ABC088B: Card Game for Two
+Sonome kas N tas Kisite kas readint.
+Sonome kas A tas Kisite kas reverse vis (Kisite kas paline vis (Kisite kas readints vis N)).
+Sonome kas alice tas 0.
+Sonome kas bob tas 0.
+Pilike kas i pas Kisite kas pilika vis N {
+    Palusta i % 2 kate 0 {
+        alice += A[i].
+    } Japalusta {
+        bob += A[i].
+    }
+}
+Takute kas alice - bob.

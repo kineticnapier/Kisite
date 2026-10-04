@@ -1,0 +1,9 @@
+# Language Test 202505 - ABC081A: Placing Marbles
+Polike kas s vos stdin.
+Sonome kas answer tas 0.
+Pilike kas ch pas s {
+    Palusta ch kate "1" {
+        answer += 1.
+    }
+}
+Takute kas answer.

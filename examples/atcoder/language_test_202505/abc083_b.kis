@@ -1,0 +1,19 @@
+# Language Test 202505 - ABC083B: Some Sums
+Kalivisku musope kas digit_sum vis x {
+    Sonome kas total tas 0.
+    Pilike palusta x > 0 {
+        total += x % 10.
+        x //= 10.
+    }
+    Jasepe kas total.
+}
+Sonome kas N kasta A kasta B tas Kisite kas readints vis 3.
+Sonome kas answer tas 0.
+Sonome kas s tas 0.
+Pilike kas x pas Kisite kas pilika vis 1 kasta N + 1 {
+    Kemese kas s tas Kisite kas digit_sum vis x.
+    Palusta s >= A kasta s <= B {
+        answer += x.
+    }
+}
+Takute kas answer.

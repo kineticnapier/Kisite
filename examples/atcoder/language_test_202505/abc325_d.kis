@@ -1,0 +1,36 @@
+# Language Test 202505 - ABC325D: Printing Machine
+Sonome kas N tas Kisite kas readint.
+Sonome kas jobs tas [].
+Sonome kas pair tas [0, 0].
+Sonome kas start tas 0.
+Sonome kas duration tas 0.
+Pilike kas i pas Kisite kas pilika vis N {
+    Kemese kas pair tas Kisite kas readints vis 2.
+    Kemese kas start tas pair[0].
+    Kemese kas duration tas pair[1].
+    Putike kas [start, start + duration] tas jobs.
+}
+Kemese kas jobs tas Kisite kas paline vis jobs.
+Sonome kas heap tas [].
+Sonome kas index tas 0.
+Sonome kas now tas 0.
+Sonome kas answer tas 0.
+Sonome kas deadline tas 0.
+Pilike palusta index < N vista (Kisite kas kipala vis heap) > 0 {
+    Palusta (Kisite kas kipala vis heap) kate 0 kasta index < N kasta now < jobs[index][0] {
+        Kemese kas now tas jobs[index][0].
+    }
+    Pilike palusta index < N kasta jobs[index][0] <= now {
+        Kisite kas heappush vis heap kasta jobs[index][1].
+        index += 1.
+    }
+    Pilike palusta (Kisite kas kipala vis heap) > 0 kasta (Kisite kas heappeek vis heap) < now {
+        Kisite kas heappop vis heap.
+    }
+    Palusta (Kisite kas kipala vis heap) > 0 {
+        Kemese kas deadline tas Kisite kas heappop vis heap.
+        answer += 1.
+        now += 1.
+    }
+}
+Takute kas answer.

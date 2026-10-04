@@ -1,0 +1,7 @@
+# Language Test 202505 - ABC086A: Product
+Sonome kas a kasta b tas Kisite kas readints vis 2.
+Palusta (a * b) % 2 kate 0 {
+    Takute kas "Even".
+} Japalusta {
+    Takute kas "Odd".
+}

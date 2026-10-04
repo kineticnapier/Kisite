@@ -1,0 +1,30 @@
+# Language Test 202505 - Memory Test 2
+# Intentionally allocates O(N) integers; the official task is designed to probe memory limits.
+Sonome kas N kasta K kasta x kasta y tas Kisite kas readints vis 4.
+Sonome kas modulus tas 998244353.
+Sonome kas a tas Kisite kas fill vis 0 kasta N.
+Kemese kas a[0] tas x.
+Palusta N > 1 {
+    Kemese kas a[1] tas y.
+}
+Sonome kas i tas 2.
+Sonome kas anchor tas 0.
+Pilike palusta i < N {
+    Kemese kas anchor tas Kisite kas ponavi vis i - K kasta 0.
+    Kemese kas a[i] tas (a[i - 1] + a[i - 2] * a[anchor]) % modulus.
+    i += 1.
+}
+Sonome kas Q tas Kisite kas readint.
+Sonome kas previous tas 0.
+Sonome kas b tas 0.
+Sonome kas index tas 0.
+Pilike kas qi pas Kisite kas pilika vis Q {
+    Kemese kas b tas Kisite kas readint.
+    Palusta qi kate 0 {
+        Kemese kas index tas b.
+    } Japalusta {
+        Kemese kas index tas (b + previous) % N.
+    }
+    Kemese kas previous tas a[index].
+    Takute kas previous.
+}

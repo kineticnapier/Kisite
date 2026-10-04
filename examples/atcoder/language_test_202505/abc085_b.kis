@@ -1,0 +1,8 @@
+# Language Test 202505 - ABC085B: Kagami Mochi
+Sonome kas N tas Kisite kas readint.
+Sonome kas values tas [].
+Pilike kas i pas Kisite kas pilika vis N {
+    Putike kas (Kisite kas readint) tas values.
+}
+Sonome kas distinct tas Kisite kas set vis values.
+Takute kas Kisite kas kipala vis distinct.

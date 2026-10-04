@@ -1,0 +1,31 @@
+# Language Test 202505 - ABC086C: Traveling
+Sonome kas N tas Kisite kas readint.
+Sonome kas previous_t tas 0.
+Sonome kas previous_x tas 0.
+Sonome kas previous_y tas 0.
+Sonome kas ok tas Tuni.
+Sonome kas t tas 0.
+Sonome kas x tas 0.
+Sonome kas y tas 0.
+Sonome kas dt tas 0.
+Sonome kas distance tas 0.
+Sonome kas values tas [0, 0, 0].
+Pilike kas i pas Kisite kas pilika vis N {
+    Kemese kas values tas Kisite kas readints vis 3.
+    Kemese kas t tas values[0].
+    Kemese kas x tas values[1].
+    Kemese kas y tas values[2].
+    Kemese kas dt tas t - previous_t.
+    Kemese kas distance tas (Kisite kas abs vis x - previous_x) + (Kisite kas abs vis y - previous_y).
+    Palusta distance > dt vista (dt - distance) % 2 != 0 {
+        Kemese kas ok tas Jatuni.
+    }
+    Kemese kas previous_t tas t.
+    Kemese kas previous_x tas x.
+    Kemese kas previous_y tas y.
+}
+Palusta ok {
+    Takute kas "Yes".
+} Japalusta {
+    Takute kas "No".
+}

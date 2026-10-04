@@ -1,0 +1,21 @@
+# Language Test 202505 - DP_L: Deque
+Sonome kas N tas Kisite kas readint.
+Sonome kas A tas Kisite kas readints vis N.
+Sonome kas dp tas Kisite kas array vis A.
+Sonome kas length tas 2.
+Sonome kas left_index tas 0.
+Sonome kas right_index tas 0.
+Sonome kas left_value tas 0.
+Sonome kas right_value tas 0.
+Pilike palusta length <= N {
+    Kemese kas left_index tas 0.
+    Pilike palusta left_index + length <= N {
+        Kemese kas right_index tas left_index + length - 1.
+        Kemese kas left_value tas A[left_index] - dp[left_index + 1].
+        Kemese kas right_value tas A[right_index] - dp[left_index].
+        Kemese kas dp[left_index] tas Kisite kas ponavi vis left_value kasta right_value.
+        left_index += 1.
+    }
+    length += 1.
+}
+Takute kas dp[0].

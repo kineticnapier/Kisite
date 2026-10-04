@@ -1,0 +1,27 @@
+# Language Test 202505 - ABC169B: Multiplication 2
+Sonome kas N tas Kisite kas readint.
+Sonome kas A tas Kisite kas readints vis N.
+Sonome kas product tas 1.
+Sonome kas zero tas Jatuni.
+Sonome kas overflow tas Jatuni.
+Pilike kas x pas A {
+    Palusta x kate 0 {
+        Kemese kas zero tas Tuni.
+    }
+}
+Palusta kix zero {
+    Pilike kas x pas A {
+        Palusta product > 1000000000000000000 // x {
+            Kemese kas overflow tas Tuni.
+        } Japalusta {
+            product *= x.
+        }
+    }
+}
+Palusta zero {
+    Takute kas 0.
+} Japalusta palusta overflow {
+    Takute kas -1.
+} Japalusta {
+    Takute kas product.
+}

@@ -1,0 +1,8 @@
+# Language Test 202505 - ABC259B: Counterclockwise Rotation
+Sonome kas a kasta b kasta d tas Kisite kas readints vis 3.
+Sonome kas angle tas d * (Kisite kas pi) / 180.
+Sonome kas cs tas Kisite kas cos vis angle.
+Sonome kas sn tas Kisite kas sin vis angle.
+Sonome kas x tas a * cs - b * sn.
+Sonome kas y tas a * sn + b * cs.
+Takute kas [x, y] vis " ".
