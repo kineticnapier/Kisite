@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 
-VERSION = "0.0.17"
+VERSION = "0.1.0"
 
 
 class KisiteError(Exception):
