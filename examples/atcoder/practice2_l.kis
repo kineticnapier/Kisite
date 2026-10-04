@@ -1,0 +1,99 @@
+# AtCoder Library Practice Contest L - Lazy Segment Tree
+# https://atcoder.jp/contests/practice2/tasks/practice2_l
+
+Kalivisku musope kas apply_flip vis zeros kasta ones kasta inv kasta lazy kasta node {
+    Sonome kas old_zero tas zeros[node].
+    Kemese kas inv[node] tas zeros[node] * ones[node] - inv[node].
+    Kemese kas zeros[node] tas ones[node].
+    Kemese kas ones[node] tas old_zero.
+    lazy[node] ^= 1.
+}
+
+Kalivisku musope kas push_flip vis zeros kasta ones kasta inv kasta lazy kasta node kasta l kasta r {
+    Palusta lazy[node] != 0 kasta r - l > 1 {
+        Kisite kas apply_flip vis zeros kasta ones kasta inv kasta lazy kasta node * 2.
+        Kisite kas apply_flip vis zeros kasta ones kasta inv kasta lazy kasta node * 2 + 1.
+    }
+    Kemese kas lazy[node] tas 0.
+}
+
+Kalivisku musope kas range_flip vis zeros kasta ones kasta inv kasta lazy kasta node kasta l kasta r kasta ql kasta qr {
+    Sonome kas mid tas 0.
+    Palusta qr <= l vista r <= ql {
+        Jasepe kas 0.
+    }
+    Palusta ql <= l kasta r <= qr {
+        Kisite kas apply_flip vis zeros kasta ones kasta inv kasta lazy kasta node.
+        Jasepe kas 0.
+    }
+    Kisite kas push_flip vis zeros kasta ones kasta inv kasta lazy kasta node kasta l kasta r.
+    Kemese kas mid tas (l + r) // 2.
+    Kisite kas range_flip vis zeros kasta ones kasta inv kasta lazy kasta node * 2 kasta l kasta mid kasta ql kasta qr.
+    Kisite kas range_flip vis zeros kasta ones kasta inv kasta lazy kasta node * 2 + 1 kasta mid kasta r kasta ql kasta qr.
+    Kemese kas zeros[node] tas zeros[node * 2] + zeros[node * 2 + 1].
+    Kemese kas ones[node] tas ones[node * 2] + ones[node * 2 + 1].
+    Kemese kas inv[node] tas inv[node * 2] + inv[node * 2 + 1] + ones[node * 2] * zeros[node * 2 + 1].
+    Jasepe kas 0.
+}
+
+Kalivisku musope kas merge_info vis left kasta right {
+    Jasepe kas [left[0] + right[0], left[1] + right[1], left[2] + right[2] + left[1] * right[0]].
+}
+
+Kalivisku musope kas range_query vis zeros kasta ones kasta inv kasta lazy kasta node kasta l kasta r kasta ql kasta qr {
+    Sonome kas mid tas 0.
+    Sonome kas left tas [0, 0, 0].
+    Sonome kas right tas [0, 0, 0].
+    Palusta qr <= l vista r <= ql {
+        Jasepe kas [0, 0, 0].
+    }
+    Palusta ql <= l kasta r <= qr {
+        Jasepe kas [zeros[node], ones[node], inv[node]].
+    }
+    Kisite kas push_flip vis zeros kasta ones kasta inv kasta lazy kasta node kasta l kasta r.
+    Kemese kas mid tas (l + r) // 2.
+    Kemese kas left tas Kisite kas range_query vis zeros kasta ones kasta inv kasta lazy kasta node * 2 kasta l kasta mid kasta ql kasta qr.
+    Kemese kas right tas Kisite kas range_query vis zeros kasta ones kasta inv kasta lazy kasta node * 2 + 1 kasta mid kasta r kasta ql kasta qr.
+    Jasepe kas Kisite kas merge_info vis left kasta right.
+}
+
+Sonome kas N kasta Q tas Kisite kas readints vis 2.
+Sonome kas A tas Kisite kas readints vis N.
+Sonome kas size tas 1.
+Pilike palusta size < N {
+    size *= 2.
+}
+Sonome kas zeros tas Kisite kas fill vis 0 kasta 2 * size.
+Sonome kas ones tas Kisite kas fill vis 0 kasta 2 * size.
+Sonome kas inv tas Kisite kas fill vis 0 kasta 2 * size.
+Sonome kas lazy tas Kisite kas fill vis 0 kasta 2 * size.
+Sonome kas i tas 0.
+Sonome kas query tas [0, 0, 0].
+Sonome kas info tas [0, 0, 0].
+
+Kemese kas i tas 0.
+Pilike palusta i < N {
+    Palusta A[i] kate 0 {
+        Kemese kas zeros[size + i] tas 1.
+    } Japalusta {
+        Kemese kas ones[size + i] tas 1.
+    }
+    i += 1.
+}
+Kemese kas i tas size - 1.
+Pilike palusta i > 0 {
+    Kemese kas zeros[i] tas zeros[2 * i] + zeros[2 * i + 1].
+    Kemese kas ones[i] tas ones[2 * i] + ones[2 * i + 1].
+    Kemese kas inv[i] tas inv[2 * i] + inv[2 * i + 1] + ones[2 * i] * zeros[2 * i + 1].
+    i -= 1.
+}
+
+Pilike kas qi pas Kisite kas pilika vis Q {
+    Kemese kas query tas Kisite kas readints vis 3.
+    Palusta query[0] kate 1 {
+        Kisite kas range_flip vis zeros kasta ones kasta inv kasta lazy kasta 1 kasta 0 kasta size kasta query[1] - 1 kasta query[2].
+    } Japalusta {
+        Kemese kas info tas Kisite kas range_query vis zeros kasta ones kasta inv kasta lazy kasta 1 kasta 0 kasta size kasta query[1] - 1 kasta query[2].
+        Takute kas info[2].
+    }
+}
