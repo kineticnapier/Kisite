@@ -1,0 +1,8 @@
+# AtCoder Library Practice Contest F - Convolution
+# https://atcoder.jp/contests/practice2/tasks/practice2_f
+
+Sonome kas N kasta M tas Kisite kas readints vis 2.
+Sonome kas a tas Kisite kas readints vis N.
+Sonome kas b tas Kisite kas readints vis M.
+Sonome kas c tas Kisite kas convolution vis a kasta b kasta 998244353.
+Takute kas c vis " ".
