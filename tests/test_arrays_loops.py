@@ -64,8 +64,8 @@ class ArraysAndLoopsTests(unittest.TestCase):
         source = "Sonome kas i tas 99. Pilike kas i pas [1, 2] { Takute kas i. } Takute kas i."
         self.assertEqual(kisite.run(source), ["1", "2", "2"])
 
-    def test_foreach_requires_array_or_string(self):
-        with self.assertRaisesRegex(kisite.KisiteError, "requires an array or string"):
+    def test_foreach_requires_collection_or_range(self):
+        with self.assertRaisesRegex(kisite.KisiteError, "requires a collection or pilika range"):
             kisite.run("Pilike kas i pas 3 { Takute kas i. }")
 
     def test_pilike_requires_mode(self):
