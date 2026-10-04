@@ -1,0 +1,39 @@
+# AtCoder Library Practice Contest C - Floor Sum
+# https://atcoder.jp/contests/practice2/tasks/practice2_c
+
+Kalivisku musope kas floor_sum vis n kasta m kasta a kasta b {
+    Sonome kas answer tas 0.
+    Sonome kas y_max tas 0.
+
+    Pilike palusta Tuni {
+        Palusta a >= m {
+            answer += (n - 1) * n * (a // m) // 2.
+            a %= m.
+        }
+        Palusta b >= m {
+            answer += n * (b // m).
+            b %= m.
+        }
+
+        Kemese kas y_max tas a * n + b.
+        Palusta y_max < m {
+            Kinise.
+        }
+
+        Kemese kas n tas y_max // m.
+        Kemese kas b tas y_max % m.
+        Sonome kas old_m tas m.
+        Kemese kas m tas a.
+        Kemese kas a tas old_m.
+    }
+
+    Jasepe kas answer.
+}
+
+Sonome kas T tas Kisite kas readint.
+Sonome kas query tas [0, 0, 0, 0].
+
+Pilike kas i pas Kisite kas pilika vis T {
+    Kemese kas query tas Kisite kas readints vis 4.
+    Takute kas Kisite kas floor_sum vis query[0] kasta query[1] kasta query[2] kasta query[3].
+}
