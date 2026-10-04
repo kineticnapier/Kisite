@@ -1,0 +1,102 @@
+# Language Test 202505 - ABC385D: Santa Claus 2
+Kalivisku musope kas find_next vis parent kasta x {
+    Sonome kas root tas x.
+    Sonome kas next_x tas 0.
+    Pilike palusta parent[root] != root {
+        Kemese kas root tas parent[root].
+    }
+    Pilike palusta parent[x] != x {
+        Kemese kas next_x tas parent[x].
+        Kemese kas parent[x] tas root.
+        Kemese kas x tas next_x.
+    }
+    Jasepe kas root.
+}
+
+Kalivisku musope kas remove_house vis visited kasta parent_v kasta parent_h kasta pos_v kasta pos_h kasta id {
+    Palusta visited[id] {
+        Jasepe kas 0.
+    }
+    Kemese kas visited[id] tas Tuni.
+    Sonome kas p tas pos_v[id].
+    Kemese kas parent_v[p] tas Kisite kas find_next vis parent_v kasta p + 1.
+    Kemese kas p tas pos_h[id].
+    Kemese kas parent_h[p] tas Kisite kas find_next vis parent_h kasta p + 1.
+    Jasepe kas 1.
+}
+
+Sonome kas N kasta M kasta current_x kasta current_y tas Kisite kas readints vis 4.
+Sonome kas vertical tas [].
+Sonome kas horizontal tas [].
+Sonome kas point tas [0, 0].
+Sonome kas hx tas 0.
+Sonome kas hy tas 0.
+Pilike kas id pas Kisite kas pilika vis N {
+    Kemese kas point tas Kisite kas readints vis 2.
+    Kemese kas hx tas point[0].
+    Kemese kas hy tas point[1].
+    Putike kas [hx, hy, id] tas vertical.
+    Putike kas [hy, hx, id] tas horizontal.
+}
+Kemese kas vertical tas Kisite kas paline vis vertical.
+Kemese kas horizontal tas Kisite kas paline vis horizontal.
+Sonome kas pos_v tas Kisite kas fill vis 0 kasta N.
+Sonome kas pos_h tas Kisite kas fill vis 0 kasta N.
+Pilike kas i pas Kisite kas pilika vis N {
+    Kemese kas pos_v[vertical[i][2]] tas i.
+    Kemese kas pos_h[horizontal[i][2]] tas i.
+}
+Sonome kas parent_v tas [i Pilike kas i pas (Kisite kas pilika vis N + 1)].
+Sonome kas parent_h tas [i Pilike kas i pas (Kisite kas pilika vis N + 1)].
+Sonome kas visited tas Kisite kas fill vis Jatuni kasta N.
+Sonome kas answer tas 0.
+Sonome kas direction tas "".
+Sonome kas distance tas 0.
+Sonome kas next_x tas 0.
+Sonome kas next_y tas 0.
+Sonome kas low tas 0.
+Sonome kas high tas 0.
+Sonome kas start tas 0.
+Sonome kas p tas 0.
+Sonome kas id tas 0.
+
+Pilike kas qi pas Kisite kas pilika vis M {
+    Polike kas direction vos stdin.
+    Kemese kas distance tas Kisite kas readint.
+    Kemese kas next_x tas current_x.
+    Kemese kas next_y tas current_y.
+    Palusta direction kate "U" {
+        Kemese kas next_y tas current_y + distance.
+    } Japalusta palusta direction kate "D" {
+        Kemese kas next_y tas current_y - distance.
+    } Japalusta palusta direction kate "L" {
+        Kemese kas next_x tas current_x - distance.
+    } Japalusta {
+        Kemese kas next_x tas current_x + distance.
+    }
+
+    Palusta current_x kate next_x {
+        Kemese kas low tas Kisite kas japonavi vis current_y kasta next_y.
+        Kemese kas high tas Kisite kas ponavi vis current_y kasta next_y.
+        Kemese kas start tas Kisite kas bisectleft vis vertical kasta [current_x, low, -1].
+        Kemese kas p tas Kisite kas find_next vis parent_v kasta start.
+        Pilike palusta p < N kasta vertical[p][0] kate current_x kasta vertical[p][1] <= high {
+            Kemese kas id tas vertical[p][2].
+            answer += Kisite kas remove_house vis visited kasta parent_v kasta parent_h kasta pos_v kasta pos_h kasta id.
+            Kemese kas p tas Kisite kas find_next vis parent_v kasta p.
+        }
+    } Japalusta {
+        Kemese kas low tas Kisite kas japonavi vis current_x kasta next_x.
+        Kemese kas high tas Kisite kas ponavi vis current_x kasta next_x.
+        Kemese kas start tas Kisite kas bisectleft vis horizontal kasta [current_y, low, -1].
+        Kemese kas p tas Kisite kas find_next vis parent_h kasta start.
+        Pilike palusta p < N kasta horizontal[p][0] kate current_y kasta horizontal[p][1] <= high {
+            Kemese kas id tas horizontal[p][2].
+            answer += Kisite kas remove_house vis visited kasta parent_v kasta parent_h kasta pos_v kasta pos_h kasta id.
+            Kemese kas p tas Kisite kas find_next vis parent_h kasta p.
+        }
+    }
+    Kemese kas current_x tas next_x.
+    Kemese kas current_y tas next_y.
+}
+Takute kas [current_x, current_y, answer] vis " ".

@@ -1,0 +1,132 @@
+# Language Test 202505 - ABC421E: Yacht
+# A state is a base-6 encoding of the kept counts for the six face positions.
+Kalivisku musope kas best_sub vis values kasta kept_state kasta roll_state kasta powers kasta position kasta add_state {
+    Palusta position kate 6 {
+        Jasepe kas values[kept_state + add_state].
+    }
+    Sonome kas count tas (roll_state // powers[position]) % 6.
+    Sonome kas k tas 0.
+    Sonome kas best tas -1.0.
+    Sonome kas candidate tas 0.0.
+    Pilike palusta k <= count {
+        Kemese kas candidate tas Kisite kas best_sub vis values kasta kept_state kasta roll_state kasta powers kasta position + 1 kasta add_state + k * powers[position].
+        Palusta candidate > best {
+            Kemese kas best tas candidate.
+        }
+        k += 1.
+    }
+    Jasepe kas best.
+}
+
+Sonome kas faces tas Kisite kas readints vis 6.
+Sonome kas powers tas [1, 6, 36, 216, 1296, 7776].
+Sonome kas dice_powers tas [1, 6, 36, 216, 1296, 7776].
+Sonome kas factorial tas [1, 1, 2, 6, 24, 120].
+Sonome kas states tas 46656.
+Sonome kas count_sum tas Kisite kas fill vis -1 kasta states.
+Sonome kas weight tas Kisite kas fill vis 0 kasta states.
+Sonome kas state tas 0.
+Sonome kas temp tas 0.
+Sonome kas digit tas 0.
+Sonome kas total_count tas 0.
+Sonome kas denominator tas 1.
+Sonome kas position tas 0.
+
+Pilike palusta state < states {
+    Kemese kas temp tas state.
+    Kemese kas total_count tas 0.
+    Kemese kas denominator tas 1.
+    Kemese kas position tas 0.
+    Pilike palusta position < 6 {
+        Kemese kas digit tas temp % 6.
+        Kemese kas total_count tas total_count + digit.
+        Kemese kas denominator tas denominator * factorial[digit].
+        Kemese kas temp tas temp // 6.
+        position += 1.
+    }
+    Palusta total_count <= 5 {
+        Kemese kas count_sum[state] tas total_count.
+        Kemese kas weight[state] tas factorial[total_count] // denominator.
+    }
+    state += 1.
+}
+
+Sonome kas value1 tas Kisite kas fill vis 0.0 kasta states.
+Sonome kas layer tas 5.
+Sonome kas face tas 0.
+Sonome kas same_count tas 0.
+Sonome kas candidate_score tas 0.
+Sonome kas best_score tas 0.
+Sonome kas expected tas 0.0.
+Sonome kas other_face tas 0.
+Pilike palusta layer >= 0 {
+    Kemese kas state tas 0.
+    Pilike palusta state < states {
+        Palusta count_sum[state] kate layer {
+            Palusta layer kate 5 {
+                Kemese kas best_score tas 0.
+                Kemese kas face tas 0.
+                Pilike palusta face < 6 {
+                    Kemese kas same_count tas 0.
+                    Kemese kas other_face tas 0.
+                    Pilike palusta other_face < 6 {
+                        Palusta faces[other_face] kate faces[face] {
+                            Kemese kas same_count tas same_count + ((state // powers[other_face]) % 6).
+                        }
+                        other_face += 1.
+                    }
+                    Kemese kas candidate_score tas faces[face] * same_count.
+                    Palusta candidate_score > best_score {
+                        Kemese kas best_score tas candidate_score.
+                    }
+                    face += 1.
+                }
+                Kemese kas value1[state] tas best_score.
+            } Japalusta {
+                Kemese kas expected tas 0.0.
+                Kemese kas face tas 0.
+                Pilike palusta face < 6 {
+                    Kemese kas expected tas expected + value1[state + powers[face]].
+                    face += 1.
+                }
+                Kemese kas value1[state] tas expected / 6.
+            }
+        }
+        state += 1.
+    }
+    layer -= 1.
+}
+
+Sonome kas value2 tas Kisite kas fill vis 0.0 kasta states.
+Sonome kas kept tas 0.
+Sonome kas roll tas 0.
+Sonome kas rolls tas 0.
+Sonome kas weighted_total tas 0.0.
+Sonome kas best tas 0.0.
+Pilike palusta kept < states {
+    Palusta count_sum[kept] >= 0 {
+        Kemese kas rolls tas 5 - count_sum[kept].
+        Kemese kas weighted_total tas 0.0.
+        Kemese kas roll tas 0.
+        Pilike palusta roll < states {
+            Palusta count_sum[roll] kate rolls {
+                Kemese kas best tas Kisite kas best_sub vis value1 kasta kept kasta roll kasta powers kasta 0 kasta 0.
+                Kemese kas weighted_total tas weighted_total + weight[roll] * best.
+            }
+            roll += 1.
+        }
+        Kemese kas value2[kept] tas weighted_total / dice_powers[rolls].
+    }
+    kept += 1.
+}
+
+Kemese kas weighted_total tas 0.0.
+Kemese kas roll tas 0.
+Pilike palusta roll < states {
+    Palusta count_sum[roll] kate 5 {
+        Kemese kas best tas Kisite kas best_sub vis value2 kasta 0 kasta roll kasta powers kasta 0 kasta 0.
+        Kemese kas weighted_total tas weighted_total + weight[roll] * best.
+    }
+    roll += 1.
+}
+Takute kas weighted_total / dice_powers[5].

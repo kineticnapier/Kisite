@@ -1,0 +1,94 @@
+# Language Test 202505 - ABC370D: Cross Explosion
+Kalivisku musope kas find_next vis parent kasta x {
+    Sonome kas root tas x.
+    Sonome kas next_x tas 0.
+    Pilike palusta parent[root] != root {
+        Kemese kas root tas parent[root].
+    }
+    Pilike palusta parent[x] != x {
+        Kemese kas next_x tas parent[x].
+        Kemese kas parent[x] tas root.
+        Kemese kas x tas next_x.
+    }
+    Jasepe kas root.
+}
+
+Kalivisku musope kas remove_wall vis alive kasta right_parent kasta left_parent kasta down_parent kasta up_parent kasta H kasta W kasta r kasta c {
+    Sonome kas cell tas r * W + c.
+    Palusta kix alive[cell] {
+        Jasepe kas 0.
+    }
+    Kemese kas alive[cell] tas Jatuni.
+
+    Sonome kas row_base tas r * (W + 1).
+    Sonome kas right_index tas row_base + c.
+    Kemese kas right_parent[right_index] tas Kisite kas find_next vis right_parent kasta right_index + 1.
+
+    Sonome kas reversed_c tas W - 1 - c.
+    Sonome kas left_index tas row_base + reversed_c.
+    Kemese kas left_parent[left_index] tas Kisite kas find_next vis left_parent kasta left_index + 1.
+
+    Sonome kas column_base tas c * (H + 1).
+    Sonome kas down_index tas column_base + r.
+    Kemese kas down_parent[down_index] tas Kisite kas find_next vis down_parent kasta down_index + 1.
+
+    Sonome kas reversed_r tas H - 1 - r.
+    Sonome kas up_index tas column_base + reversed_r.
+    Kemese kas up_parent[up_index] tas Kisite kas find_next vis up_parent kasta up_index + 1.
+    Jasepe kas 1.
+}
+
+Sonome kas H kasta W kasta Q tas Kisite kas readints vis 3.
+Sonome kas cells tas H * W.
+Sonome kas alive tas Kisite kas fill vis Tuni kasta cells.
+Sonome kas right_size tas H * (W + 1).
+Sonome kas vertical_size tas W * (H + 1).
+Sonome kas right_parent tas [i Pilike kas i pas (Kisite kas pilika vis right_size)].
+Sonome kas left_parent tas [i Pilike kas i pas (Kisite kas pilika vis right_size)].
+Sonome kas down_parent tas [i Pilike kas i pas (Kisite kas pilika vis vertical_size)].
+Sonome kas up_parent tas [i Pilike kas i pas (Kisite kas pilika vis vertical_size)].
+Sonome kas removed tas 0.
+Sonome kas query tas [0, 0].
+Sonome kas r tas 0.
+Sonome kas c tas 0.
+Sonome kas cell tas 0.
+Sonome kas base tas 0.
+Sonome kas pos tas 0.
+Sonome kas candidate tas 0.
+
+Pilike kas qi pas Kisite kas pilika vis Q {
+    Kemese kas query tas Kisite kas readints vis 2.
+    Kemese kas r tas query[0] - 1.
+    Kemese kas c tas query[1] - 1.
+    Kemese kas cell tas r * W + c.
+    Palusta alive[cell] {
+        removed += Kisite kas remove_wall vis alive kasta right_parent kasta left_parent kasta down_parent kasta up_parent kasta H kasta W kasta r kasta c.
+    } Japalusta {
+        Kemese kas base tas r * (W + 1).
+        Kemese kas pos tas Kisite kas find_next vis right_parent kasta base + c + 1.
+        Palusta pos < base + W {
+            Kemese kas candidate tas pos - base.
+            removed += Kisite kas remove_wall vis alive kasta right_parent kasta left_parent kasta down_parent kasta up_parent kasta H kasta W kasta r kasta candidate.
+        }
+
+        Kemese kas pos tas Kisite kas find_next vis left_parent kasta base + (W - c).
+        Palusta pos < base + W {
+            Kemese kas candidate tas W - 1 - (pos - base).
+            removed += Kisite kas remove_wall vis alive kasta right_parent kasta left_parent kasta down_parent kasta up_parent kasta H kasta W kasta r kasta candidate.
+        }
+
+        Kemese kas base tas c * (H + 1).
+        Kemese kas pos tas Kisite kas find_next vis down_parent kasta base + r + 1.
+        Palusta pos < base + H {
+            Kemese kas candidate tas pos - base.
+            removed += Kisite kas remove_wall vis alive kasta right_parent kasta left_parent kasta down_parent kasta up_parent kasta H kasta W kasta candidate kasta c.
+        }
+
+        Kemese kas pos tas Kisite kas find_next vis up_parent kasta base + (H - r).
+        Palusta pos < base + H {
+            Kemese kas candidate tas H - 1 - (pos - base).
+            removed += Kisite kas remove_wall vis alive kasta right_parent kasta left_parent kasta down_parent kasta up_parent kasta H kasta W kasta candidate kasta c.
+        }
+    }
+}
+Takute kas cells - removed.

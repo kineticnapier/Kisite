@@ -45,6 +45,9 @@ class LanguageTest202505Tests(unittest.TestCase):
     def test_abc085_c(self):
         self.assert_both("abc085_c", "9 45000\n", ["4 0 5"])
 
+    def test_abc049_c(self):
+        self.assert_both("abc049_c", "erasedream\n", ["YES"])
+
     def test_abc086_c(self):
         self.assert_both("abc086_c", "2\n3 1 2\n6 1 1\n", ["Yes"])
 
@@ -63,6 +66,10 @@ class LanguageTest202505Tests(unittest.TestCase):
     def test_dp_g(self):
         self.assert_both("dp_g", "4 5\n1 2\n1 3\n3 2\n2 4\n3 4\n", ["3"])
 
+    def test_dp_j(self):
+        output = self.run_both("dp_j", "3\n1 1 1\n")
+        self.assertAlmostEqual(float(output[0]), 5.5, places=9)
+
     def test_dp_l(self):
         self.assert_both("dp_l", "4\n10 80 90 30\n", ["10"])
 
@@ -74,6 +81,40 @@ class LanguageTest202505Tests(unittest.TestCase):
 
     def test_memorytest_b_sample(self):
         self.assert_both("memorytest_b", "5 2 1 3\n3\n2\n0\n4\n", ["4", "29", "13"])
+
+    def test_abc370_d(self):
+        self.assert_both("abc370_d", "2 4 3\n1 2\n1 2\n1 3\n", ["2"])
+
+    def test_abc385_d(self):
+        input_data = """\
+3 3 0 0
+0 2
+2 2
+2 0
+U 2
+R 2
+D 2
+"""
+        self.assert_both("abc385_d", input_data, ["2 0 3"])
+
+    def test_abc411_f(self):
+        input_data = """\
+7 7
+1 2
+1 3
+2 3
+1 4
+1 5
+2 5
+6 7
+5
+1 2 3 1 5
+"""
+        self.assert_both("abc411_f", input_data, ["4", "3", "3", "3", "2"])
+
+    def test_abc421_e(self):
+        output = self.run_both("abc421_e", "1 2 3 4 5 6\n")
+        self.assertAlmostEqual(float(output[0]), 14.6588633742, places=8)
 
 
 if __name__ == "__main__":

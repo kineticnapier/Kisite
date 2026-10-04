@@ -1,0 +1,24 @@
+# Language Test 202505 - ABC049C: Daydream
+Polike kas s vos stdin.
+Sonome kas n tas Kisite kas kipala vis s.
+Sonome kas dp tas Kisite kas fill vis Jatuni kasta n + 1.
+Kemese kas dp[0] tas Tuni.
+Sonome kas words tas ["dream", "dreamer", "erase", "eraser"].
+Sonome kas i tas 0.
+Sonome kas word_len tas 0.
+Pilike palusta i < n {
+    Palusta dp[i] {
+        Pilike kas word pas words {
+            Kemese kas word_len tas Kisite kas kipala vis word.
+            Palusta i + word_len <= n kasta s[i:i + word_len] kate word {
+                Kemese kas dp[i + word_len] tas Tuni.
+            }
+        }
+    }
+    i += 1.
+}
+Palusta dp[n] {
+    Takute kas "YES".
+} Japalusta {
+    Takute kas "NO".
+}

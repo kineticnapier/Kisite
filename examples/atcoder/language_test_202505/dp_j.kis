@@ -1,0 +1,56 @@
+# Language Test 202505 - DP_J: Sushi
+Sonome kas N tas Kisite kas readint.
+Sonome kas sushi tas Kisite kas readints vis N.
+Sonome kas count1 tas 0.
+Sonome kas count2 tas 0.
+Sonome kas count3 tas 0.
+Pilike kas x pas sushi {
+    Palusta x kate 1 {
+        count1 += 1.
+    } Japalusta palusta x kate 2 {
+        count2 += 1.
+    } Japalusta {
+        count3 += 1.
+    }
+}
+Sonome kas side tas N + 1.
+Sonome kas total_states tas side * side * side.
+Sonome kas dp tas Kisite kas fill vis 0.0 kasta total_states.
+Sonome kas c tas 0.
+Sonome kas b tas 0.
+Sonome kas a tas 0.
+Sonome kas index tas 0.
+Sonome kas nonempty tas 0.
+Sonome kas value tas 0.0.
+Sonome kas dep tas 0.
+Pilike palusta c <= N {
+    Kemese kas b tas 0.
+    Pilike palusta b + c <= N {
+        Kemese kas a tas 0.
+        Pilike palusta a + b + c <= N {
+            Kemese kas nonempty tas a + b + c.
+            Palusta nonempty > 0 {
+                Kemese kas value tas N.
+                Palusta a > 0 {
+                    Kemese kas dep tas ((a - 1) * side + b) * side + c.
+                    Kemese kas value tas value + a * dp[dep].
+                }
+                Palusta b > 0 {
+                    Kemese kas dep tas ((a + 1) * side + (b - 1)) * side + c.
+                    Kemese kas value tas value + b * dp[dep].
+                }
+                Palusta c > 0 {
+                    Kemese kas dep tas (a * side + (b + 1)) * side + (c - 1).
+                    Kemese kas value tas value + c * dp[dep].
+                }
+                Kemese kas index tas (a * side + b) * side + c.
+                Kemese kas dp[index] tas value / nonempty.
+            }
+            a += 1.
+        }
+        b += 1.
+    }
+    c += 1.
+}
+Kemese kas index tas (count1 * side + count2) * side + count3.
+Takute kas dp[index].

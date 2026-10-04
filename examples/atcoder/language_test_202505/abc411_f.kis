@@ -1,0 +1,77 @@
+# Language Test 202505 - ABC411F: Contraction
+Kalivisku musope kas root vis parent kasta x {
+    Sonome kas r tas x.
+    Sonome kas next_x tas 0.
+    Pilike palusta parent[r] != r {
+        Kemese kas r tas parent[r].
+    }
+    Pilike palusta parent[x] != x {
+        Kemese kas next_x tas parent[x].
+        Kemese kas parent[x] tas r.
+        Kemese kas x tas next_x.
+    }
+    Jasepe kas r.
+}
+
+Kalivisku musope kas contract vis parent kasta adj kasta a kasta b {
+    Sonome kas ra tas Kisite kas root vis parent kasta a.
+    Sonome kas rb tas Kisite kas root vis parent kasta b.
+    Palusta ra kate rb {
+        Jasepe kas 0.
+    }
+    Palusta kix (rb pas adj[ra]) {
+        Jasepe kas 0.
+    }
+
+    Sonome kas small tas ra.
+    Sonome kas large tas rb.
+    Sonome kas tmp tas 0.
+    Palusta (Kisite kas kipala vis adj[small]) > (Kisite kas kipala vis adj[large]) {
+        Kemese kas tmp tas small.
+        Kemese kas small tas large.
+        Kemese kas large tas tmp.
+    }
+
+    Sonome kas removed tas 1.
+    Kinise kas adj[small][large].
+    Kinise kas adj[large][small].
+    Pilike kas x pas adj[small] {
+        Kinise kas adj[x][small].
+        Palusta x pas adj[large] {
+            removed += 1.
+        } Japalusta {
+            Putike kas x tas adj[large].
+            Putike kas large tas adj[x].
+        }
+    }
+    Kemese kas parent[small] tas large.
+    Kemese kas adj[small] tas {}.
+    Jasepe kas removed.
+}
+
+Sonome kas N kasta M tas Kisite kas readints vis 2.
+Sonome kas parent tas [i Pilike kas i pas (Kisite kas pilika vis N)].
+Sonome kas adj tas Kisite kas fill vis {} kasta N.
+Sonome kas U tas Kisite kas fill vis 0 kasta M.
+Sonome kas V tas Kisite kas fill vis 0 kasta M.
+Sonome kas edge tas [0, 0].
+Sonome kas u tas 0.
+Sonome kas v tas 0.
+Pilike kas i pas Kisite kas pilika vis M {
+    Kemese kas edge tas Kisite kas readints vis 2.
+    Kemese kas u tas edge[0] - 1.
+    Kemese kas v tas edge[1] - 1.
+    Kemese kas U[i] tas u.
+    Kemese kas V[i] tas v.
+    Putike kas v tas adj[u].
+    Putike kas u tas adj[v].
+}
+Sonome kas Q tas Kisite kas readint.
+Sonome kas queries tas Kisite kas readints vis Q.
+Sonome kas edges tas M.
+Sonome kas index tas 0.
+Pilike kas q pas queries {
+    Kemese kas index tas q - 1.
+    edges -= Kisite kas contract vis parent kasta adj kasta U[index] kasta V[index].
+    Takute kas edges.
+}
