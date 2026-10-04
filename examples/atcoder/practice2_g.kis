@@ -1,0 +1,84 @@
+# AtCoder Library Practice Contest G - SCC
+# https://atcoder.jp/contests/practice2/tasks/practice2_g
+
+Sonome kas N kasta M tas Kisite kas readints vis 2.
+Sonome kas graph tas Kisite kas fill vis [] kasta N.
+Sonome kas rev tas Kisite kas fill vis [] kasta N.
+Sonome kas edge tas [0, 0].
+Sonome kas visited tas Kisite kas fill vis Jatuni kasta N.
+Sonome kas order tas [].
+Sonome kas stack tas [].
+Sonome kas start tas 0.
+Sonome kas top tas 0.
+Sonome kas v tas 0.
+Sonome kas ei tas 0.
+Sonome kas to tas 0.
+
+Pilike kas i pas Kisite kas pilika vis M {
+    Kemese kas edge tas Kisite kas readints vis 2.
+    Putike kas edge[1] tas graph[edge[0]].
+    Putike kas edge[0] tas rev[edge[1]].
+}
+
+Kemese kas start tas 0.
+Pilike palusta start < N {
+    Palusta kix visited[start] {
+        Kemese kas stack tas [[start, 0]].
+        Kemese kas visited[start] tas Tuni.
+        Pilike palusta (Kisite kas kipala vis stack) > 0 {
+            Kemese kas top tas (Kisite kas kipala vis stack) - 1.
+            Kemese kas v tas stack[top][0].
+            Kemese kas ei tas stack[top][1].
+            Palusta ei < (Kisite kas kipala vis graph[v]) {
+                Kemese kas to tas graph[v][ei].
+                stack[top][1] += 1.
+                Palusta kix visited[to] {
+                    Kemese kas visited[to] tas Tuni.
+                    Putike kas [to, 0] tas stack.
+                }
+            } Japalusta {
+                Putike kas v tas order.
+                Kinise kas stack[-1].
+            }
+        }
+    }
+    start += 1.
+}
+
+Sonome kas comp tas Kisite kas fill vis -1 kasta N.
+Sonome kas groups tas [].
+Sonome kas group tas [].
+Sonome kas cid tas 0.
+Sonome kas oi tas N - 1.
+
+Pilike palusta oi >= 0 {
+    Kemese kas v tas order[oi].
+    Palusta comp[v] kate -1 {
+        Kemese kas cid tas Kisite kas kipala vis groups.
+        Kemese kas group tas [].
+        Kemese kas stack tas [v].
+        Kemese kas comp[v] tas cid.
+        Pilike palusta (Kisite kas kipala vis stack) > 0 {
+            Kemese kas top tas (Kisite kas kipala vis stack) - 1.
+            Kemese kas v tas stack[top].
+            Kinise kas stack[top].
+            Putike kas v tas group.
+            Kemese kas ei tas 0.
+            Pilike palusta ei < (Kisite kas kipala vis rev[v]) {
+                Kemese kas to tas rev[v][ei].
+                Palusta comp[to] kate -1 {
+                    Kemese kas comp[to] tas cid.
+                    Putike kas to tas stack.
+                }
+                ei += 1.
+            }
+        }
+        Putike kas group tas groups.
+    }
+    oi -= 1.
+}
+
+Takute kas Kisite kas kipala vis groups.
+Pilike kas g pas groups {
+    Takute kas [(Kisite kas kipala vis g)] + g vis " ".
+}
