@@ -1,0 +1,90 @@
+# AtCoder Library Practice Contest K - Range Affine Range Sum
+# https://atcoder.jp/contests/practice2/tasks/practice2_k
+
+Kalivisku musope kas apply_affine vis seg kasta lazy_b kasta lazy_c kasta node kasta l kasta r kasta b kasta c kasta MOD {
+    Kemese kas seg[node] tas (b * seg[node] + c * (r - l)) % MOD.
+    Kemese kas lazy_b[node] tas (b * lazy_b[node]) % MOD.
+    Kemese kas lazy_c[node] tas (b * lazy_c[node] + c) % MOD.
+}
+
+Kalivisku musope kas push_affine vis seg kasta lazy_b kasta lazy_c kasta node kasta l kasta r kasta MOD {
+    Sonome kas mid tas 0.
+    Palusta r - l > 1 kasta (lazy_b[node] != 1 vista lazy_c[node] != 0) {
+        Kemese kas mid tas (l + r) // 2.
+        Kisite kas apply_affine vis seg kasta lazy_b kasta lazy_c kasta node * 2 kasta l kasta mid kasta lazy_b[node] kasta lazy_c[node] kasta MOD.
+        Kisite kas apply_affine vis seg kasta lazy_b kasta lazy_c kasta node * 2 + 1 kasta mid kasta r kasta lazy_b[node] kasta lazy_c[node] kasta MOD.
+    }
+    Kemese kas lazy_b[node] tas 1.
+    Kemese kas lazy_c[node] tas 0.
+}
+
+Kalivisku musope kas range_apply vis seg kasta lazy_b kasta lazy_c kasta node kasta l kasta r kasta ql kasta qr kasta b kasta c kasta MOD {
+    Sonome kas mid tas 0.
+    Palusta qr <= l vista r <= ql {
+        Jasepe kas 0.
+    }
+    Palusta ql <= l kasta r <= qr {
+        Kisite kas apply_affine vis seg kasta lazy_b kasta lazy_c kasta node kasta l kasta r kasta b kasta c kasta MOD.
+        Jasepe kas 0.
+    }
+    Kisite kas push_affine vis seg kasta lazy_b kasta lazy_c kasta node kasta l kasta r kasta MOD.
+    Kemese kas mid tas (l + r) // 2.
+    Kisite kas range_apply vis seg kasta lazy_b kasta lazy_c kasta node * 2 kasta l kasta mid kasta ql kasta qr kasta b kasta c kasta MOD.
+    Kisite kas range_apply vis seg kasta lazy_b kasta lazy_c kasta node * 2 + 1 kasta mid kasta r kasta ql kasta qr kasta b kasta c kasta MOD.
+    Kemese kas seg[node] tas (seg[node * 2] + seg[node * 2 + 1]) % MOD.
+    Jasepe kas 0.
+}
+
+Kalivisku musope kas range_sum vis seg kasta lazy_b kasta lazy_c kasta node kasta l kasta r kasta ql kasta qr kasta MOD {
+    Sonome kas mid tas 0.
+    Sonome kas left tas 0.
+    Sonome kas right tas 0.
+    Palusta qr <= l vista r <= ql {
+        Jasepe kas 0.
+    }
+    Palusta ql <= l kasta r <= qr {
+        Jasepe kas seg[node].
+    }
+    Kisite kas push_affine vis seg kasta lazy_b kasta lazy_c kasta node kasta l kasta r kasta MOD.
+    Kemese kas mid tas (l + r) // 2.
+    Kemese kas left tas Kisite kas range_sum vis seg kasta lazy_b kasta lazy_c kasta node * 2 kasta l kasta mid kasta ql kasta qr kasta MOD.
+    Kemese kas right tas Kisite kas range_sum vis seg kasta lazy_b kasta lazy_c kasta node * 2 + 1 kasta mid kasta r kasta ql kasta qr kasta MOD.
+    Jasepe kas (left + right) % MOD.
+}
+
+Sonome kas MOD tas 998244353.
+Sonome kas N kasta Q tas Kisite kas readints vis 2.
+Sonome kas A tas Kisite kas readints vis N.
+Sonome kas size tas 1.
+Pilike palusta size < N {
+    size *= 2.
+}
+Sonome kas seg tas Kisite kas fill vis 0 kasta 2 * size.
+Sonome kas lazy_b tas Kisite kas fill vis 1 kasta 2 * size.
+Sonome kas lazy_c tas Kisite kas fill vis 0 kasta 2 * size.
+Sonome kas i tas 0.
+Sonome kas t tas 0.
+Sonome kas q4 tas [0, 0, 0, 0].
+Sonome kas q2 tas [0, 0].
+
+Kemese kas i tas 0.
+Pilike palusta i < N {
+    Kemese kas seg[size + i] tas A[i].
+    i += 1.
+}
+Kemese kas i tas size - 1.
+Pilike palusta i > 0 {
+    Kemese kas seg[i] tas (seg[2 * i] + seg[2 * i + 1]) % MOD.
+    i -= 1.
+}
+
+Pilike kas qi pas Kisite kas pilika vis Q {
+    Kemese kas t tas Kisite kas readint.
+    Palusta t kate 0 {
+        Kemese kas q4 tas Kisite kas readints vis 4.
+        Kisite kas range_apply vis seg kasta lazy_b kasta lazy_c kasta 1 kasta 0 kasta size kasta q4[0] kasta q4[1] kasta q4[2] kasta q4[3] kasta MOD.
+    } Japalusta {
+        Kemese kas q2 tas Kisite kas readints vis 2.
+        Takute kas Kisite kas range_sum vis seg kasta lazy_b kasta lazy_c kasta 1 kasta 0 kasta size kasta q2[0] kasta q2[1] kasta MOD.
+    }
+}
