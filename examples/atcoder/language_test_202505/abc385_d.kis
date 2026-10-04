@@ -31,12 +31,12 @@ Sonome kas horizontal tas [].
 Sonome kas point tas [0, 0].
 Sonome kas hx tas 0.
 Sonome kas hy tas 0.
-Pilike kas id pas Kisite kas pilika vis N {
+Pilike kas house_id pas Kisite kas pilika vis N {
     Kemese kas point tas Kisite kas readints vis 2.
     Kemese kas hx tas point[0].
     Kemese kas hy tas point[1].
-    Putike kas [hx, hy, id] tas vertical.
-    Putike kas [hy, hx, id] tas horizontal.
+    Putike kas [hx, hy, house_id] tas vertical.
+    Putike kas [hy, hx, house_id] tas horizontal.
 }
 Kemese kas vertical tas Kisite kas paline vis vertical.
 Kemese kas horizontal tas Kisite kas paline vis horizontal.
