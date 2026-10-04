@@ -7,6 +7,7 @@ Kisite is still experimental, so syntax and semantics may change between 0.x rel
 - Added augmented assignment: `+=`, `-=`, `*=`, `/=`, `//=`, `%=`, `&=`, `|=`, `^=`, `<<=`, and `>>=`.
 - Added negative indexing and Python-style read slices such as `a[1:-1]` and `a[::-1]`.
 - Added destructuring initialization (`Sonome kas a kasta b tas ...`) and foreach destructuring (`Pilike kas x kasta y pas ...`).
+- Added array comprehensions such as `[x * 2 Pilike kas x pas a]`, with optional filtering using `Palusta` and destructuring bindings such as `Pilike kas x kasta y pas points`. Comprehension bindings are local to the expression; the initial form supports one generator.
 - Added array concatenation with `+` and array repetition with `*`.
 - Added provisional competitive-programming helpers `readint`, `readints`, `fill`, `reverse`, `resize`, `truncate`, `combinations`, `gcd`, `lcm`, `set`, and `array` pending suitable Lisatopian vocabulary where needed.
 - Sets and dictionary keys can now use nested arrays of scalar values, making point-like arrays usable as set elements.
