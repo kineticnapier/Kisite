@@ -33,6 +33,10 @@ def _type_matches_with_kati_alias(annotation, value):
 
 _values.type_matches = _type_matches_with_kati_alias
 
+# Install the 0.0.17 array-comprehension syntax after the compatibility aliases,
+# so both parser extensions compose in a predictable order.
+import kisite_comprehension as _comprehension
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
