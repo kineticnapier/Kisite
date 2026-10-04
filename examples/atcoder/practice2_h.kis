@@ -1,0 +1,153 @@
+# AtCoder Library Practice Contest H - Two SAT
+# https://atcoder.jp/contests/practice2/tasks/practice2_h
+
+Kalivisku musope kas scc_ids vis graph kasta rev kasta N {
+    Sonome kas visited tas Kisite kas fill vis Jatuni kasta N.
+    Sonome kas order tas [].
+    Sonome kas stack tas [].
+    Sonome kas start tas 0.
+    Sonome kas top tas 0.
+    Sonome kas v tas 0.
+    Sonome kas ei tas 0.
+    Sonome kas to tas 0.
+    Sonome kas oi tas 0.
+    Sonome kas cid tas 0.
+    Sonome kas comp tas Kisite kas fill vis -1 kasta N.
+
+    Pilike palusta start < N {
+        Palusta kix visited[start] {
+            Kemese kas stack tas [[start, 0]].
+            Kemese kas visited[start] tas Tuni.
+            Pilike palusta (Kisite kas kipala vis stack) > 0 {
+                Kemese kas top tas (Kisite kas kipala vis stack) - 1.
+                Kemese kas v tas stack[top][0].
+                Kemese kas ei tas stack[top][1].
+                Palusta ei < (Kisite kas kipala vis graph[v]) {
+                    Kemese kas to tas graph[v][ei].
+                    stack[top][1] += 1.
+                    Palusta kix visited[to] {
+                        Kemese kas visited[to] tas Tuni.
+                        Putike kas [to, 0] tas stack.
+                    }
+                } Japalusta {
+                    Putike kas v tas order.
+                    Kinise kas stack[-1].
+                }
+            }
+        }
+        start += 1.
+    }
+
+    Kemese kas oi tas N - 1.
+    Pilike palusta oi >= 0 {
+        Kemese kas v tas order[oi].
+        Palusta comp[v] kate -1 {
+            Kemese kas stack tas [v].
+            Kemese kas comp[v] tas cid.
+            Pilike palusta (Kisite kas kipala vis stack) > 0 {
+                Kemese kas top tas (Kisite kas kipala vis stack) - 1.
+                Kemese kas v tas stack[top].
+                Kinise kas stack[top].
+                Kemese kas ei tas 0.
+                Pilike palusta ei < (Kisite kas kipala vis rev[v]) {
+                    Kemese kas to tas rev[v][ei].
+                    Palusta comp[to] kate -1 {
+                        Kemese kas comp[to] tas cid.
+                        Putike kas to tas stack.
+                    }
+                    ei += 1.
+                }
+            }
+            cid += 1.
+        }
+        oi -= 1.
+    }
+    Jasepe kas comp.
+}
+
+Sonome kas N kasta D tas Kisite kas readints vis 2.
+Sonome kas X tas Kisite kas fill vis 0 kasta N.
+Sonome kas Y tas Kisite kas fill vis 0 kasta N.
+Sonome kas pair tas [0, 0].
+Sonome kas V tas 2 * N.
+Sonome kas graph tas Kisite kas fill vis [] kasta V.
+Sonome kas rev tas Kisite kas fill vis [] kasta V.
+Sonome kas i tas 0.
+Sonome kas j tas 0.
+Sonome kas ci tas 0.
+Sonome kas cj tas 0.
+Sonome kas pi tas 0.
+Sonome kas pj tas 0.
+Sonome kas ni tas 0.
+Sonome kas nj tas 0.
+Sonome kas oi tas 0.
+Sonome kas oj tas 0.
+Sonome kas possible tas Tuni.
+
+Pilike palusta i < N {
+    Kemese kas pair tas Kisite kas readints vis 2.
+    Kemese kas X[i] tas pair[0].
+    Kemese kas Y[i] tas pair[1].
+    i += 1.
+}
+
+Kemese kas i tas 0.
+Pilike palusta i < N {
+    Kemese kas j tas i + 1.
+    Pilike palusta j < N {
+        Kemese kas ci tas 0.
+        Pilike palusta ci < 2 {
+            Palusta ci kate 0 {
+                Kemese kas pi tas X[i].
+            } Japalusta {
+                Kemese kas pi tas Y[i].
+            }
+            Kemese kas cj tas 0.
+            Pilike palusta cj < 2 {
+                Palusta cj kate 0 {
+                    Kemese kas pj tas X[j].
+                } Japalusta {
+                    Kemese kas pj tas Y[j].
+                }
+                Palusta (Kisite kas abs vis pi - pj) < D {
+                    Kemese kas ni tas 2 * i + ci.
+                    Kemese kas nj tas 2 * j + cj.
+                    Kemese kas oi tas 2 * i + (1 - ci).
+                    Kemese kas oj tas 2 * j + (1 - cj).
+                    Putike kas oj tas graph[ni].
+                    Putike kas ni tas rev[oj].
+                    Putike kas oi tas graph[nj].
+                    Putike kas nj tas rev[oi].
+                }
+                cj += 1.
+            }
+            ci += 1.
+        }
+        j += 1.
+    }
+    i += 1.
+}
+
+Sonome kas comp tas Kisite kas scc_ids vis graph kasta rev kasta V.
+Kemese kas i tas 0.
+Pilike palusta i < N {
+    Palusta comp[2 * i] kate comp[2 * i + 1] {
+        Kemese kas possible tas Jatuni.
+    }
+    i += 1.
+}
+
+Palusta kix possible {
+    Takute kas "No".
+} Japalusta {
+    Takute kas "Yes".
+    Kemese kas i tas 0.
+    Pilike palusta i < N {
+        Palusta comp[2 * i + 1] < comp[2 * i] {
+            Takute kas X[i].
+        } Japalusta {
+            Takute kas Y[i].
+        }
+        i += 1.
+    }
+}
