@@ -1,3 +1,7 @@
+import argparse
+from pathlib import Path
+import sys
+
 import kisite_syntax as _syntax
 import kisite_parser as _parser
 import kisite_values as _values
@@ -44,6 +48,31 @@ from kisite_runtime import *
 
 run_compiled = _compiler.run_compiled
 CompiledBackendUnsupported = _compiler.CompiledBackendUnsupported
+_reference_main = _runtime.main
+
+
+def main(argv: list[str] | None = None) -> int:
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    if "--compiled" not in arguments:
+        return _reference_main(arguments)
+
+    argp = argparse.ArgumentParser(prog="kisite")
+    argp.add_argument("--version", action="version", version=f"Kisite {VERSION}")
+    argp.add_argument("--compiled", action="store_true")
+    argp.add_argument("source", type=Path)
+    args = argp.parse_args(arguments)
+    try:
+        source = args.source.read_text(encoding="utf-8")
+        run_compiled(
+            source,
+            input_data=None,
+            base_dir=args.source.parent,
+            output_stream=sys.stdout,
+        )
+        return 0
+    except (OSError, KisiteError) as exc:
+        print(f"kisite: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
