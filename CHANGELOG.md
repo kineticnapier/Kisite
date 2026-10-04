@@ -10,6 +10,8 @@ Kisite is still experimental, so syntax and semantics may change between 0.x rel
 - Added provisional min-heap helpers `heapify`, `heappush`, `heappop`, and `heappeek`; heaps support numbers and nested numeric arrays such as pair-like `[priority, value]` entries.
 - Added `bisectleft` and `bisectright` for lower-bound / upper-bound style binary searches on sorted arrays.
 - Kept `run()` capture semantics for tests while adding an optional `output_stream` for live-output testing and embedding.
+- Added an experimental `--compiled` backend that lowers the supported Kisite AST directly to Python AST/bytecode; the interpreter remains the default and reference backend while semantic coverage is expanded.
+- Added compiled-backend regression tests and `python benchmarks/run.py --compiled` for direct performance comparison with the interpreter.
 
 ## 0.1.0 - 2026-10-04
 
