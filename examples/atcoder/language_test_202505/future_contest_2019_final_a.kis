@@ -1,0 +1,10 @@
+# Language Test 202505 - FutureContest2019FinalA: Monster Tamer
+# Baseline valid heuristic: ignore jobs and work part-time for all T turns.
+Sonome kas T kasta N kasta M tas Kisite kas readints vis 3.
+Sonome kas row tas [].
+Pilike kas i pas Kisite kas pilika vis M {
+    Kemese kas row tas Kisite kas readints vis N + 3.
+}
+Pilike kas turn pas Kisite kas pilika vis T {
+    Takute kas 3.
+}

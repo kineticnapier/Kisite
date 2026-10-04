@@ -1,0 +1,132 @@
+# Language Test 202505 - PracticeB: Interactive Sorting
+Kalivisku musope kas compare vis a kasta b {
+    Takute kas "? " + a + " " + b.
+    Kisite kas flush.
+    Polike kas answer vos stdin.
+    Palusta answer kate "<" {
+        Jasepe kas Tuni.
+    }
+    Jasepe kas Jatuni.
+}
+
+Kalivisku musope kas merge_sorted vis left kasta right {
+    Sonome kas result tas [].
+    Sonome kas li tas 0.
+    Sonome kas ri tas 0.
+    Pilike palusta li < (Kisite kas kipala vis left) kasta ri < (Kisite kas kipala vis right) {
+        Palusta Kisite kas compare vis left[li] kasta right[ri] {
+            Putike kas left[li] tas result.
+            li += 1.
+        } Japalusta {
+            Putike kas right[ri] tas result.
+            ri += 1.
+        }
+    }
+    Pilike palusta li < (Kisite kas kipala vis left) {
+        Putike kas left[li] tas result.
+        li += 1.
+    }
+    Pilike palusta ri < (Kisite kas kipala vis right) {
+        Putike kas right[ri] tas result.
+        ri += 1.
+    }
+    Jasepe kas result.
+}
+
+Kalivisku musope kas merge_sort vis values {
+    Sonome kas n tas Kisite kas kipala vis values.
+    Palusta n <= 1 {
+        Jasepe kas values.
+    }
+    Sonome kas mid tas n // 2.
+    Sonome kas left tas Kisite kas merge_sort vis values[:mid].
+    Sonome kas right tas Kisite kas merge_sort vis values[mid:].
+    Jasepe kas Kisite kas merge_sorted vis left kasta right.
+}
+
+Kalivisku musope kas sort5 vis values {
+    Sonome kas a kasta b kasta c kasta d kasta e tas values.
+    Sonome kas tmp tas "".
+    Sonome kas result tas [].
+    Palusta kix (Kisite kas compare vis a kasta b) {
+        Kemese kas tmp tas a.
+        Kemese kas a tas b.
+        Kemese kas b tas tmp.
+    }
+    Palusta kix (Kisite kas compare vis c kasta d) {
+        Kemese kas tmp tas c.
+        Kemese kas c tas d.
+        Kemese kas d tas tmp.
+    }
+    Palusta kix (Kisite kas compare vis a kasta c) {
+        Kemese kas tmp tas a.
+        Kemese kas a tas c.
+        Kemese kas c tas tmp.
+        Kemese kas tmp tas b.
+        Kemese kas b tas d.
+        Kemese kas d tas tmp.
+    }
+
+    Palusta Kisite kas compare vis c kasta e {
+        Palusta kix (Kisite kas compare vis d kasta e) {
+            Kemese kas tmp tas d.
+            Kemese kas d tas e.
+            Kemese kas e tas tmp.
+        }
+        Palusta Kisite kas compare vis b kasta d {
+            Palusta Kisite kas compare vis b kasta c {
+                Kemese kas result tas [a, b, c, d, e].
+            } Japalusta {
+                Kemese kas result tas [a, c, b, d, e].
+            }
+        } Japalusta {
+            Palusta Kisite kas compare vis b kasta e {
+                Kemese kas result tas [a, c, d, b, e].
+            } Japalusta {
+                Kemese kas result tas [a, c, d, e, b].
+            }
+        }
+    } Japalusta {
+        Palusta Kisite kas compare vis a kasta e {
+            Palusta Kisite kas compare vis b kasta c {
+                Palusta Kisite kas compare vis b kasta e {
+                    Kemese kas result tas [a, b, e, c, d].
+                } Japalusta {
+                    Kemese kas result tas [a, e, b, c, d].
+                }
+            } Japalusta {
+                Palusta Kisite kas compare vis b kasta d {
+                    Kemese kas result tas [a, e, c, b, d].
+                } Japalusta {
+                    Kemese kas result tas [a, e, c, d, b].
+                }
+            }
+        } Japalusta {
+            Palusta Kisite kas compare vis b kasta c {
+                Kemese kas result tas [e, a, b, c, d].
+            } Japalusta {
+                Palusta Kisite kas compare vis b kasta d {
+                    Kemese kas result tas [e, a, c, b, d].
+                } Japalusta {
+                    Kemese kas result tas [e, a, c, d, b].
+                }
+            }
+        }
+    }
+    Jasepe kas result.
+}
+
+Sonome kas N kasta Q tas Kisite kas readints vis 2.
+Sonome kas letters tas ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"].
+Sonome kas answer tas letters[:N].
+Palusta N kate 5 {
+    Kemese kas answer tas Kisite kas sort5 vis answer.
+} Japalusta {
+    Kemese kas answer tas Kisite kas merge_sort vis answer.
+}
+Sonome kas answer_text tas "".
+Pilike kas ch pas answer {
+    answer_text += ch.
+}
+Takute kas "! " + answer_text.
+Kisite kas flush.

@@ -1,0 +1,15 @@
+# Language Test 202505 - ABC244C: Yamanote Line Game
+Sonome kas N tas Kisite kas readint.
+Sonome kas mine tas N + 1.
+Takute kas mine.
+Kisite kas flush.
+Sonome kas reply tas 0.
+Pilike kas turn pas Kisite kas pilika vis N {
+    Kemese kas reply tas Kisite kas readint.
+    Palusta reply kate 0 {
+        Kinise.
+    }
+    Kemese kas mine tas 2 * N + 2 - reply.
+    Takute kas mine.
+    Kisite kas flush.
+}

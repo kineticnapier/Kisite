@@ -1,0 +1,21 @@
+# Language Test 202505 - AHC040A: Packing Uncertain Rectangles
+# Simple valid interactive baseline: place every rectangle in one horizontal chain.
+Sonome kas N kasta T kasta sigma tas Kisite kas readints vis 3.
+Sonome kas observed tas [].
+Sonome kas pair tas [0, 0].
+Pilike kas i pas Kisite kas pilika vis N {
+    Kemese kas pair tas Kisite kas readints vis 2.
+    Putike kas pair tas observed.
+}
+Sonome kas feedback tas [0, 0].
+Sonome kas base tas -1.
+Pilike kas turn pas Kisite kas pilika vis T {
+    Takute kas N.
+    Kemese kas base tas -1.
+    Pilike kas i pas Kisite kas pilika vis N {
+        Takute kas [i, 0, "U", base] vis " ".
+        Kemese kas base tas i.
+    }
+    Kisite kas flush.
+    Kemese kas feedback tas Kisite kas readints vis 2.
+}

@@ -60,6 +60,9 @@ class LanguageTest202505Tests(unittest.TestCase):
     def test_abc169_b(self):
         self.assert_both("abc169_b", "2\n1000000000 1000000000\n", ["1000000000000000000"])
 
+    def test_abc345_g_sample_1(self):
+        self.assert_both("abc345_g", "3 2\n", ["0", "249561089", "748683265"])
+
     def test_abc358_d(self):
         self.assert_both("abc358_d", "4 2\n3 4 5 4\n1 4\n", ["7"])
 

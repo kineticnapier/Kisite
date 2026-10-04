@@ -1,0 +1,96 @@
+# Language Test 202505 - ABC345G: Sugoroku 5
+# Hybrid of the two O(N^1.5 log N)-style approaches from the official editorial.
+
+Kalivisku musope kas comb_mod vis fact kasta invfact kasta n kasta r kasta MOD {
+    Palusta r < 0 vista r > n {
+        Jasepe kas 0.
+    }
+    Jasepe kas fact[n] * invfact[r] % MOD * invfact[n - r] % MOD.
+}
+
+Kalivisku musope kas dc_power vis l kasta r kasta g kasta f kasta answers kasta N kasta K kasta MOD {
+    Sonome kas span tas r - l.
+    Sonome kas keep tas Kisite kas japonavi vis (Kisite kas kipala vis g) kasta (span - 1) * K + 1.
+    Palusta (Kisite kas kipala vis g) > keep {
+        Kemese kas g tas g[(Kisite kas kipala vis g) - keep:].
+    }
+
+    Palusta l + 1 kate r {
+        Kemese kas answers[l] tas g[(Kisite kas kipala vis g) - 1].
+        Jasepe kas f.
+    }
+
+    Sonome kas mid tas (l + r) // 2.
+    Sonome kas p tas Kisite kas dc_power vis l kasta mid kasta g kasta f kasta answers kasta N kasta K kasta MOD.
+    Sonome kas gp tas Kisite kas convolution vis g kasta p kasta MOD.
+    Palusta (Kisite kas kipala vis gp) > keep {
+        Kemese kas gp tas Kisite kas truncate vis gp kasta keep.
+    }
+    Sonome kas q tas Kisite kas dc_power vis mid kasta r kasta gp kasta f kasta answers kasta N kasta K kasta MOD.
+    Sonome kas product tas Kisite kas convolution vis p kasta q kasta MOD.
+    Palusta (Kisite kas kipala vis product) > N {
+        Kemese kas product tas Kisite kas truncate vis product kasta N.
+    }
+    Jasepe kas product.
+}
+
+Sonome kas N kasta K tas Kisite kas readints vis 2.
+Sonome kas MOD tas 998244353.
+Sonome kas answers tas Kisite kas fill vis 0 kasta N + 1.
+Sonome kas invK tas Kisite kas modinv vis K kasta MOD.
+Sonome kas threshold tas 64.
+
+Palusta K <= threshold {
+    Sonome kas f tas Kisite kas fill vis invK kasta K + 1.
+    Kemese kas f[0] tas 0.
+    Sonome kas initial tas Kisite kas fill vis 1 kasta N.
+    Kisite kas dc_power vis 0 kasta N + 1 kasta initial kasta f kasta answers kasta N kasta K kasta MOD.
+} Japalusta {
+    Sonome kas fact tas Kisite kas fill vis 1 kasta N + 1.
+    Sonome kas invfact tas Kisite kas fill vis 1 kasta N + 1.
+    Sonome kas i tas 1.
+    Pilike palusta i <= N {
+        Kemese kas fact[i] tas fact[i - 1] * i % MOD.
+        i += 1.
+    }
+    Kemese kas invfact[N] tas Kisite kas modinv vis fact[N] kasta MOD.
+    Kemese kas i tas N.
+    Pilike palusta i > 0 {
+        Kemese kas invfact[i - 1] tas invfact[i] * i % MOD.
+        i -= 1.
+    }
+
+    Sonome kas n tas 0.
+    Sonome kas invpow tas 1.
+    Sonome kas limit tas 0.
+    Sonome kas j tas 0.
+    Sonome kas total tas 0.
+    Sonome kas term tas 0.
+    Pilike palusta n <= N {
+        Kemese kas total tas 0.
+        Palusta n <= N - 1 {
+            Kemese kas limit tas (N - 1 - n) // K.
+            Kemese kas limit tas Kisite kas japonavi vis limit kasta n.
+            Kemese kas j tas 0.
+            Pilike palusta j <= limit {
+                Kemese kas term tas (Kisite kas comb_mod vis fact kasta invfact kasta n kasta j kasta MOD) * (Kisite kas comb_mod vis fact kasta invfact kasta N - 1 - j * K kasta n kasta MOD) % MOD.
+                Palusta j % 2 kate 0 {
+                    total += term.
+                } Japalusta {
+                    total -= term.
+                }
+                Kemese kas total tas total % MOD.
+                j += 1.
+            }
+            Kemese kas answers[n] tas total * invpow % MOD.
+        } Japalusta {
+            Kemese kas answers[n] tas 0.
+        }
+        Kemese kas invpow tas invpow * invK % MOD.
+        n += 1.
+    }
+}
+
+Pilike kas i pas Kisite kas pilika vis N {
+    Takute kas (answers[i] - answers[i + 1]) % MOD.
+}
