@@ -47,6 +47,25 @@ class AtCoderPractice2Tests(unittest.TestCase):
                     self.assertEqual(grid[i - 1][j], "v")
         self.assertEqual(tiles, 3)
 
+    def assert_practice2_e_output(self, output: list[str], values: list[list[int]], k: int, expected: int):
+        n = len(values)
+        self.assertEqual(output[0], str(expected))
+        self.assertEqual(len(output), n + 1)
+        board = output[1:]
+        self.assertTrue(all(len(row) == n for row in board))
+
+        total = 0
+        column_counts = [0] * n
+        for i, row in enumerate(board):
+            self.assertLessEqual(row.count("X"), k)
+            for j, value in enumerate(row):
+                self.assertIn(value, ".X")
+                if value == "X":
+                    total += values[i][j]
+                    column_counts[j] += 1
+        self.assertTrue(all(count <= k for count in column_counts))
+        self.assertEqual(total, expected)
+
     def test_practice2_a_sample(self):
         source = (EXAMPLES / "practice2_a.kis").read_text(encoding="utf-8")
         input_data = """\
@@ -102,6 +121,44 @@ class AtCoderPractice2Tests(unittest.TestCase):
         compiled = kisite.run_compiled(source, input_data)
         self.assert_practice2_d_output(reference)
         self.assert_practice2_d_output(compiled)
+        self.assertEqual(compiled, reference)
+
+    def test_practice2_e_sample_1(self):
+        source = (EXAMPLES / "practice2_e.kis").read_text(encoding="utf-8")
+        values = [
+            [5, 3, 2],
+            [1, 4, 8],
+            [7, 6, 9],
+        ]
+        input_data = """\
+3 1
+5 3 2
+1 4 8
+7 6 9
+"""
+        reference = kisite.run(source, input_data)
+        compiled = kisite.run_compiled(source, input_data)
+        self.assert_practice2_e_output(reference, values, 1, 19)
+        self.assert_practice2_e_output(compiled, values, 1, 19)
+        self.assertEqual(compiled, reference)
+
+    def test_practice2_e_sample_2(self):
+        source = (EXAMPLES / "practice2_e.kis").read_text(encoding="utf-8")
+        values = [
+            [10, 10, 1],
+            [10, 10, 1],
+            [1, 1, 10],
+        ]
+        input_data = """\
+3 2
+10 10 1
+10 10 1
+1 1 10
+"""
+        reference = kisite.run(source, input_data)
+        compiled = kisite.run_compiled(source, input_data)
+        self.assert_practice2_e_output(reference, values, 2, 50)
+        self.assert_practice2_e_output(compiled, values, 2, 50)
         self.assertEqual(compiled, reference)
 
 
