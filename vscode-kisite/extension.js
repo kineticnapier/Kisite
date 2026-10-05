@@ -131,12 +131,12 @@ function activate(context) {
     registerLanguageFeatures(context, findInterpreter);
 
     const runItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 101);
-    runItem.text = '$(play) Kisite';
+    runItem.text = `$(play) ${t.runStatus}`;
     runItem.tooltip = t.runTooltip;
     runItem.command = 'kisite.run';
 
     const compiledItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-    compiledItem.text = '$(rocket) Compiled';
+    compiledItem.text = `$(rocket) ${t.compiledStatus}`;
     compiledItem.tooltip = t.compiledTooltip;
     compiledItem.command = 'kisite.runCompiled';
 
