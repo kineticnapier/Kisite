@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const vscode = require('vscode');
+const { registerLanguageFeatures } = require('./languageFeatures');
 
 function workspaceFolderFor(document) {
     return vscode.workspace.getWorkspaceFolder(document.uri);
@@ -127,6 +128,8 @@ function activate(context) {
         vscode.commands.registerCommand('kisite.run', () => runActiveFile(false)),
         vscode.commands.registerCommand('kisite.runCompiled', () => runActiveFile(true))
     );
+
+    registerLanguageFeatures(context, findInterpreter);
 
     const runItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 101);
     runItem.text = '$(play) Kisite';
