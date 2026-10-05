@@ -69,13 +69,15 @@ const DOCS = {
         example: 'Jasepe kas value.'
     },
     palusta: {
-        meaning: { ja: 'もし', en: 'if' },
+        meaning: { ja: 'もし / もし〜 / もしも〜 / 〜ならば', en: 'if / if ... / provided that' },
+        grammar: { ja: '接続詞。条件を導入します。', en: 'A conjunction introducing a condition.' },
         role: { ja: '条件分岐を開始します。', en: 'Starts a conditional branch.' },
         example: 'Palusta x > 0 { Takute kas x. }'
     },
     japalusta: {
-        meaning: { ja: 'そうでなければ', en: 'else' },
-        role: { ja: 'Palusta に続く else / else-if 分岐です。', en: 'Introduces an else or else-if branch after Palusta.' },
+        meaning: { ja: '〜ことがない限り / 〜しない限り / もし〜しないなら', en: 'unless / if ... not' },
+        grammar: { ja: '接続詞。莉語本来では否定条件を導入します。', en: 'A conjunction introducing a negative condition in Lisatopa.' },
+        role: { ja: 'Kisite では `Palusta` に続く else / else-if 分岐として使います。莉語本来の語義とは役割が少し異なります。', en: 'In Kisite, introduces an else or else-if branch after `Palusta`; this differs somewhat from its original Lisatopa meaning.' },
         example: 'Japalusta { Takute kas 0. }'
     },
     kas: {
@@ -101,8 +103,9 @@ const DOCS = {
         example: 'Pilike kas x pas xs { ... }'
     },
     sis: {
-        meaning: { ja: '〜として / 型マーカー', en: 'as / type marker' },
-        role: { ja: '変数の型注釈を導入します。', en: 'Introduces a variable type annotation.' },
+        meaning: { ja: '〜として / 〜という / 〜である', en: 'as / called / being' },
+        grammar: { ja: '前置詞。身分・名称・性質などを示します。', en: 'A preposition marking role, name, or identity/property.' },
+        role: { ja: 'Kisite では型注釈を導入し、「x を minika として扱う」のように型を示します。', en: 'In Kisite, introduces a type annotation, treating a value as a given type.' },
         example: 'Sonome kas x sis minika tas 0.'
     },
     vis: {
@@ -117,13 +120,15 @@ const DOCS = {
         example: 'Polike kas raw vos stdin.'
     },
     kasta: {
-        meaning: { ja: 'そして / and', en: 'and' },
-        role: { ja: '論理 AND。また、引数・変数などの並びの区切りにも使います。', en: 'Logical AND, and also a separator for arguments, parameters, and names.' },
+        meaning: { ja: 'そして / 〜と', en: 'and / with' },
+        grammar: { ja: '接続詞。語や節を並列につなぎます。', en: 'A conjunction joining words or clauses in coordination.' },
+        role: { ja: 'Kisite では論理 AND を表すほか、引数・変数などの並びの区切りにも使います。', en: 'In Kisite, represents logical AND and also separates arguments, parameters, and names.' },
         example: 'Kisite kas add vis x kasta y'
     },
     vista: {
-        meaning: { ja: 'または / or', en: 'or' },
-        role: { ja: '論理 OR を表します。', en: 'Logical OR.' },
+        meaning: { ja: 'もしくは / または / あるいは / つまり', en: 'or / alternatively / in other words' },
+        grammar: { ja: '接続詞。選択・言い換えなどを表します。', en: 'A conjunction expressing alternatives or restatement.' },
+        role: { ja: 'Kisite では論理 OR を表します。', en: 'In Kisite, represents logical OR.' },
         example: 'Palusta a vista b { ... }'
     },
     kix: {
@@ -132,18 +137,21 @@ const DOCS = {
         example: 'Palusta kix done { ... }'
     },
     kate: {
-        meaning: { ja: '〜である / 等しい', en: 'is / equal' },
-        role: { ja: '等値比較を表します。', en: 'Equality comparison.' },
+        meaning: { ja: '〜である', en: 'be / is' },
+        grammar: { ja: '動詞。莉語ではコピュラとして「〜である」を表します。', en: 'A verb functioning as a copula meaning “be”.' },
+        role: { ja: 'Kisite では等値比較として使います。莉語本来の「〜である」を比較演算に対応させています。', en: 'In Kisite, used for equality comparison, extending the Lisatopa copular meaning into a comparison operator.' },
         example: 'Palusta x kate 0 { ... }'
     },
     tuni: {
-        meaning: { ja: '真 / 実', en: 'true / real' },
-        role: { ja: '真を表す真偽値リテラルです。', en: 'Boolean true literal.' },
+        meaning: { ja: '本当な / 本当の / 現実的な / 実際の', en: 'true / real / actual' },
+        grammar: { ja: '形容詞。真実性・現実性を表します。', en: 'An adjective expressing truth or reality.' },
+        role: { ja: 'Kisite では真を表す真偽値リテラルです。', en: 'In Kisite, the boolean true literal.' },
         example: 'Sonome kas ok tas Tuni.'
     },
     jatuni: {
-        meaning: { ja: '偽', en: 'false' },
-        role: { ja: '偽を表す真偽値リテラルです。', en: 'Boolean false literal.' },
+        meaning: { ja: '偽りな / 虚偽な', en: 'false / untrue' },
+        grammar: { ja: '形容詞。偽・虚偽を表します。', en: 'An adjective expressing falsity.' },
+        role: { ja: 'Kisite では偽を表す真偽値リテラルです。', en: 'In Kisite, the boolean false literal.' },
         example: 'Sonome kas ok tas Jatuni.'
     },
     stdin: {
@@ -159,8 +167,9 @@ const DOCS = {
         example: 'Sonome kas xs sis kineska tas [1, 2, 3].'
     },
     tuna: {
-        meaning: { ja: '現実 / 真偽', en: 'reality / truth' },
-        role: { ja: 'Kisite の真偽値型名です。', en: 'Kisite boolean type name.' },
+        meaning: { ja: '現実', en: 'reality' },
+        grammar: { ja: '名詞。現実を表します。', en: 'A noun meaning reality.' },
+        role: { ja: 'Kisite では真偽値型名として使います。`tuni` / `jatuni` を値として持つ型です。', en: 'In Kisite, used as the boolean type name whose values are `tuni` and `jatuni`.' },
         example: 'Sonome kas ok sis tuna tas Tuni.'
     }
 };
