@@ -138,12 +138,10 @@ const DOCS = {
         example: 'Polike kas raw vos stdin.'
     },
     takuta: {
-        meaning: { ja: '文字列型として使用', en: 'used as the string type' },
         role: { ja: 'Kisite の文字列型名です。', en: 'Kisite string type name.' },
         example: 'Sonome kas text sis takuta tas "hello".'
     },
     kineska: {
-        meaning: { ja: '配列型として使用', en: 'used as the array type' },
         role: { ja: 'Kisite の配列型名です。', en: 'Kisite array type name.' },
         example: 'Sonome kas xs sis kineska tas [1, 2, 3].'
     },
