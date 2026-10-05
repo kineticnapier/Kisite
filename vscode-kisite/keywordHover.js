@@ -52,11 +52,15 @@ const DOCS = {
         example: 'Kisite kas add vis x kasta y'
     },
     kalivisku: {
-        role: { ja: '`Kalivisku musope kas ...` で関数定義を開始します。', en: 'Starts a function definition in `Kalivisku musope kas ...`.' },
+        meaning: { ja: '意味的に / 意味を定めるように', en: 'semantically / in a meaning-defining way' },
+        grammar: { ja: '`kalivi` に副詞化の語素 `-sku` が付いた形です。`kalivi musopa` は「定義」。', en: 'An adverbial form built from `kalivi` with the adverbializing element `-sku`; `kalivi musopa` means “definition”.' },
+        role: { ja: '`musope`（決める）を修飾し、`Kalivisku musope` 全体で「意味を定める → 定義する」として関数定義を開始します。', en: 'Modifies `musope` (“decide/set”), so `Kalivisku musope` means “define” and starts a function definition.' },
         example: 'Kalivisku musope kas add vis x kasta y { Jasepe kas x + y. }'
     },
     musope: {
-        role: { ja: '`Kalivisku musope` の一部として関数定義に使われます。', en: 'Used as part of `Kalivisku musope` for function definitions.' },
+        meaning: { ja: '決まる / 決める / 約束する', en: 'be decided / decide / promise' },
+        grammar: { ja: '動詞。`musope kas X` で「X を決める」と表せます。', en: 'Verb. `musope kas X` can express “decide/set X”.' },
+        role: { ja: '`Kalivisku musope` の一部として「定義する」を表し、関数名を `kas` の後に取ります。', en: 'As part of `Kalivisku musope`, expresses “define” and takes the function name after `kas`.' },
         example: 'Kalivisku musope kas add { Jasepe kas 0. }'
     },
     jasepe: {
