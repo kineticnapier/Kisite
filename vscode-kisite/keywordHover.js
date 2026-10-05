@@ -95,8 +95,9 @@ const DOCS = {
         example: 'Sonome kas x tas 0.'
     },
     pas: {
-        meaning: { ja: '場所 / 状態 / 時間を広く表す語', en: 'broad place / state / time relation' },
-        role: { ja: 'foreach の反復対象や membership (`in`) を表します。', en: 'Marks foreach iteration sources and membership (`in`).' },
+        meaning: { ja: '〜で / 〜に / 〜にて / 〜の中で', en: 'at / in / within' },
+        grammar: { ja: '場所・位置・内部を表す前置詞です。', en: 'A preposition marking place, position, or being within something.' },
+        role: { ja: 'Kisite では反復対象・所属先を示します。`x pas xs` の「xs の中で x」という関係から、foreach と membership (`in`) に使われます。', en: 'In Kisite, marks an iteration source or membership container. The relation in `x pas xs` is used for foreach and membership (`in`).' },
         example: 'Pilike kas x pas xs { ... }'
     },
     sis: {
