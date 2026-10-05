@@ -2,7 +2,7 @@
   "name": "kisite-language",
   "displayName": "Kisite",
   "description": "VS Code language support for Kisite.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "kineticnapier",
   "license": "MIT",
   "engines": {
@@ -74,7 +74,7 @@
         "kisite.pythonPath": {
           "type": "string",
           "default": "python",
-          "description": "Python executable used to run Kisite."
+          "description": "Python executable used to run Kisite and parser diagnostics."
         },
         "kisite.interpreterPath": {
           "type": "string",
@@ -85,6 +85,17 @@
           "type": "boolean",
           "default": true,
           "description": "Save the active Kisite file before running it."
+        },
+        "kisite.diagnostics.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Parse Kisite documents with the real Kisite parser and show syntax errors as diagnostics."
+        },
+        "kisite.diagnostics.delay": {
+          "type": "number",
+          "default": 250,
+          "minimum": 0,
+          "description": "Milliseconds to debounce parser diagnostics after editing."
         }
       }
     }
