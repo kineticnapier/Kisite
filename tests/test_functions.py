@@ -61,6 +61,26 @@ class FunctionTests(unittest.TestCase):
         with self.assertRaisesRegex(kisite.KisiteError, "expects 2 arguments"):
             kisite.run(source)
 
+    def test_nested_fixed_arity_builtin_arguments_do_not_consume_outer_kasta(self):
+        source = """
+        Kalivisku musope kas add vis x kasta y {
+            Jasepe kas x + y.
+        }
+        Polike kas raw vos stdin.
+        Takute kas Kisite kas add vis Kisite kas minika vis raw kasta Kisite kas minika vis raw.
+        """
+        self.assertEqual(kisite.run(source, "6\n"), ["12"])
+        self.assertEqual(kisite.run_compiled(source, "6\n"), ["12"])
+
+    def test_nested_user_function_arguments_do_not_consume_outer_kasta(self):
+        source = """
+        Kalivisku musope kas inc vis x { Jasepe kas x + 1. }
+        Kalivisku musope kas add vis x kasta y { Jasepe kas x + y. }
+        Takute kas Kisite kas add vis Kisite kas inc vis 2 kasta Kisite kas inc vis 3.
+        """
+        self.assertEqual(kisite.run(source), ["7"])
+        self.assertEqual(kisite.run_compiled(source), ["7"])
+
     def test_function_has_local_scope(self):
         source = """
         Sonome kas x tas 100.
