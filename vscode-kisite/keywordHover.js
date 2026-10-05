@@ -106,8 +106,9 @@ const DOCS = {
         example: 'Sonome kas x sis minika tas 0.'
     },
     vis: {
-        meaning: { ja: '〜を介して / 〜によって', en: 'via / by' },
-        role: { ja: '関数定義・関数呼び出しの引数列を開始します。', en: 'Starts the parameter/argument list of a function definition or call.' },
+        meaning: { ja: '〜によって / 〜を使って / 〜のせいで', en: 'by / using / because of' },
+        grammar: { ja: '手段・原因・作用主などを表す前置詞です。', en: 'A preposition marking means, cause, or agent.' },
+        role: { ja: 'Kisite では関数定義・関数呼び出しで、引数を「〜を使って処理する」ための引数列として導入します。', en: 'In Kisite, introduces function parameters/arguments as the values used by a function call or definition.' },
         example: 'Kisite kas add vis x kasta y'
     },
     vos: {
