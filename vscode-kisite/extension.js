@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const vscode = require('vscode');
-const { registerLanguageFeatures } = require('./languageFeatures');
+const { LanguageClient } = require('vscode-languageclient/node');
 const { t } = require('./i18n');
+
+let languageClient;
 
 function workspaceFolderFor(document) {
     return vscode.workspace.getWorkspaceFolder(document.uri);
@@ -23,9 +25,9 @@ function expandConfiguredPath(value, workspaceFolder) {
 }
 
 function findInterpreter(document) {
-    const config = vscode.workspace.getConfiguration('kisite', document.uri);
+    const config = vscode.workspace.getConfiguration('kisite', document?.uri);
     const configured = config.get('interpreterPath', '').trim();
-    const workspaceFolder = workspaceFolderFor(document);
+    const workspaceFolder = document ? workspaceFolderFor(document) : vscode.workspace.workspaceFolders?.[0];
 
     if (configured) {
         const resolved = expandConfiguredPath(configured, workspaceFolder);
@@ -35,20 +37,82 @@ function findInterpreter(document) {
         return resolved;
     }
 
-    let current = path.dirname(document.uri.fsPath);
-    while (true) {
-        const candidate = path.join(current, 'kisite.py');
+    if (document && document.uri.scheme === 'file') {
+        let current = path.dirname(document.uri.fsPath);
+        while (true) {
+            const candidate = path.join(current, 'kisite.py');
+            if (fs.existsSync(candidate)) {
+                return candidate;
+            }
+            const parent = path.dirname(current);
+            if (parent === current) {
+                break;
+            }
+            current = parent;
+        }
+    }
+
+    for (const folder of vscode.workspace.workspaceFolders || []) {
+        const candidate = path.join(folder.uri.fsPath, 'kisite.py');
         if (fs.existsSync(candidate)) {
             return candidate;
         }
-        const parent = path.dirname(current);
-        if (parent === current) {
-            break;
-        }
-        current = parent;
+    }
+
+    const developmentCandidate = path.resolve(__dirname, '..', 'kisite.py');
+    if (fs.existsSync(developmentCandidate)) {
+        return developmentCandidate;
     }
 
     throw new Error(t.interpreterNotFound);
+}
+
+async function startLanguageServer(context) {
+    const activeDocument = vscode.window.activeTextEditor?.document;
+    let interpreter;
+    try {
+        interpreter = findInterpreter(
+            activeDocument?.languageId === 'kisite' ? activeDocument : undefined
+        );
+    } catch (error) {
+        console.warn('[Kisite LSP]', error instanceof Error ? error.message : String(error));
+        return;
+    }
+
+    const config = vscode.workspace.getConfiguration('kisite', activeDocument?.uri);
+    const pythonPath = config.get('pythonPath', 'python');
+    const serverScript = context.asAbsolutePath(path.join('server', 'kisite_lsp.py'));
+    const kisiteRoot = path.dirname(interpreter);
+
+    const serverOptions = {
+        command: pythonPath,
+        args: [
+            serverScript,
+            '--kisite-root', kisiteRoot,
+            '--locale', vscode.env.language,
+        ],
+        options: {
+            cwd: kisiteRoot,
+            windowsHide: true,
+        },
+    };
+
+    const clientOptions = {
+        documentSelector: [{ scheme: 'file', language: 'kisite' }],
+        synchronize: {
+            configurationSection: 'kisite',
+        },
+        outputChannelName: 'Kisite Language Server',
+    };
+
+    languageClient = new LanguageClient(
+        'kisiteLanguageServer',
+        'Kisite Language Server',
+        serverOptions,
+        clientOptions
+    );
+    context.subscriptions.push(languageClient);
+    await languageClient.start();
 }
 
 async function runActiveFile(compiled) {
@@ -122,13 +186,11 @@ function updateStatusBars(runItem, compiledItem) {
     }
 }
 
-function activate(context) {
+async function activate(context) {
     context.subscriptions.push(
         vscode.commands.registerCommand('kisite.run', () => runActiveFile(false)),
         vscode.commands.registerCommand('kisite.runCompiled', () => runActiveFile(true))
     );
-
-    registerLanguageFeatures(context, findInterpreter);
 
     const runItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 101);
     runItem.text = `$(play) ${t.runStatus}`;
@@ -145,9 +207,16 @@ function activate(context) {
         vscode.window.onDidChangeActiveTextEditor(() => updateStatusBars(runItem, compiledItem))
     );
     updateStatusBars(runItem, compiledItem);
+
+    await startLanguageServer(context);
 }
 
-function deactivate() {}
+async function deactivate() {
+    if (languageClient) {
+        await languageClient.stop();
+        languageClient = undefined;
+    }
+}
 
 module.exports = {
     activate,
