@@ -1,5 +1,6 @@
 import importlib.util
 from pathlib import Path
+import sys
 import unittest
 
 
@@ -8,6 +9,7 @@ LSP_PATH = ROOT / "vscode-kisite" / "server" / "kisite_lsp.py"
 SPEC = importlib.util.spec_from_file_location("kisite_lsp", LSP_PATH)
 assert SPEC is not None and SPEC.loader is not None
 kisite_lsp = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = kisite_lsp
 SPEC.loader.exec_module(kisite_lsp)
 
 
