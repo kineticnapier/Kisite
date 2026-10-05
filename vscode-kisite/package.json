@@ -2,7 +2,7 @@
   "name": "kisite-language",
   "displayName": "Kisite",
   "description": "%extension.description%",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "publisher": "kineticnapier",
   "license": "MIT",
   "engines": {
@@ -17,6 +17,9 @@
     "onCommand:kisite.run",
     "onCommand:kisite.runCompiled"
   ],
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
   "contributes": {
     "languages": [
       {
@@ -90,12 +93,6 @@
           "type": "boolean",
           "default": true,
           "description": "%config.diagnostics.enabled%"
-        },
-        "kisite.diagnostics.delay": {
-          "type": "number",
-          "default": 250,
-          "minimum": 0,
-          "description": "%config.diagnostics.delay%"
         }
       }
     }
