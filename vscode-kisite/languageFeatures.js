@@ -1,6 +1,7 @@
 const { spawn } = require('child_process');
 const path = require('path');
 const vscode = require('vscode');
+const { t, localizeParserMessage } = require('./i18n');
 
 const KEYWORDS = [
     'Takute', 'Sonome', 'Kemese', 'Polike', 'Pilike', 'Putike',
@@ -21,23 +22,7 @@ const BUILTINS = [
     'bisectleft', 'bisectright',
 ];
 
-const BUILTIN_DETAILS = new Map([
-    ['readint', 'Read one integer from stdin.'],
-    ['readints', 'Read integers from stdin.'],
-    ['kipala', 'Return the length of a collection.'],
-    ['pilika', 'Create a range-like sequence / count helper.'],
-    ['paline', 'Return a sorted array.'],
-    ['japonavi', 'Return the minimum value.'],
-    ['ponavi', 'Return the maximum value.'],
-    ['fill', 'Create an array filled with a value.'],
-    ['convolution', 'Convolution modulo the supported modulus.'],
-    ['flush', 'Flush interactive output.'],
-    ['heappush', 'Push a value onto a heap.'],
-    ['heappop', 'Pop the minimum value from a heap.'],
-    ['heappeek', 'Read the minimum value from a heap.'],
-    ['bisectleft', 'Find the left insertion position in a sorted array.'],
-    ['bisectright', 'Find the right insertion position in a sorted array.'],
-]);
+const BUILTIN_DETAILS = new Map(Object.entries(t.builtins));
 
 function wordRange(document, position) {
     return document.getWordRangeAtPosition(position, /[A-Za-z_][A-Za-z0-9_]*/);
@@ -124,23 +109,23 @@ function completionItems(document) {
 
     for (const keyword of KEYWORDS) {
         const item = new vscode.CompletionItem(keyword, vscode.CompletionItemKind.Keyword);
-        item.detail = 'Kisite keyword';
+        item.detail = t.keywordDetail;
         items.push(item);
     }
     for (const type of TYPES) {
         const item = new vscode.CompletionItem(type, vscode.CompletionItemKind.TypeParameter);
-        item.detail = 'Kisite type';
+        item.detail = t.typeDetail;
         items.push(item);
     }
     for (const name of BUILTINS) {
         const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Function);
-        item.detail = 'Kisite builtin';
-        item.documentation = BUILTIN_DETAILS.get(name) || `Kisite builtin: ${name}`;
+        item.detail = t.builtinDetail;
+        item.documentation = BUILTIN_DETAILS.get(name) || `${t.builtinLabel}: ${name}`;
         items.push(item);
     }
     for (const [name] of functions) {
         const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Function);
-        item.detail = 'Function in this file';
+        item.detail = t.functionDetail;
         items.push(item);
     }
     for (const [name] of definitions) {
@@ -148,7 +133,7 @@ function completionItems(document) {
             continue;
         }
         const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Variable);
-        item.detail = 'Variable in this file';
+        item.detail = t.variableDetail;
         items.push(item);
     }
     return items;
@@ -181,7 +166,7 @@ function parseError(stderr) {
     return {
         line: Math.max(0, Number(match[1]) - 1),
         column: Math.max(0, Number(match[2]) - 1),
-        message: match[3].trim(),
+        message: localizeParserMessage(match[3].trim()),
     };
 }
 
@@ -272,12 +257,12 @@ function registerLanguageFeatures(context, findInterpreter) {
                 const word = document.getText(range);
                 if (BUILTIN_DETAILS.has(word)) {
                     return new vscode.Hover([
-                        new vscode.MarkdownString(`**Kisite builtin** \`${word}\``),
+                        new vscode.MarkdownString(`**${t.builtinLabel}** \`${word}\``),
                         new vscode.MarkdownString(BUILTIN_DETAILS.get(word)),
                     ]);
                 }
                 if (BUILTINS.includes(word)) {
-                    return new vscode.Hover(`Kisite builtin: \`${word}\``);
+                    return new vscode.Hover(`${t.builtinLabel}: \`${word}\``);
                 }
                 return undefined;
             },
