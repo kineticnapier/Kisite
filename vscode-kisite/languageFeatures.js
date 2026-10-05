@@ -171,7 +171,7 @@ function parseError(stderr) {
 }
 
 function validateDocument(document, diagnostics, findInterpreter) {
-    if (document.languageId !== 'kisite') {
+    if (document.languageId !== 'kisite' || document.isClosed) {
         return;
     }
     const config = vscode.workspace.getConfiguration('kisite', document.uri);
@@ -189,17 +189,42 @@ function validateDocument(document, diagnostics, findInterpreter) {
     }
 
     const pythonPath = config.get('pythonPath', 'python');
-    const child = spawn(
-        pythonPath,
-        ['-c', makeParserCommand(interpreter)],
-        { cwd: path.dirname(interpreter), stdio: ['pipe', 'ignore', 'pipe'], windowsHide: true }
-    );
+    let child;
+    try {
+        child = spawn(
+            pythonPath,
+            ['-c', makeParserCommand(interpreter)],
+            { cwd: path.dirname(interpreter), stdio: ['pipe', 'ignore', 'pipe'], windowsHide: true }
+        );
+    } catch (error) {
+        diagnostics.set(document.uri, []);
+        return;
+    }
+
     let stderr = '';
-    child.stderr.setEncoding('utf8');
-    child.stderr.on('data', chunk => { stderr += chunk; });
-    child.on('error', () => diagnostics.set(document.uri, []));
+    let spawnFailed = false;
+
+    // A parser process can exit before the editor finishes writing stdin. On Windows
+    // that may surface as EPIPE. Streams emit "error" events; without handlers an
+    // EPIPE can terminate the entire Extension Host process.
+    if (child.stdin) {
+        child.stdin.on('error', () => {});
+    }
+    if (child.stderr) {
+        child.stderr.setEncoding('utf8');
+        child.stderr.on('data', chunk => { stderr += chunk; });
+        child.stderr.on('error', () => {});
+    }
+
+    child.on('error', () => {
+        spawnFailed = true;
+        if (!document.isClosed) {
+            diagnostics.set(document.uri, []);
+        }
+    });
+
     child.on('close', code => {
-        if (document.isClosed) {
+        if (spawnFailed || document.isClosed) {
             return;
         }
         if (code === 0) {
@@ -214,7 +239,7 @@ function validateDocument(document, diagnostics, findInterpreter) {
         const line = Math.min(parsed.line, Math.max(0, document.lineCount - 1));
         const lineText = document.lineAt(line).text;
         const start = Math.min(parsed.column, lineText.length);
-        const end = Math.min(lineText.length, Math.max(start + 1, start + 1));
+        const end = Math.min(lineText.length, start + 1);
         const diagnostic = new vscode.Diagnostic(
             new vscode.Range(line, start, line, end),
             parsed.message,
@@ -223,7 +248,15 @@ function validateDocument(document, diagnostics, findInterpreter) {
         diagnostic.source = 'Kisite';
         diagnostics.set(document.uri, [diagnostic]);
     });
-    child.stdin.end(document.getText(), 'utf8');
+
+    if (child.stdin) {
+        try {
+            child.stdin.end(document.getText(), 'utf8');
+        } catch (error) {
+            // The process may already have terminated. Its close/error handler above
+            // owns the diagnostic result; never let this escape into Extension Host.
+        }
+    }
 }
 
 function registerLanguageFeatures(context, findInterpreter) {
