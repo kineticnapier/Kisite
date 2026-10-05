@@ -1,0 +1,10 @@
+{
+  "extension.description": "Kisite の VS Code 向け言語サポートです。",
+  "command.run": "Kisite: 実行",
+  "command.runCompiled": "Kisite: コンパイル実行",
+  "config.pythonPath": "Kisite の実行と構文診断に使用する Python 実行ファイルです。",
+  "config.interpreterPath": "kisite.py のパスです。空欄の場合は、開いている .kis ファイルの親ディレクトリを上方向に検索します。${workspaceFolder} を使用できます。",
+  "config.saveBeforeRun": "Kisite ファイルを実行する前に保存します。",
+  "config.diagnostics.enabled": "実際の Kisite パーサーで文書を解析し、構文エラーを診断として表示します。",
+  "config.diagnostics.delay": "編集後に構文診断を実行するまでの待ち時間（ミリ秒）です。"
+}
