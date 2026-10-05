@@ -1,8 +1,8 @@
 {
   "name": "kisite-language",
   "displayName": "Kisite",
-  "description": "VS Code language support for Kisite.",
-  "version": "0.0.2",
+  "description": "%extension.description%",
+  "version": "0.0.3",
   "publisher": "kineticnapier",
   "license": "MIT",
   "engines": {
@@ -47,11 +47,11 @@
     "commands": [
       {
         "command": "kisite.run",
-        "title": "Kisite: Run"
+        "title": "%command.run%"
       },
       {
         "command": "kisite.runCompiled",
-        "title": "Kisite: Run Compiled"
+        "title": "%command.runCompiled%"
       }
     ],
     "menus": {
@@ -74,28 +74,28 @@
         "kisite.pythonPath": {
           "type": "string",
           "default": "python",
-          "description": "Python executable used to run Kisite and parser diagnostics."
+          "description": "%config.pythonPath%"
         },
         "kisite.interpreterPath": {
           "type": "string",
           "default": "",
-          "description": "Path to kisite.py. Leave empty to search parent directories of the active .kis file. ${workspaceFolder} is supported."
+          "description": "%config.interpreterPath%"
         },
         "kisite.saveBeforeRun": {
           "type": "boolean",
           "default": true,
-          "description": "Save the active Kisite file before running it."
+          "description": "%config.saveBeforeRun%"
         },
         "kisite.diagnostics.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Parse Kisite documents with the real Kisite parser and show syntax errors as diagnostics."
+          "description": "%config.diagnostics.enabled%"
         },
         "kisite.diagnostics.delay": {
           "type": "number",
           "default": 250,
           "minimum": 0,
-          "description": "Milliseconds to debounce parser diagnostics after editing."
+          "description": "%config.diagnostics.delay%"
         }
       }
     }
