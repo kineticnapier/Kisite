@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const vscode = require('vscode');
 const { registerLanguageFeatures } = require('./languageFeatures');
+const { t } = require('./i18n');
 
 function workspaceFolderFor(document) {
     return vscode.workspace.getWorkspaceFolder(document.uri);
@@ -29,7 +30,7 @@ function findInterpreter(document) {
     if (configured) {
         const resolved = expandConfiguredPath(configured, workspaceFolder);
         if (!fs.existsSync(resolved)) {
-            throw new Error(`Configured Kisite interpreter was not found: ${resolved}`);
+            throw new Error(t.interpreterMissing(resolved));
         }
         return resolved;
     }
@@ -47,21 +48,19 @@ function findInterpreter(document) {
         current = parent;
     }
 
-    throw new Error(
-        'Could not find kisite.py. Set kisite.interpreterPath in VS Code settings.'
-    );
+    throw new Error(t.interpreterNotFound);
 }
 
 async function runActiveFile(compiled) {
     const editor = vscode.window.activeTextEditor;
     if (!editor || editor.document.languageId !== 'kisite') {
-        vscode.window.showErrorMessage('Open a .kis file before running Kisite.');
+        vscode.window.showErrorMessage(t.openKisiteFile);
         return;
     }
 
     const document = editor.document;
     if (document.isUntitled) {
-        vscode.window.showErrorMessage('Save the Kisite file before running it.');
+        vscode.window.showErrorMessage(t.saveBeforeRun);
         return;
     }
 
@@ -92,7 +91,7 @@ async function runActiveFile(compiled) {
     const cwd = workspaceFolder ? workspaceFolder.uri.fsPath : path.dirname(document.uri.fsPath);
     const execution = new vscode.ProcessExecution(pythonPath, args, { cwd });
     const scope = workspaceFolder || vscode.TaskScope.Workspace;
-    const name = compiled ? 'Run Kisite (Compiled)' : 'Run Kisite';
+    const name = compiled ? t.runCompiledTask : t.runTask;
     const task = new vscode.Task(
         { type: 'kisite', compiled },
         scope,
@@ -133,12 +132,12 @@ function activate(context) {
 
     const runItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 101);
     runItem.text = '$(play) Kisite';
-    runItem.tooltip = 'Run Kisite';
+    runItem.tooltip = t.runTooltip;
     runItem.command = 'kisite.run';
 
     const compiledItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     compiledItem.text = '$(rocket) Compiled';
-    compiledItem.tooltip = 'Run Kisite with the compiled backend';
+    compiledItem.tooltip = t.compiledTooltip;
     compiledItem.command = 'kisite.runCompiled';
 
     context.subscriptions.push(runItem, compiledItem);
