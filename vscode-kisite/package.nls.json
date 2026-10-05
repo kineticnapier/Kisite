@@ -1,0 +1,10 @@
+{
+  "extension.description": "VS Code language support for Kisite.",
+  "command.run": "Kisite: Run",
+  "command.runCompiled": "Kisite: Run Compiled",
+  "config.pythonPath": "Python executable used to run Kisite and parser diagnostics.",
+  "config.interpreterPath": "Path to kisite.py. Leave empty to search parent directories of the active .kis file. ${workspaceFolder} is supported.",
+  "config.saveBeforeRun": "Save the active Kisite file before running it.",
+  "config.diagnostics.enabled": "Parse Kisite documents with the real Kisite parser and show syntax errors as diagnostics.",
+  "config.diagnostics.delay": "Milliseconds to debounce parser diagnostics after editing."
+}
