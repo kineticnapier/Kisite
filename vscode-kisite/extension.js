@@ -3,6 +3,7 @@ const path = require('path');
 const vscode = require('vscode');
 const { LanguageClient } = require('vscode-languageclient/node');
 const { t } = require('./i18n');
+const { registerKeywordHover } = require('./keywordHover');
 
 let languageClient;
 
@@ -202,6 +203,8 @@ async function activate(context) {
         vscode.commands.registerCommand('kisite.run', () => runActiveFile(false)),
         vscode.commands.registerCommand('kisite.runCompiled', () => runActiveFile(true))
     );
+
+    registerKeywordHover(context);
 
     const runItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 101);
     runItem.text = `$(play) ${t.runStatus}`;
