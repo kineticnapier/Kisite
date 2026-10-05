@@ -89,8 +89,9 @@ const DOCS = {
         ]
     },
     tas: {
-        meaning: { ja: '〜へ', en: 'to' },
-        role: { ja: '初期化・代入・追加などで行き先を示します。', en: 'Marks the destination of initialization, assignment, or insertion.' },
+        meaning: { ja: '〜に', en: 'to' },
+        grammar: { ja: '方向・到達先を表す前置詞。英語の `to` に近い語です。', en: 'A preposition marking direction or destination, similar to English `to`.' },
+        role: { ja: 'Kisite では初期化・代入・追加などの代入先・到達先を示します。', en: 'In Kisite, marks the destination/target of initialization, assignment, or insertion.' },
         example: 'Sonome kas x tas 0.'
     },
     pas: {
