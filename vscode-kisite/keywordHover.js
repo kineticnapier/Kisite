@@ -1,0 +1,196 @@
+const vscode = require('vscode');
+
+const JA = vscode.env.language.toLowerCase().startsWith('ja');
+
+// `meaning` is only filled where the Lisatopa meaning is already established.
+// Do not guess vocabulary here: words with an uncertain lexical origin still get
+// a Kisite grammar-role explanation, but no claimed Lisatopa translation.
+const DOCS = {
+    takute: {
+        meaning: { ja: '言う / 表示する', en: 'say / show' },
+        role: { ja: '値を出力します。', en: 'Outputs a value.' },
+        example: 'Takute kas value.'
+    },
+    sonome: {
+        meaning: { ja: '初期化する', en: 'initialize' },
+        role: { ja: '変数を初期化します。', en: 'Initializes variables.' },
+        example: 'Sonome kas x tas 0.'
+    },
+    kemese: {
+        meaning: { ja: '設定する', en: 'set' },
+        role: { ja: '既存の変数・要素へ値を設定します。', en: 'Sets an existing variable or element.' },
+        example: 'Kemese kas x tas 10.'
+    },
+    polike: {
+        meaning: { ja: '読む / 読み取る', en: 'read / scan' },
+        role: { ja: '入力元から値を読み取ります。', en: 'Reads values from an input source.' },
+        example: 'Polike kas raw vos stdin.'
+    },
+    pilike: {
+        meaning: { ja: '繰り返す / 複製する', en: 'repeat / copy' },
+        role: { ja: 'Kisite では while / foreach の反復構文を開始します。', en: 'Starts while/foreach repetition in Kisite.' },
+        example: 'Pilike kas x pas xs { Takute kas x. }'
+    },
+    putike: {
+        meaning: { ja: '加える', en: 'add' },
+        role: { ja: '配列や集合へ値を追加します。', en: 'Adds a value to an array or set.' },
+        example: 'Putike kas value tas xs.'
+    },
+    kinise: {
+        meaning: { ja: '切る / 削除する / 中断する', en: 'cut / delete / break' },
+        role: { ja: 'ループを抜ける、または要素を削除します。', en: 'Breaks a loop or deletes an element.' },
+        example: 'Kinise.'
+    },
+    kinate: {
+        meaning: { ja: '続ける', en: 'continue' },
+        role: { ja: '現在の反復を打ち切り、次の反復へ進みます。', en: 'Continues with the next loop iteration.' },
+        example: 'Kinate.'
+    },
+    kisite: {
+        meaning: { ja: '処理する', en: 'process' },
+        role: { ja: '関数・組み込み関数の呼び出しを開始します。', en: 'Starts a function or builtin call.' },
+        example: 'Kisite kas add vis x kasta y'
+    },
+    kalivisku: {
+        role: { ja: '`Kalivisku musope kas ...` で関数定義を開始します。', en: 'Starts a function definition in `Kalivisku musope kas ...`.' },
+        example: 'Kalivisku musope kas add vis x kasta y { Jasepe kas x + y. }'
+    },
+    musope: {
+        role: { ja: '`Kalivisku musope` の一部として関数定義に使われます。', en: 'Used as part of `Kalivisku musope` for function definitions.' },
+        example: 'Kalivisku musope kas add { Jasepe kas 0. }'
+    },
+    jasepe: {
+        meaning: { ja: '返す', en: 'return' },
+        role: { ja: '関数から値を返します。', en: 'Returns a value from a function.' },
+        example: 'Jasepe kas value.'
+    },
+    palusta: {
+        meaning: { ja: 'もし', en: 'if' },
+        role: { ja: '条件分岐を開始します。', en: 'Starts a conditional branch.' },
+        example: 'Palusta x > 0 { Takute kas x. }'
+    },
+    japalusta: {
+        meaning: { ja: 'そうでなければ', en: 'else' },
+        role: { ja: 'Palusta に続く else / else-if 分岐です。', en: 'Introduces an else or else-if branch after Palusta.' },
+        example: 'Japalusta { Takute kas 0. }'
+    },
+    kas: {
+        role: { ja: '文の対象・値・名前を導入する構文マーカーです。', en: 'Introduces the target, value, or name of a statement.' },
+        example: 'Takute kas value.'
+    },
+    tas: {
+        meaning: { ja: '〜へ', en: 'to' },
+        role: { ja: '初期化・代入・追加などで行き先を示します。', en: 'Marks the destination of initialization, assignment, or insertion.' },
+        example: 'Sonome kas x tas 0.'
+    },
+    pas: {
+        meaning: { ja: '場所 / 状態 / 時間を広く表す語', en: 'broad place / state / time relation' },
+        role: { ja: 'foreach の反復対象や membership (`in`) を表します。', en: 'Marks foreach iteration sources and membership (`in`).' },
+        example: 'Pilike kas x pas xs { ... }'
+    },
+    sis: {
+        meaning: { ja: '〜として / 型マーカー', en: 'as / type marker' },
+        role: { ja: '変数の型注釈を導入します。', en: 'Introduces a variable type annotation.' },
+        example: 'Sonome kas x sis minika tas 0.'
+    },
+    vis: {
+        meaning: { ja: '〜を介して / 〜によって', en: 'via / by' },
+        role: { ja: '関数定義・関数呼び出しの引数列を開始します。', en: 'Starts the parameter/argument list of a function definition or call.' },
+        example: 'Kisite kas add vis x kasta y'
+    },
+    vos: {
+        meaning: { ja: '〜から', en: 'from' },
+        role: { ja: '入力元を指定します。', en: 'Specifies an input source.' },
+        example: 'Polike kas raw vos stdin.'
+    },
+    kasta: {
+        meaning: { ja: 'そして / and', en: 'and' },
+        role: { ja: '論理 AND。また、引数・変数などの並びの区切りにも使います。', en: 'Logical AND, and also a separator for arguments, parameters, and names.' },
+        example: 'Kisite kas add vis x kasta y'
+    },
+    vista: {
+        meaning: { ja: 'または / or', en: 'or' },
+        role: { ja: '論理 OR を表します。', en: 'Logical OR.' },
+        example: 'Palusta a vista b { ... }'
+    },
+    kix: {
+        meaning: { ja: '否定', en: 'negation' },
+        role: { ja: '真偽値を反転する論理 NOT です。', en: 'Logical NOT for boolean values.' },
+        example: 'Palusta kix done { ... }'
+    },
+    kate: {
+        meaning: { ja: '〜である / 等しい', en: 'is / equal' },
+        role: { ja: '等値比較を表します。', en: 'Equality comparison.' },
+        example: 'Palusta x kate 0 { ... }'
+    },
+    tuni: {
+        meaning: { ja: '真 / 実', en: 'true / real' },
+        role: { ja: '真を表す真偽値リテラルです。', en: 'Boolean true literal.' },
+        example: 'Sonome kas ok tas Tuni.'
+    },
+    jatuni: {
+        meaning: { ja: '偽', en: 'false' },
+        role: { ja: '偽を表す真偽値リテラルです。', en: 'Boolean false literal.' },
+        example: 'Sonome kas ok tas Jatuni.'
+    },
+    stdin: {
+        role: { ja: '標準入力を表す予約語です。', en: 'Reserved word for standard input.' },
+        example: 'Polike kas raw vos stdin.'
+    },
+    takuta: {
+        meaning: { ja: '文字列型として使用', en: 'used as the string type' },
+        role: { ja: 'Kisite の文字列型名です。', en: 'Kisite string type name.' },
+        example: 'Sonome kas text sis takuta tas "hello".'
+    },
+    kineska: {
+        meaning: { ja: '配列型として使用', en: 'used as the array type' },
+        role: { ja: 'Kisite の配列型名です。', en: 'Kisite array type name.' },
+        example: 'Sonome kas xs sis kineska tas [1, 2, 3].'
+    },
+    tuna: {
+        meaning: { ja: '現実 / 真偽', en: 'reality / truth' },
+        role: { ja: 'Kisite の真偽値型名です。', en: 'Kisite boolean type name.' },
+        example: 'Sonome kas ok sis tuna tas Tuni.'
+    }
+};
+
+function localized(value) {
+    if (!value) return undefined;
+    return JA ? value.ja : value.en;
+}
+
+function renderHover(word, doc) {
+    const title = JA ? 'Kisite 予約語' : 'Kisite reserved word';
+    const roleTitle = JA ? 'Kisite での役割' : 'Role in Kisite';
+    const meaningTitle = JA ? '莉語での語義' : 'Lisatopa meaning';
+    const exampleTitle = JA ? '例' : 'Example';
+    const parts = [`**${title}: \`${word}\`**`];
+    const meaning = localized(doc.meaning);
+    if (meaning) {
+        parts.push(`**${meaningTitle}:** ${meaning}`);
+    }
+    parts.push(`**${roleTitle}:** ${localized(doc.role)}`);
+    if (doc.example) {
+        parts.push(`**${exampleTitle}:**\n\n\`\`\`kisite\n${doc.example}\n\`\`\``);
+    }
+    return new vscode.MarkdownString(parts.join('\n\n'));
+}
+
+function registerKeywordHover(context) {
+    const provider = vscode.languages.registerHoverProvider(
+        { language: 'kisite', scheme: 'file' },
+        {
+            provideHover(document, position) {
+                const range = document.getWordRangeAtPosition(position, /[\p{L}_][\p{L}\p{N}_]*/u);
+                if (!range) return undefined;
+                const raw = document.getText(range);
+                const doc = DOCS[raw.toLowerCase()];
+                if (!doc) return undefined;
+                return new vscode.Hover(renderHover(raw, doc), range);
+            },
+        }
+    );
+    context.subscriptions.push(provider);
+}
+
+module.exports = { registerKeywordHover };
