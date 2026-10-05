@@ -75,8 +75,14 @@ const DOCS = {
         example: 'Japalusta { Takute kas 0. }'
     },
     kas: {
-        role: { ja: '文の対象・値・名前を導入する構文マーカーです。', en: 'Introduces the target, value, or name of a statement.' },
-        example: 'Takute kas value.'
+        meaning: { ja: '〜を', en: 'object marker / accusative' },
+        grammar: { ja: '対格を表す助詞。対象につけます。', en: 'An accusative particle attached to the object.' },
+        role: { ja: '文や命令の対象を導入します。出力する値、初期化する変数名、関数名などの前に置かれます。', en: 'Introduces the object of a statement or command, such as an output value, initialized variable name, or function name.' },
+        examples: [
+            'Takute kas value.',
+            'Sonome kas x tas 0.',
+            'Kisite kas add vis x kasta y'
+        ]
     },
     tas: {
         meaning: { ja: '〜へ', en: 'to' },
@@ -161,15 +167,21 @@ function renderHover(word, doc) {
     const title = JA ? 'Kisite 予約語' : 'Kisite reserved word';
     const roleTitle = JA ? 'Kisite での役割' : 'Role in Kisite';
     const meaningTitle = JA ? '莉語での語義' : 'Lisatopa meaning';
+    const grammarTitle = JA ? '文法' : 'Grammar';
     const exampleTitle = JA ? '例' : 'Example';
     const parts = [`**${title}: \`${word}\`**`];
     const meaning = localized(doc.meaning);
     if (meaning) {
         parts.push(`**${meaningTitle}:** ${meaning}`);
     }
+    const grammar = localized(doc.grammar);
+    if (grammar) {
+        parts.push(`**${grammarTitle}:** ${grammar}`);
+    }
     parts.push(`**${roleTitle}:** ${localized(doc.role)}`);
-    if (doc.example) {
-        parts.push(`**${exampleTitle}:**\n\n\`\`\`kisite\n${doc.example}\n\`\`\``);
+    const examples = doc.examples || (doc.example ? [doc.example] : []);
+    if (examples.length) {
+        parts.push(`**${exampleTitle}:**\n\n\`\`\`kisite\n${examples.join('\n')}\n\`\`\``);
     }
     return new vscode.MarkdownString(parts.join('\n\n'));
 }
