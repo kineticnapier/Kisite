@@ -83,6 +83,8 @@ async function startLanguageServer(context) {
     const pythonPath = config.get('pythonPath', 'python');
     const serverScript = context.asAbsolutePath(path.join('server', 'kisite_lsp.py'));
     const kisiteRoot = path.dirname(interpreter);
+    const fileWatcher = vscode.workspace.createFileSystemWatcher('**/*.kis');
+    context.subscriptions.push(fileWatcher);
 
     const serverOptions = {
         command: pythonPath,
@@ -101,6 +103,7 @@ async function startLanguageServer(context) {
         documentSelector: [{ scheme: 'file', language: 'kisite' }],
         synchronize: {
             configurationSection: 'kisite',
+            fileEvents: fileWatcher,
         },
         outputChannelName: 'Kisite Language Server',
         middleware: {
