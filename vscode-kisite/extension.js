@@ -103,6 +103,14 @@ async function startLanguageServer(context) {
             configurationSection: 'kisite',
         },
         outputChannelName: 'Kisite Language Server',
+        middleware: {
+            handleDiagnostics(uri, diagnostics, next) {
+                const enabled = vscode.workspace
+                    .getConfiguration('kisite', uri)
+                    .get('diagnostics.enabled', true);
+                next(uri, enabled ? diagnostics : []);
+            },
+        },
     };
 
     languageClient = new LanguageClient(
